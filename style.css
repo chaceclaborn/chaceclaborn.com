@@ -1,0 +1,477 @@
+/* CSS Variables for consistent theming */
+:root {
+    --primary: #617140;
+    --primary-dark: #536036;
+    --primary-light: #869960;
+    --accent-yellow: #e6d94c;
+    --text-light: #ffffff;
+    --text-dark: #2c3e50;
+    --background: #617140;
+    --background-light: #fafbfc;
+    --card-bg: #ffffff;
+    --shadow: rgba(0, 0, 0, 0.15);
+    --section-bg: #536036;
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: var(--background);
+}
+
+/* Split Layout Container - FIXED VERSION */
+.split-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    width: 100%;
+}
+
+/* Left Panel - Changed from fixed to absolute */
+.left-panel {
+    background-color: var(--primary);
+    color: var(--text-light);
+    width: 40%;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.profile-section {
+    text-align: left;
+}
+
+.profile-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    object-fit: cover;
+    border: 3px solid var(--text-light);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.profile-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: var(--accent-yellow);
+}
+
+.profile-section .title {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.social-links a {
+    color: var(--text-light);
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: var(--accent-yellow);
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    display: inline-block;
+    background-color: var(--accent-yellow);
+    color: var(--primary-dark);
+    padding: 0.75rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(97, 113, 64, 0.15);
+}
+
+.btn:hover {
+    background-color: #f4e556;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(97, 113, 64, 0.25);
+}
+
+.btn-email {
+    background-color: var(--accent-yellow);
+}
+
+/* About Section */
+.about-section {
+    margin-top: 3rem;
+}
+
+.about-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent-yellow);
+}
+
+.about-section p {
+    font-size: 1rem;
+    line-height: 1.8;
+    opacity: 0.9;
+}
+
+/* Right Panel - Fixed positioning */
+.right-panel {
+    margin-left: 40%;
+    width: 60%;
+    height: 100vh;
+    background-image: url('images/manufacturing.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.right-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+}
+
+/* Section Break / Next Container */
+.section-break {
+    width: 100%;
+    height: 80px;
+    background-color: var(--background);
+    position: relative;
+}
+
+.next-section {
+    background-color: var(--background);
+    padding: 4rem 2rem;
+    min-height: 100vh;
+    color: var(--text-light);
+}
+
+.next-section .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.next-section h2 {
+    color: var(--accent-yellow);
+}
+
+/* Alternate section styling for visual variety */
+.section-alt {
+    background-color: var(--section-bg);
+    padding: 4rem 2rem;
+    color: var(--text-light);
+}
+
+.section-alt h2 {
+    color: var(--accent-yellow);
+}
+
+/* Content Pages Styles */
+.content-page {
+    min-height: 100vh;
+    background-color: var(--background-light);
+}
+
+.content-header {
+    background-color: var(--primary);
+    color: var(--text-light);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(97, 113, 64, 0.3);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content h1 {
+    font-size: 1.75rem;
+    color: var(--accent-yellow);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--accent-yellow);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content Area */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+/* Portfolio Grid */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.portfolio-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(97, 113, 64, 0.15), 0 2px 8px rgba(97, 113, 64, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(97, 113, 64, 0.08);
+}
+
+.portfolio-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(97, 113, 64, 0.2), 0 4px 12px rgba(97, 113, 64, 0.15);
+}
+
+.portfolio-card h3 {
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.portfolio-card p {
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
+
+.project-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--primary);
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(97, 113, 64, 0.15);
+}
+
+.project-link:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(97, 113, 64, 0.25);
+}
+
+/* Resume Section */
+.resume-container {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 3rem;
+    box-shadow: 0 2px 10px var(--shadow);
+    margin-top: 2rem;
+}
+
+.resume-container a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.resume-container a:hover {
+    text-decoration: underline;
+}
+
+.resume-section {
+    margin-bottom: 2.5rem;
+}
+
+.resume-section:last-child {
+    margin-bottom: 0;
+}
+
+.resume-section h2 {
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(134, 153, 96, 0.3);
+}
+
+.resume-item {
+    margin-bottom: 1.5rem;
+}
+
+.resume-item h3 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.resume-item .date {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background-color: var(--primary-light);
+    color: var(--text-light);
+    padding: 0.25rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(97, 113, 64, 0.1);
+}
+
+/* Download Resume Button */
+.download-resume {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.download-resume .btn {
+    box-shadow: 0 3px 10px rgba(97, 113, 64, 0.2);
+}
+
+.download-resume .btn:hover {
+    box-shadow: 0 5px 20px rgba(97, 113, 64, 0.3);
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary-dark);
+    color: var(--text-light);
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 968px) {
+    .split-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .left-panel {
+        width: 100%;
+        position: relative;
+        height: auto;
+        min-height: 500px;
+        padding: 3rem 2rem;
+    }
+
+    .right-panel {
+        margin-left: 0;
+        width: 100%;
+        height: 400px;
+        min-height: 400px;
+    }
+
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Hide table layout on mobile and show as blocks */
+    .resume-container table {
+        display: block !important;
+    }
+
+    .resume-container table tr {
+        display: block !important;
+    }
+
+    .resume-container table td {
+        display: block !important;
+        width: 100% !important;
+        border-left: none !important;
+        padding: 1rem 2rem !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .left-panel h1 {
+        font-size: 2rem;
+    }
+
+    .nav-buttons {
+        flex-direction: column;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+}
