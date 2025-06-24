@@ -47,7 +47,7 @@ body {
 .left-panel {
     background-color: var(--primary);
     color: var(--text-light);
-    width: 40%;
+    width: 30%;
     padding: 4rem;
     display: flex;
     flex-direction: column;
@@ -154,8 +154,8 @@ body {
 
 /* Right Panel - Fixed positioning */
 .right-panel {
-    margin-left: 40%;
-    width: 60%;
+    margin-left: 30%;
+    width: 70%;
     height: 100vh;
     background-image: url('images/manufacturing.png');
     background-size: cover;
