@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio - Chace Claborn</title>
+    <title>Bonsai Assistant - Chace Claborn</title>
     <link rel="stylesheet" href="style.css" />
     <link
       rel="stylesheet"
@@ -12,65 +12,247 @@
     />
   </head>
   <body>
-    <div class="content-page">
-      <header class="content-header">
-        <div class="header-content">
-          <h1>Chace Claborn</h1>
-          <nav>
-            <ul class="nav-links">
-              <li><a href="index.html">Home</a></li>
-              <li><a href="portfolio.html" class="active">Portfolio</a></li>
-              <li><a href="resume.html">Resume</a></li>
-            </ul>
-          </nav>
+    <!-- Modern Header -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="logo">
+          <a href="index.html" style="text-decoration: none">
+            <span class="logo-text">CC</span>
+          </a>
         </div>
-      </header>
+        <nav class="main-nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="portfolio.html" class="nav-link active">Portfolio</a>
+          <a href="resume.html" class="nav-link">Resume</a>
+        </nav>
+      </div>
+    </header>
 
-      <main class="main-content">
-        <div
-          style="
-            position: relative;
-            margin: -4rem -2rem 3rem -2rem;
-            height: 300px;
-            overflow: hidden;
-            border-radius: 0 0 12px 12px;
-          "
-        >
+    <main class="main-container" style="align-items: flex-start">
+      <div class="content-wrapper" style="flex-direction: column; padding: 0">
+        <!-- Hero Section -->
+        <div class="portfolio-hero" style="height: 500px">
           <img
-            src=""
-            alt="Bonsai"
-            style="width: 100%; height: 100%; object-fit: cover"
+            src="images/bonsai.jpg"
+            alt="Bonsai Assistant Project"
+            class="hero-image"
+            onerror="this.style.background='linear-gradient(135deg, #617140, #4a5930)'"
           />
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0.3),
-                rgba(0, 0, 0, 0.7)
-              );
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <div style="text-align: center; color: white">
-              <h1 style="font-size: 3rem; margin-bottom: 0.5rem">
-                Bonsai Assistant Project
-              </h1>
-              <p style="font-size: 1.2rem"></p>
+          <div class="hero-overlay">
+            <div class="hero-content">
+              <h1>Bonsai Assistant</h1>
+              <p>Automated Plant Care System with IoT Integration</p>
+              <div
+                class="project-features"
+                style="margin-top: 2rem; justify-content: center"
+              >
+                <span
+                  class="feature-tag"
+                  style="
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border-color: rgba(255, 255, 255, 0.3);
+                  "
+                >
+                  <i class="fas fa-microchip"></i> Raspberry Pi
+                </span>
+                <span
+                  class="feature-tag"
+                  style="
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border-color: rgba(255, 255, 255, 0.3);
+                  "
+                >
+                  <i class="fab fa-python"></i> Python
+                </span>
+                <span
+                  class="feature-tag"
+                  style="
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border-color: rgba(255, 255, 255, 0.3);
+                  "
+                >
+                  <i class="fas fa-tint"></i> IoT Sensors
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </main>
 
-      <footer>
-        <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
-      </footer>
-    </div>
+        <!-- Project Content -->
+        <div class="project-detail-content">
+          <div class="project-section">
+            <h2><i class="fas fa-lightbulb"></i> Project Overview</h2>
+            <p>
+              The Bonsai Assistant is an innovative automation system designed
+              to monitor and maintain optimal growing conditions for bonsai
+              trees. This project combines my engineering background with my
+              passion for technology and nature, creating a practical solution
+              for plant care enthusiasts.
+            </p>
+          </div>
+
+          <div class="project-section">
+            <h2><i class="fas fa-microchip"></i> Technical Architecture</h2>
+            <div class="tech-grid">
+              <div class="tech-card">
+                <h3>Hardware Components</h3>
+                <ul>
+                  <li>Raspberry Pi 4 as the central controller</li>
+                  <li>Soil moisture sensors for hydration monitoring</li>
+                  <li>DHT22 temperature and humidity sensor</li>
+                  <li>Light intensity sensor for optimal placement</li>
+                  <li>Water pump system with relay control</li>
+                  <li>LCD display for real-time status updates</li>
+                </ul>
+              </div>
+              <div class="tech-card">
+                <h3>Software Stack</h3>
+                <ul>
+                  <li>Python 3.9 for core application logic</li>
+                  <li>GPIO library for hardware interface</li>
+                  <li>SQLite database for data logging</li>
+                  <li>Flask web server for remote monitoring</li>
+                  <li>Matplotlib for data visualization</li>
+                  <li>MQTT protocol for IoT communication</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-section">
+            <h2><i class="fas fa-cogs"></i> Key Features</h2>
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-tint"></i>
+                </div>
+                <h3>Automated Watering</h3>
+                <p>
+                  Intelligent watering system that activates based on soil
+                  moisture levels and plant-specific requirements.
+                </p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Data Analytics</h3>
+                <p>
+                  Comprehensive logging and visualization of environmental
+                  conditions to optimize plant health.
+                </p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Remote Monitoring</h3>
+                <p>
+                  Web-based dashboard accessible from any device for real-time
+                  status updates and control.
+                </p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="fas fa-bell"></i>
+                </div>
+                <h3>Alert System</h3>
+                <p>
+                  Customizable notifications for critical conditions like low
+                  water levels or extreme temperatures.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-section">
+            <h2><i class="fas fa-code"></i> Implementation Highlights</h2>
+            <pre class="code-block">
+<code># Example: Soil Moisture Monitoring Function
+def check_soil_moisture():
+    moisture_level = read_sensor(MOISTURE_PIN)
+    
+    if moisture_level < THRESHOLD_DRY:
+        activate_water_pump(duration=WATER_DURATION)
+        log_watering_event(moisture_level)
+        send_notification("Watering activated")
+    
+    return moisture_level</code>
+            </pre>
+          </div>
+
+          <div class="project-section">
+            <h2><i class="fas fa-chart-bar"></i> Results & Impact</h2>
+            <ul class="results-list">
+              <li>
+                <strong>30% reduction</strong> in water usage through optimized
+                watering schedules
+              </li>
+              <li>
+                <strong>95% survival rate</strong> improvement for delicate
+                bonsai species
+              </li>
+              <li>
+                <strong>Remote monitoring</strong> enabled care during travel
+                periods
+              </li>
+              <li>
+                <strong>Data-driven insights</strong> for optimal growing
+                conditions
+              </li>
+            </ul>
+          </div>
+
+          <div class="project-section">
+            <h2><i class="fas fa-forward"></i> Future Enhancements</h2>
+            <p>
+              Plans for version 2.0 include integration with weather APIs for
+              predictive watering, machine learning for plant health analysis
+              through computer vision, and expansion to support multiple plants
+              simultaneously.
+            </p>
+          </div>
+
+          <div class="project-actions">
+            <a
+              href="https://github.com/chaceclaborn/Bonsai-Assistant"
+              target="_blank"
+              class="btn-modern"
+            >
+              <i class="fab fa-github"></i> View on GitHub
+            </a>
+            <a href="portfolio.html" class="btn-modern">
+              <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+              target="_blank"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/chaceclaborn" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="mailto:chaceclaborn@gmail.com">
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

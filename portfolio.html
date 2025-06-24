@@ -12,145 +12,168 @@
     />
   </head>
   <body>
-    <div class="content-page">
-      <header class="content-header">
-        <div class="header-content">
-          <h1>Chace Claborn</h1>
-          <nav>
-            <ul class="nav-links">
-              <li><a href="index.html">Home</a></li>
-              <li><a href="portfolio.html" class="active">Portfolio</a></li>
-              <li><a href="resume.html">Resume</a></li>
-            </ul>
-          </nav>
+    <!-- Modern Header -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="logo">
+          <a href="index.html" style="text-decoration: none">
+            <span class="logo-text">chaceclaborn.com</span>
+          </a>
         </div>
-      </header>
+        <nav class="main-nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="portfolio.html" class="nav-link active">Portfolio</a>
+          <a href="resume.html" class="nav-link">Resume</a>
+        </nav>
+      </div>
+    </header>
 
-      <main class="main-content">
-        <div
-          style="
-            position: relative;
-            margin: -4rem -2rem 3rem -2rem;
-            height: 300px;
-            overflow: hidden;
-            border-radius: 0 0 12px 12px;
-          "
-        >
+    <main class="main-container" style="align-items: flex-start">
+      <div class="content-wrapper" style="flex-direction: column; padding: 0">
+        <!-- Hero Section -->
+        <div class="portfolio-hero">
           <img
             src="images/hotfire.jpg"
             alt="Rocket Engine Hot Fire Test"
-            style="width: 100%; height: 100%; object-fit: cover"
+            class="hero-image"
           />
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0.3),
-                rgba(0, 0, 0, 0.7)
-              );
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <div style="text-align: center; color: white">
-              <h1 style="font-size: 3rem; margin-bottom: 0.5rem">
-                My Portfolio
-              </h1>
-              <p style="font-size: 1.2rem">
-                My professional and private projects in manufacturing,
-                aerospace, coding, etc.
+          <div class="hero-overlay">
+            <div class="hero-content">
+              <h1>My Portfolio</h1>
+              <p>
+                Professional and private projects in manufacturing, aerospace,
+                and coding
               </p>
             </div>
           </div>
         </div>
 
-        <div class="portfolio-grid">
-          <!-- GitHub Projects -->
-          <div class="portfolio-card">
-            <h3>🚀 My On-Going Career Presentation</h3>
-            <p>
-              A comprehensive overview of my career journey, skills, and
-              specific projects within the manufacturing and aerospace
-              industries.
-            </p>
-            <div class="project-links">
-              <a
-                href="https://docs.google.com/presentation/d/[YOUR-PRESENTATION-ID]"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fas fa-file-powerpoint"></i> View Presentation
-              </a>
+        <!-- Portfolio Content -->
+        <div class="portfolio-content">
+          <div class="portfolio-grid">
+            <!-- GitHub Projects -->
+            <div class="portfolio-card">
+              <div class="card-icon">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <h3>My On-Going Career Presentation</h3>
+              <p>
+                A comprehensive overview of my career journey, skills, and
+                specific projects within the manufacturing and aerospace
+                industries.
+              </p>
+              <div class="project-links">
+                <a
+                  href="#"
+                  class="project-link"
+                  onclick="alert('Please update with your Google Presentation ID'); return false;"
+                >
+                  <i class="fas fa-file-powerpoint"></i> View Presentation
+                </a>
+              </div>
             </div>
-          </div>
 
-          <div class="portfolio-card">
-            <h3>📊 Github Portfolio</h3>
-            <div class="project-links">
-              <a
-                href="https://github.com/chaceclaborn/chaceclaborn.com"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> My Website Source Code
-              </a>
+            <div class="portfolio-card">
+              <div class="card-icon">
+                <i class="fab fa-github"></i>
+              </div>
+              <h3>Github Portfolio</h3>
+              <p>Explore my coding projects and contributions on GitHub.</p>
+              <div class="project-links">
+                <a
+                  href="https://github.com/chaceclaborn/chaceclaborn.com"
+                  target="_blank"
+                  class="project-link"
+                >
+                  <i class="fab fa-github"></i> Website Source
+                </a>
 
-              <a
-                href="https://github.com/chaceclaborn/Bonsai-Assistant"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> Bonsai Assisstant
-              </a>
+                <a
+                  href="https://github.com/chaceclaborn/Bonsai-Assistant"
+                  target="_blank"
+                  class="project-link"
+                >
+                  <i class="fab fa-github"></i> Bonsai Assistant
+                </a>
 
-              <a
-                href="https://github.com/chaceclaborn/Stock-App"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> Chace's Stock App
-              </a>
+                <a
+                  href="https://github.com/chaceclaborn/Stock-App"
+                  target="_blank"
+                  class="project-link"
+                >
+                  <i class="fab fa-github"></i> Stock App
+                </a>
 
-              <a
-                href="https://github.com/chaceclaborn/Propulsion-App"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> Propulsion App
-              </a>
+                <a
+                  href="https://github.com/chaceclaborn/Propulsion-App"
+                  target="_blank"
+                  class="project-link"
+                >
+                  <i class="fab fa-github"></i> Propulsion App
+                </a>
+              </div>
             </div>
-          </div>
 
-          <div class="portfolio-card">
-            <h3>🎯 Bonsai Assistant</h3>
-            <p>
-              Project where I developed an automation system for bonsai tree
-              care, utilizing Raspberry Pi and Python. This page shows in-depth
-              the details, design, and the struggles I faced while building the
-              system.
-            </p>
-            <div class="project-links">
-              <a
-                href="https://chaceclaborn.com/bonsai-assistant"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> Bonsai Assistant Page
-              </a>
+            <div class="portfolio-card featured">
+              <div class="card-icon">
+                <i class="fas fa-tree"></i>
+              </div>
+              <h3>Bonsai Assistant</h3>
+              <p>
+                An innovative automation system for bonsai tree care, utilizing
+                Raspberry Pi and Python. This project showcases my ability to
+                combine hardware and software for practical solutions.
+              </p>
+              <div class="project-features">
+                <span class="feature-tag"
+                  ><i class="fas fa-microchip"></i> Raspberry Pi</span
+                >
+                <span class="feature-tag"
+                  ><i class="fab fa-python"></i> Python</span
+                >
+                <span class="feature-tag"
+                  ><i class="fas fa-tint"></i> IoT Sensors</span
+                >
+              </div>
+              <div class="project-links">
+                <a href="bonsai-assistant.html" class="project-link">
+                  <i class="fas fa-external-link-alt"></i> View Project Details
+                </a>
+                <a
+                  href="https://github.com/chaceclaborn/Bonsai-Assistant"
+                  target="_blank"
+                  class="project-link"
+                >
+                  <i class="fab fa-github"></i> View on GitHub
+                </a>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
 
-      <footer>
-        <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
-      </footer>
-    </div>
+    <!-- Modern Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+              target="_blank"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/chaceclaborn" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="mailto:chaceclaborn@gmail.com">
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

@@ -81,6 +81,11 @@ body::before {
     align-items: center;
 }
 
+.logo a {
+    text-decoration: none;
+    display: inline-block;
+}
+
 .logo-text {
     font-size: 1.75rem;
     font-weight: 700;
@@ -149,6 +154,8 @@ body::before {
     padding: 3rem 2rem;
     position: relative;
     z-index: 1;
+    min-height: calc(100vh - 200px);
+    /* Account for header and footer */
 }
 
 .content-wrapper {
@@ -555,48 +562,19 @@ body::before {
     padding: 4rem 2rem;
 }
 
-/* Portfolio Cards Update */
-.portfolio-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(230, 234, 212, 0.5) 100%);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 16px rgba(74, 89, 48, 0.15);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(74, 89, 48, 0.12);
-    position: relative;
-    overflow: hidden;
+/* Portfolio Grid */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
 }
 
-.portfolio-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--dark-green), var(--primary-green), var(--dark-green));
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.portfolio-card:hover::before {
-    transform: scaleX(1);
-}
-
-.portfolio-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(74, 89, 48, 0.2);
-    border-color: var(--primary-green);
-}
-
-.portfolio-card h3 {
-    color: var(--deep-green);
-    font-weight: 600;
-}
-
-.portfolio-card p {
-    color: var(--dark-green);
-    opacity: 0.95;
+.project-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
 }
 
 .project-link {
@@ -620,14 +598,16 @@ body::before {
     box-shadow: 0 4px 12px rgba(74, 89, 48, 0.2);
 }
 
-/* Resume Container Update */
+/* Resume Container */
 .resume-container {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(230, 234, 212, 0.3) 100%);
     border-radius: 16px;
     padding: 3rem;
     box-shadow: 0 6px 20px rgba(74, 89, 48, 0.15);
-    margin-top: 2rem;
     border: 1px solid rgba(74, 89, 48, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .resume-section h2 {
@@ -660,7 +640,12 @@ body::before {
     box-shadow: 0 5px 12px rgba(74, 89, 48, 0.3);
 }
 
-/* Download Resume Button Update */
+/* Download Resume Button */
+.download-resume {
+    text-align: center;
+    margin: 3rem 0 2rem 0;
+}
+
 .download-resume .btn {
     background: linear-gradient(135deg, var(--primary-green), var(--vibrant-green));
     color: var(--white);
@@ -671,6 +656,8 @@ body::before {
     box-shadow: 0 4px 16px rgba(74, 89, 48, 0.3);
     transition: all 0.3s ease;
     border: 2px solid transparent;
+    display: inline-block;
+    text-decoration: none;
 }
 
 .download-resume .btn:hover {
@@ -691,6 +678,456 @@ footer {
     font-weight: 500;
 }
 
+/* Portfolio Page Styles */
+.portfolio-hero {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(20, 25, 30, 0.4) 0%,
+            rgba(10, 12, 15, 0.8) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    text-align: center;
+    color: var(--white);
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.portfolio-content {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Enhanced Portfolio Cards */
+.portfolio-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(230, 234, 212, 0.4) 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 6px 20px rgba(74, 89, 48, 0.15);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(74, 89, 48, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.portfolio-card.featured {
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--off-white) 0%, var(--sage-green) 100%);
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-green), var(--vibrant-green));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(74, 89, 48, 0.3);
+}
+
+.project-features {
+    display: flex;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(97, 113, 64, 0.1);
+    color: var(--dark-green);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid rgba(97, 113, 64, 0.2);
+}
+
+.feature-tag i {
+    color: var(--primary-green);
+}
+
+/* Resume Page Styles */
+.resume-header-section {
+    background: linear-gradient(135deg, var(--sage-green) 0%, var(--accent-green) 100%);
+    margin: -3rem -3rem 3rem -3rem;
+    padding: 3rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.resume-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.photo-name {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 2;
+}
+
+.resume-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--white);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.photo-name h1 {
+    color: var(--white);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.current-position {
+    color: var(--pale-green);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.contact-info, .education-info {
+    flex: 1;
+    color: var(--white);
+}
+
+.contact-info h3, .education-info h3 {
+    color: var(--white);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.contact-info p, .education-info p {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-info a {
+    color: var(--pale-green);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-info a:hover {
+    color: var(--white);
+    text-decoration: underline;
+}
+
+.contact-info i, .education-info i {
+    width: 20px;
+    color: var(--pale-green);
+}
+
+.degree {
+    font-weight: 600;
+}
+
+.gpa {
+    color: var(--pale-green);
+    font-weight: 600;
+}
+
+/* Resume Sections */
+.resume-section h2 {
+    color: var(--deep-green);
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid var(--sage-green);
+    font-weight: 600;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.resume-section h2 i {
+    color: var(--primary-green);
+    font-size: 1.5rem;
+}
+
+.skills-category {
+    margin-bottom: 2rem;
+}
+
+.skills-category h3 {
+    color: var(--primary-green);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+/* Job Header */
+.job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.job-header h3 {
+    color: var(--primary-green);
+    font-size: 1.4rem;
+}
+
+.date {
+    color: var(--dark-green);
+    font-weight: 600;
+    background: rgba(97, 113, 64, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.company {
+    color: var(--dark-green);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.company i {
+    color: var(--primary-green);
+    margin-right: 0.5rem;
+}
+
+.role-title {
+    color: var(--vibrant-green);
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.resume-item ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.resume-item li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+
+.resume-item li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--primary-green);
+    font-weight: bold;
+}
+
+/* Bonsai Assistant Page Styles */
+.project-detail-content {
+    padding: 4rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.project-section {
+    margin-bottom: 4rem;
+}
+
+.project-section h2 {
+    color: var(--deep-green);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.project-section h2 i {
+    color: var(--primary-green);
+    font-size: 1.75rem;
+}
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.tech-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(230, 234, 212, 0.3) 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(74, 89, 48, 0.1);
+    border: 1px solid rgba(74, 89, 48, 0.1);
+}
+
+.tech-card h3 {
+    color: var(--primary-green);
+    margin-bottom: 1rem;
+}
+
+.tech-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.tech-card li {
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    color: var(--text-dark);
+}
+
+.tech-card li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    color: var(--primary-green);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(74, 89, 48, 0.1);
+    box-shadow: 0 2px 8px rgba(74, 89, 48, 0.08);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(74, 89, 48, 0.15);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, var(--primary-green), var(--vibrant-green));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: var(--white);
+}
+
+.feature-card h3 {
+    color: var(--dark-green);
+    margin-bottom: 0.75rem;
+}
+
+.code-block {
+    background: var(--deep-green);
+    color: var(--pale-green);
+    padding: 2rem;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+    box-shadow: 0 4px 16px rgba(46, 58, 31, 0.3);
+}
+
+.results-list {
+    list-style: none;
+    padding: 0;
+}
+
+.results-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(74, 89, 48, 0.1);
+    color: var(--text-dark);
+    font-size: 1.1rem;
+}
+
+.results-list li:last-child {
+    border-bottom: none;
+}
+
+.results-list strong {
+    color: var(--primary-green);
+    font-size: 1.2rem;
+}
+
+.project-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+/* Responsive adjustments for portfolio and resume */
+@media screen and (max-width: 968px) {
+    .portfolio-card.featured {
+        grid-column: span 1;
+    }
+
+    .resume-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .photo-name {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .job-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
 /* Responsive Design */
 @media screen and (max-width: 968px) {
     .content-wrapper {
@@ -703,7 +1140,7 @@ footer {
         width: 100%;
     }
 
-    .info-panel::before {
+    .info-panel::after {
         display: none;
     }
 
