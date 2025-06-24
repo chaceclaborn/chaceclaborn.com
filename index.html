@@ -6,79 +6,183 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chace Claborn - Mechanical Engineer</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Add Font Awesome for social icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
   </head>
   <body>
-    <!-- Hero Section with Split Layout -->
-    <div class="split-container">
-      <!-- Left Panel -->
-      <div class="left-panel">
-        <div class="profile-section">
-          <!-- You can add your professional photo here -->
-          <img
-            src="images/Professional Photo.jpg"
-            alt="Chace Claborn"
-            class="profile-image"
-            style="width: 300px; height: 300px;"
-          />
+    <!-- Modern Header -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="logo">
+          <span class="logo-text">chaceclaborn.com</span>
+        </div>
+        <nav class="main-nav">
+          <a href="index.html" class="nav-link active">Home</a>
+          <a href="portfolio.html" class="nav-link">Portfolio</a>
+          <a href="resume.html" class="nav-link">Resume</a>
+        </nav>
+      </div>
+    </header>
 
-          <h1>Chace Claborn</h1>
-          <p class="title">Mechanical Engineer</p>
+    <!-- Main Content Container -->
+    <main class="main-container">
+      <div class="content-wrapper">
+        <!-- Left Panel -->
+        <div class="info-panel">
+          <div class="profile-section">
+            <img
+              src="images/Professional Photo.jpg"
+              alt="Chace Claborn"
+              class="profile-image"
+            />
 
-          <!-- Social Links -->
-          <div class="social-links">
-            <a
-              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
-              target="_blank"
-              title="LinkedIn"
-            >
-              <i class="fab fa-linkedin"></i>
-            </a>
-            <a
-              href="https://github.com/chaceclaborn"
-              target="_blank"
-              title="GitHub"
-            >
-              <i class="fab fa-github"></i>
-            </a>
-            <a href="mailto:chaceclaborn@gmail.com" title="Email">
-              <i class="fas fa-envelope"></i>
-            </a>
+            <h1>Chace Claborn</h1>
+            <p class="title">Mechanical Engineer</p>
+
+            <!-- Social Links -->
+            <div class="social-links">
+              <a
+                href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+                target="_blank"
+                title="LinkedIn"
+              >
+                <i class="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://github.com/chaceclaborn"
+                target="_blank"
+                title="GitHub"
+              >
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="mailto:chaceclaborn@gmail.com" title="Email">
+                <i class="fas fa-envelope"></i>
+              </a>
+            </div>
+
+            <!-- About Me Section -->
+            <div class="about-section">
+              <h2>About Me</h2>
+              <p>
+                I am currently a Manufacturing Engineer at Blue Origin. I
+                graduated from Auburn University with a Bachelor of Science in
+                Mechanical Engineering. This is a portfolio website to show what
+                I enjoy doing and what I have learned along the way.
+              </p>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="cta-buttons">
+              <a href="portfolio.html" class="btn-modern">View Portfolio</a>
+              <a href="resume.html" class="btn-modern">Resume</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - Image Slider -->
+        <div class="image-panel">
+          <div class="image-slider">
+            <div class="slide active">
+              <img src="images/manufacturing.png" alt="Manufacturing" />
+            </div>
+            <div class="slide">
+              <img src="images/hotfire.jpg" alt="Hot Fire Test" />
+            </div>
+            <div class="slide">
+              <img src="images/graduation.jpeg" alt="Graduation" />
+            </div>
           </div>
 
-          <!-- Navigation -->
-          <div class="nav-buttons">
-            <a href="portfolio.html" class="btn">PORTFOLIO</a>
-            <a href="resume.html" class="btn">RESUME</a>
-          </div>
-
-          <!-- About Me Section -->
-          <div class="about-section">
-            <h2>About Me</h2>
-            <p>
-              I am currently a Manufacturing Engineer at Blue Origin. I
-              graduated from Auburn University with a Bachelor of Science in
-              Mechanical Engineering. This is a portfolio website to show what I
-              enjoy doing and what I have learned along the way.
-            </p>
+          <!-- Slide Indicators -->
+          <div class="slide-indicators">
+            <span class="indicator active" data-slide="0"></span>
+            <span class="indicator" data-slide="1"></span>
+            <span class="indicator" data-slide="2"></span>
           </div>
         </div>
       </div>
+    </main>
 
-      <!-- Right Panel - Background Image -->
-      <div class="right-panel">
-        <!-- The background image is applied via CSS -->
+    <!-- Modern Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+              target="_blank"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/chaceclaborn" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="mailto:chaceclaborn@gmail.com">
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+        </div>
       </div>
-    </div>
+    </footer>
 
-    <!-- Section Break -->
-    <div class="section-break"></div>
+    <script>
+      // Image slider functionality
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const indicators = document.querySelectorAll(".indicator");
+      const totalSlides = slides.length;
+      let isTransitioning = false;
 
-    
-    </div>
+      function showSlide(n) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+
+        const prevSlide = currentSlide;
+        currentSlide = (n + totalSlides) % totalSlides;
+
+        // Don't transition if clicking the same slide
+        if (prevSlide === currentSlide) {
+          isTransitioning = false;
+          return;
+        }
+
+        // Remove active from indicators
+        indicators.forEach((indicator) => {
+          indicator.classList.remove("active");
+        });
+
+        // Add classes for slide animation
+        slides[prevSlide].classList.add("slide-out");
+        slides[prevSlide].classList.remove("active");
+
+        slides[currentSlide].classList.add("slide-in", "active");
+        indicators[currentSlide].classList.add("active");
+
+        // Clean up classes after animation
+        setTimeout(() => {
+          slides[prevSlide].classList.remove("slide-out");
+          slides[currentSlide].classList.remove("slide-in");
+          isTransitioning = false;
+        }, 1000);
+      }
+
+      // Auto-advance slides every 5 seconds
+      setInterval(() => {
+        showSlide(currentSlide + 1);
+      }, 5000);
+
+      // Click indicators to change slides
+      indicators.forEach((indicator, index) => {
+        indicator.addEventListener("click", () => {
+          showSlide(index);
+        });
+      });
+
+      // Initialize first slide
+      slides[0].classList.add("active");
+    </script>
   </body>
 </html>
