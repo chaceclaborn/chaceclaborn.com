@@ -1180,4 +1180,50 @@ footer {
         width: 100%;
         text-align: center;
     }
+
+    /* Coming Soon Badge - Modern Style */
+    .coming-soon-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        background-color: rgba(97, 113, 64, 0.1);
+        color: var(--primary);
+        border: 1px dashed var(--primary);
+        transition: all 0.3s ease;
+    }
+
+    .coming-soon-badge i {
+        animation: pulse 2s ease-in-out infinite;
+        font-size: 0.875rem;
+    }
+
+    /* Hover effect for consistency */
+    .coming-soon-badge:hover {
+        background-color: rgba(97, 113, 64, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+        0% {
+            opacity: 0.6;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0.6;
+        }
+    }
+
+    /* Make sure it aligns well with project-links */
+    .project-links .coming-soon-badge {
+        margin-right: 0.5rem;
+    }
 }
