@@ -1226,4 +1226,48 @@ footer {
     .project-links .coming-soon-badge {
         margin-right: 0.5rem;
     }
+
+    /* ===== MINIMAL FIXES FOR GREEN BORDER ISSUES ===== */
+    /* Add these to the END of your style.css */
+
+    /* Fix 1: The green border around image carousel */
+    .main-container {
+        padding: 0 2rem;
+        /* Keep horizontal padding, remove vertical */
+        margin-top: 3rem;
+        margin-bottom: 0;
+        /* Connect to footer */
+    }
+
+    /* Fix 2: Adjust content wrapper to compensate */
+    .content-wrapper {
+        gap: 0;
+        /* Remove gap between left and right panels */
+    }
+
+    /* Fix 3: Fix the footer transition line */
+    .main-container {
+        padding-bottom: 3rem;
+        /* Add padding at bottom */
+        background: linear-gradient(to bottom,
+                transparent 0%,
+                transparent 95%,
+                var(--sage-green) 100%);
+        /* Fade to footer color */
+    }
+
+    /* Fix 4: Make footer connect seamlessly */
+    .site-footer {
+        margin-top: -1px;
+        /* Tiny overlap */
+    }
+
+    /* Alternative approach if above doesn't work: */
+    /* Make the body background match the footer top color */
+    body {
+        background: var(--sage-green);
+        /* Solid color instead of gradient */
+    }
+
+
 }

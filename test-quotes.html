@@ -1,0 +1,67 @@
+<!-- COMPLETE TEST VERSION OF YOUR INDEX.HTML -->
+<!-- Save this as test-quotes.html to verify everything works -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quotes Test</title>
+    <style>
+      .quotes-section {
+        background-color: lightblue;
+        padding: 40px;
+        text-align: center;
+      }
+      .quote-text {
+        font-size: 24px;
+        font-style: italic;
+        color: #333;
+      }
+      .quote-author {
+        font-size: 18px;
+        color: #666;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Testing Quotes Carousel</h1>
+
+    <section class="quotes-section">
+      <div class="quotes-container">
+        <div class="quotes-carousel">
+          <!-- This will be filled by JavaScript -->
+          <p style="color: red">
+            If you see this red text, JavaScript hasn't loaded!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Simple inline test
+      const quotes = [
+        { text: "Test Quote 1", author: "Author 1" },
+        { text: "Test Quote 2", author: "Author 2" },
+      ];
+
+      let current = 0;
+
+      function showQuote() {
+        document.querySelector(".quotes-carousel").innerHTML = `
+                <div class="quote">
+                    <p class="quote-text">"${quotes[current].text}"</p>
+                    <p class="quote-author">- ${quotes[current].author}</p>
+                </div>
+            `;
+        current = (current + 1) % quotes.length;
+      }
+
+      // Show first quote immediately
+      showQuote();
+
+      // Rotate every 3 seconds
+      setInterval(showQuote, 3000);
+    </script>
+  </body>
+</html>
