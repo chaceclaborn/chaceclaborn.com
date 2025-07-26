@@ -6,7 +6,7 @@ import {
   signOutUser,
   observeAuthState,
   getErrorMessage 
-} from './auth.js';
+} from './auth-service.js'; // CHANGED from './auth.js'
 
 // UI state
 let isSignInMode = true;

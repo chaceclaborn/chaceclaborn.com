@@ -70,3 +70,17 @@ TODO.txt
 personal/
 private/
 files/
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Lock files (optional - some prefer to commit these)
+# package-lock.json
+# yarn.lock
