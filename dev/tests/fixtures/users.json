@@ -1,0 +1,18 @@
+{
+  "validUser": {
+    "uid": "test123",
+    "email": "test@example.com",
+    "displayName": "Test User",
+    "photoURL": "https://example.com/photo.jpg"
+  },
+  "newUser": {
+    "uid": "new456",
+    "email": "newuser@example.com",
+    "displayName": "New User"
+  },
+  "adminUser": {
+    "uid": "admin789",
+    "email": "admin@example.com",
+    "role": "admin"
+  }
+}

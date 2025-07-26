@@ -24,6 +24,8 @@ class DatabaseService {
   constructor() {
     this.db = db;
     this.listeners = new Map();
+    this.currentPageView = null;
+    this.pageStartTime = null;
   }
 
   // ========== USER MANAGEMENT ==========
@@ -97,10 +99,22 @@ class DatabaseService {
         userAgent: navigator.userAgent,
         url: window.location.href,
         sessionId: this.getSessionId(),
+        device: this.getDeviceInfo(),
+        browser: this.getBrowserInfo(),
         ...metadata
       };
       
       const docRef = await addDoc(activityRef, activityData);
+      
+      // Also update user's last activity
+      if (userId && userId !== 'anonymous') {
+        const userRef = doc(this.db, 'users', userId);
+        await updateDoc(userRef, {
+          lastActivity: serverTimestamp(),
+          lastActivityType: activity
+        });
+      }
+      
       console.log('📝 Activity logged:', activity, docRef.id);
       return docRef.id;
     } catch (error) {
@@ -111,6 +125,8 @@ class DatabaseService {
 
   async logPageView(userId, page, metadata = {}) {
     try {
+      const isUniqueView = this.isUniquePageView(page);
+      
       const analyticsRef = collection(this.db, 'analytics');
       const pageViewData = {
         userId: userId || 'anonymous',
@@ -120,7 +136,10 @@ class DatabaseService {
         screenSize: `${window.screen.width}x${window.screen.height}`,
         viewport: `${window.innerWidth}x${window.innerHeight}`,
         sessionId: this.getSessionId(),
-        duration: 0, // Will be updated on page leave
+        duration: 0,
+        isUnique: isUniqueView,
+        entryType: this.getEntryType(),
+        performance: this.getPerformanceMetrics(),
         ...metadata
       };
       
@@ -129,6 +148,9 @@ class DatabaseService {
       // Store reference for duration tracking
       this.currentPageView = docRef.id;
       this.pageStartTime = Date.now();
+      
+      // Track in session
+      this.addToSession('pageViews', page);
       
       return docRef.id;
     } catch (error) {
@@ -234,6 +256,74 @@ class DatabaseService {
     this.listeners.clear();
   }
 
+  // ========== ENGAGEMENT TRACKING ==========
+  async trackEngagement(userId, engagementType, details = {}) {
+    try {
+      const engagementRef = collection(this.db, 'engagement');
+      await addDoc(engagementRef, {
+        userId: userId || 'anonymous',
+        type: engagementType,
+        timestamp: serverTimestamp(),
+        sessionId: this.getSessionId(),
+        details,
+        ...this.getEngagementContext()
+      });
+    } catch (error) {
+      console.error('❌ Error tracking engagement:', error);
+    }
+  }
+
+  // ========== DASHBOARD DATA ==========
+  async getDashboardStats(userId) {
+    try {
+      const stats = {
+        user: await this.getUserProfile(userId),
+        recentActivity: await this.getRecentActivity(userId, 5),
+        sessionInfo: this.getCurrentSessionInfo(),
+        engagement: await this.getEngagementStats(userId)
+      };
+      
+      return stats;
+    } catch (error) {
+      console.error('❌ Error getting dashboard stats:', error);
+      throw error;
+    }
+  }
+
+  async getRecentActivity(userId, limit = 10) {
+    const activityQuery = query(
+      collection(this.db, 'userActivity'),
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc'),
+      limit(limit)
+    );
+    
+    const snapshot = await getDocs(activityQuery);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
+
+  async getEngagementStats(userId) {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const engagementQuery = query(
+      collection(this.db, 'analytics'),
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc'),
+      limit(100)
+    );
+    
+    const snapshot = await getDocs(engagementQuery);
+    const pageViews = snapshot.docs.map(doc => doc.data());
+    
+    return {
+      totalPageViews: pageViews.length,
+      uniquePages: [...new Set(pageViews.map(pv => pv.page))].length,
+      averageDuration: pageViews.reduce((acc, pv) => acc + (pv.duration || 0), 0) / (pageViews.length || 1),
+      mostVisitedPage: this.getMostVisited(pageViews)
+    };
+  }
+
   // ========== HELPER METHODS ==========
   getSessionId() {
     let sessionId = sessionStorage.getItem('sessionId');
@@ -242,6 +332,140 @@ class DatabaseService {
       sessionStorage.setItem('sessionId', sessionId);
     }
     return sessionId;
+  }
+
+  getDeviceInfo() {
+    const ua = navigator.userAgent;
+    return {
+      isMobile: /Mobile|Android|iPhone/i.test(ua),
+      isTablet: /iPad|Tablet/i.test(ua),
+      isDesktop: !(/Mobile|Android|iPhone|iPad|Tablet/i.test(ua)),
+      platform: navigator.platform,
+      vendor: navigator.vendor
+    };
+  }
+
+  getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let browserName = 'Unknown';
+    let browserVersion = '';
+    
+    if (ua.indexOf('Chrome') > -1) {
+      browserName = 'Chrome';
+      browserVersion = ua.match(/Chrome\/(\d+)/)?.[1] || '';
+    } else if (ua.indexOf('Safari') > -1) {
+      browserName = 'Safari';
+      browserVersion = ua.match(/Version\/(\d+)/)?.[1] || '';
+    } else if (ua.indexOf('Firefox') > -1) {
+      browserName = 'Firefox';
+      browserVersion = ua.match(/Firefox\/(\d+)/)?.[1] || '';
+    } else if (ua.indexOf('Edge') > -1) {
+      browserName = 'Edge';
+      browserVersion = ua.match(/Edge\/(\d+)/)?.[1] || '';
+    }
+    
+    return { name: browserName, version: browserVersion };
+  }
+
+  isUniquePageView(page) {
+    const viewedPages = JSON.parse(sessionStorage.getItem('viewedPages') || '[]');
+    if (!viewedPages.includes(page)) {
+      viewedPages.push(page);
+      sessionStorage.setItem('viewedPages', JSON.stringify(viewedPages));
+      return true;
+    }
+    return false;
+  }
+
+  getEntryType() {
+    const referrer = document.referrer;
+    if (!referrer) return 'direct';
+    if (referrer.includes(window.location.hostname)) return 'internal';
+    if (referrer.includes('google.com')) return 'search';
+    if (referrer.includes('facebook.com') || referrer.includes('twitter.com')) return 'social';
+    return 'referral';
+  }
+
+  getPerformanceMetrics() {
+    if ('performance' in window) {
+      const perfData = performance.getEntriesByType('navigation')[0];
+      if (perfData) {
+        return {
+          loadTime: Math.round(perfData.loadEventEnd - perfData.fetchStart),
+          domReady: Math.round(perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart),
+          firstPaint: Math.round(perfData.domInteractive - perfData.fetchStart)
+        };
+      }
+    }
+    return null;
+  }
+
+  addToSession(type, value) {
+    const session = JSON.parse(sessionStorage.getItem('userSession') || '{}');
+    if (!session[type]) session[type] = [];
+    session[type].push({ value, timestamp: Date.now() });
+    sessionStorage.setItem('userSession', JSON.stringify(session));
+  }
+
+  getEngagementContext() {
+    const sessionStart = parseInt(sessionStorage.getItem('sessionStart') || Date.now().toString());
+    return {
+      timeOnSite: Date.now() - sessionStart,
+      pageDepth: JSON.parse(sessionStorage.getItem('viewedPages') || '[]').length,
+      scrollDepth: this.getScrollDepth(),
+      interactionCount: parseInt(sessionStorage.getItem('interactionCount') || '0')
+    };
+  }
+
+  getScrollDepth() {
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    return Math.round(((scrollTop + windowHeight) / documentHeight) * 100);
+  }
+
+  getCurrentSessionInfo() {
+    const sessionStart = parseInt(sessionStorage.getItem('sessionStart') || Date.now().toString());
+    return {
+      sessionId: this.getSessionId(),
+      duration: Date.now() - sessionStart,
+      pageViews: JSON.parse(sessionStorage.getItem('viewedPages') || '[]'),
+      interactions: parseInt(sessionStorage.getItem('interactionCount') || '0')
+    };
+  }
+
+  getMostVisited(pageViews) {
+    const pageCounts = {};
+    pageViews.forEach(pv => {
+      pageCounts[pv.page] = (pageCounts[pv.page] || 0) + 1;
+    });
+    
+    return Object.entries(pageCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([page, count]) => ({ page, count }));
+  }
+
+  initializeSession() {
+    if (!sessionStorage.getItem('sessionStart')) {
+      sessionStorage.setItem('sessionStart', Date.now().toString());
+      sessionStorage.setItem('sessionId', this.getSessionId());
+      sessionStorage.setItem('interactionCount', '0');
+      
+      // Track session start
+      this.logUserActivity('anonymous', 'session_start', {
+        entryPoint: window.location.pathname,
+        referrer: document.referrer
+      });
+    }
+    
+    // Track interactions
+    ['click', 'scroll', 'keypress'].forEach(event => {
+      document.addEventListener(event, () => {
+        const count = parseInt(sessionStorage.getItem('interactionCount') || '0');
+        sessionStorage.setItem('interactionCount', (count + 1).toString());
+      }, { once: false, passive: true });
+    });
   }
 
   // ========== ERROR LOGGING ==========
@@ -269,5 +493,8 @@ const databaseService = new DatabaseService();
 window.addEventListener('beforeunload', () => {
   databaseService.updatePageDuration();
 });
+
+// Initialize session on load
+databaseService.initializeSession();
 
 export default databaseService;

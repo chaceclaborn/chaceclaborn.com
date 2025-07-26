@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device Preview - Chace Claborn</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f0f0f0;
+        color: var(--text-dark);
+      }
+
+      .preview-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .preview-header h1 {
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+
+      /* Control Panel */
+      .control-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(97, 113, 64, 0.15);
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Device Buttons - Match main site styling */
+      .device-selector {
+        display: flex;
+        gap: 10px;
+      }
+
+      .device-btn {
+        display: inline-block;
+        background-color: var(--primary);
+        color: var(--text-light);
+        padding: 0.75rem 2rem;
+        text-decoration: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.875rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(97, 113, 64, 0.15);
+      }
+
+      .device-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(97, 113, 64, 0.25);
+      }
+
+      .device-btn.active {
+        background-color: var(--accent-yellow);
+        color: var(--primary-dark);
+      }
+
+      /* Page Selector */
+      .page-selector select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 2px solid var(--primary);
+        border-radius: 4px;
+        background: white;
+        color: var(--text-dark);
+        cursor: pointer;
+      }
+
+      /* Zoom Control */
+      .zoom-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .zoom-control input[type="range"] {
+        width: 150px;
+      }
+
+      .zoom-value {
+        min-width: 50px;
+        font-weight: bold;
+        color: var(--primary);
+      }
+
+      /* Preview Container */
+      .preview-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(97, 113, 64, 0.15);
+        padding: 20px;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      .device-info {
+        color: var(--primary);
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .device-wrapper {
+        overflow: auto;
+        max-height: 80vh;
+        margin: 0 auto;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        display: inline-block;
+      }
+
+      .device-screen {
+        border: 2px solid #333;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.3s ease;
+      }
+
+      /* Device sizes */
+      .desktop {
+        width: 1200px;
+        height: 700px;
+      }
+      .tablet {
+        width: 768px;
+        height: 1024px;
+      }
+      .mobile {
+        width: 375px;
+        height: 812px;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      /* Hide inactive devices */
+      .device-view {
+        display: none;
+      }
+
+      .device-view.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-header">
+      <h1>Responsive Design Preview</h1>
+      <p>Test your website across different device sizes</p>
+    </div>
+
+    <div class="control-panel">
+      <div class="device-selector">
+        <button class="device-btn active" onclick="selectDevice('desktop')">
+          Desktop
+        </button>
+        <button class="device-btn" onclick="selectDevice('tablet')">
+          iPad
+        </button>
+        <button class="device-btn" onclick="selectDevice('mobile')">
+          iPhone
+        </button>
+      </div>
+
+      <div class="page-selector">
+        <label for="pageSelect">Page: </label>
+        <select id="pageSelect" onchange="changePage()">
+          <option value="../index.html">Home</option>
+          <option value="../portfolio.html">Portfolio</option>
+          <option value="../resume.html">Resume</option>
+        </select>
+      </div>
+
+      <div class="zoom-control">
+        <label for="zoomRange">Zoom: </label>
+        <input
+          type="range"
+          id="zoomRange"
+          min="30"
+          max="150"
+          value="70"
+          oninput="updateZoom(this.value)"
+        />
+        <span class="zoom-value" id="zoomValue">70%</span>
+      </div>
+    </div>
+
+    <div class="preview-container">
+      <!-- Desktop View -->
+      <div class="device-view active" id="desktop-view">
+        <div class="device-info">Desktop View (1200px width)</div>
+        <div class="device-wrapper">
+          <div class="device-screen desktop" id="desktop-device">
+            <iframe id="desktop-preview" src="../index.html"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tablet View -->
+      <div class="device-view" id="tablet-view">
+        <div class="device-info">iPad View (768px width)</div>
+        <div class="device-wrapper">
+          <div class="device-screen tablet" id="tablet-device">
+            <iframe id="tablet-preview" src="../index.html"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile View -->
+      <div class="device-view" id="mobile-view">
+        <div class="device-info">iPhone View (375px width)</div>
+        <div class="device-wrapper">
+          <div class="device-screen mobile" id="mobile-device">
+            <iframe id="mobile-preview" src="../index.html"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentDevice = "desktop";
+      let currentZoom = 70;
+
+      function selectDevice(device) {
+        // Update active button
+        document
+          .querySelectorAll(".device-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelector(`.device-btn[onclick*="${device}"]`)
+          .classList.add("active");
+
+        // Hide all views and show selected
+        document
+          .querySelectorAll(".device-view")
+          .forEach((view) => view.classList.remove("active"));
+        document.getElementById(device + "-view").classList.add("active");
+
+        currentDevice = device;
+        updateZoom(currentZoom);
+      }
+
+      function changePage() {
+        const page = document.getElementById("pageSelect").value;
+        document.getElementById("desktop-preview").src = page;
+        document.getElementById("tablet-preview").src = page;
+        document.getElementById("mobile-preview").src = page;
+      }
+
+      function updateZoom(value) {
+        currentZoom = value;
+        const scale = value / 100;
+        document.getElementById("zoomValue").textContent = value + "%";
+
+        // Apply different base scales for each device
+        const scales = {
+          desktop: scale * 0.5,
+          tablet: scale * 0.7,
+          mobile: scale * 1,
+        };
+
+        document.getElementById(
+          "desktop-device"
+        ).style.transform = `scale(${scales.desktop})`;
+        document.getElementById("desktop-device").style.transformOrigin =
+          "top left";
+
+        document.getElementById(
+          "tablet-device"
+        ).style.transform = `scale(${scales.tablet})`;
+        document.getElementById("tablet-device").style.transformOrigin =
+          "top left";
+
+        document.getElementById(
+          "mobile-device"
+        ).style.transform = `scale(${scales.mobile})`;
+        document.getElementById("mobile-device").style.transformOrigin =
+          "top left";
+      }
+
+      // Initialize
+      updateZoom(70);
+    </script>
+  </body>
+</html>
