@@ -1,0 +1,72 @@
+# Batch files (upload scripts)
+*.bat
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE and editor files
+.vscode/
+/.vscode
+dev/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# AWS CLI files
+.aws/
+
+# Node.js (if you ever use it)
+node_modules/
+npm-debug.log*
+
+# Python (if you use any Python scripts)
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Image source files (keep only optimized versions)
+*.psd
+*.ai
+*.sketch
+
+# Private/sensitive files
+secrets.txt
+passwords.txt
+*.env
+.env.local
+
+# Local notes or drafts
+notes/
+drafts/
+TODO.txt
+
+# Large media files (if needed)
+# *.mp4
+# *.mov
+# *.avi
+
+# Personal files
+personal/
+private/
+files/

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bonsai Assistant - Chace Claborn</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="content-page">
+      <!-- Modern Header (matching index.html) -->
+      <header class="site-header">
+        <div class="header-container">
+          <div class="logo">
+            <span class="logo-text">chaceclaborn.com</span>
+          </div>
+          <nav class="main-nav">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="portfolio.html" class="nav-link active">Portfolio</a>
+            <a href="resume.html" class="nav-link">Resume</a>
+          </nav>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div
+          style="
+            position: relative;
+            margin: -4rem -2rem 3rem -2rem;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 0 0 12px 12px;
+            background-color: #617140;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.3),
+                rgba(0, 0, 0, 0.7)
+              );
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <div style="text-align: center; color: white">
+              <h1 style="font-size: 3rem; margin-bottom: 0.5rem">
+                Bonsai Assistant Project
+              </h1>
+              <p style="font-size: 1.2rem">
+                An automated irrigation and monitoring system for bonsai trees
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="resume-container">
+          <div class="resume-section">
+            <h2>Project Overview</h2>
+            <p>
+              The Bonsai Assistant is an IoT project I developed to automate the
+              care of my bonsai trees. Using a Raspberry Pi, moisture sensors,
+              and a custom Python application, the system monitors soil moisture
+              levels and automatically waters the plants when needed.
+            </p>
+          </div>
+
+          <div class="resume-section">
+            <h2>Key Features</h2>
+            <ul>
+              <li>Real-time soil moisture monitoring</li>
+              <li>Automated watering based on moisture thresholds</li>
+              <li>Data logging and visualization</li>
+              <li>Mobile notifications for watering events</li>
+              <li>Web interface for remote monitoring</li>
+            </ul>
+          </div>
+
+          <div class="resume-section">
+            <h2>Technical Stack</h2>
+            <div class="skills-list">
+              <span class="skill-tag">Raspberry Pi</span>
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">GPIO</span>
+              <span class="skill-tag">Moisture Sensors</span>
+              <span class="skill-tag">Relay Module</span>
+              <span class="skill-tag">Flask</span>
+              <span class="skill-tag">SQLite</span>
+            </div>
+          </div>
+
+          <div class="resume-section">
+            <h2>Challenges & Solutions</h2>
+            <p>
+              One of the main challenges was calibrating the moisture sensors
+              for different soil types. I solved this by implementing a
+              calibration mode that allows users to set custom thresholds for
+              each plant. Additionally, preventing over-watering required
+              implementing a cooldown period between watering cycles.
+            </p>
+          </div>
+
+          <div class="resume-section">
+            <h2>Results</h2>
+            <p>
+              The system has been running successfully for over 6 months,
+              maintaining optimal soil moisture levels for my bonsai collection.
+              It has reduced daily maintenance time and improved plant health
+              through consistent watering schedules.
+            </p>
+          </div>
+
+          <div
+            class="project-links"
+            style="
+              text-align: center;
+              margin-top: 2rem;
+              display: flex;
+              gap: 1rem;
+              justify-content: center;
+            "
+          >
+            <a
+              href="https://github.com/chaceclaborn/Bonsai-Assistant"
+              target="_blank"
+              class="project-link"
+            >
+              <i class="fab fa-github"></i> View on GitHub
+            </a>
+            <a href="portfolio.html" class="project-link">
+              <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+          </div>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div class="footer-container">
+          <div class="footer-content">
+            <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+            <div class="footer-links">
+              <a
+                href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+                target="_blank"
+              >
+                <i class="fab fa-linkedin"></i>
+              </a>
+              <a href="https://github.com/chaceclaborn" target="_blank">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="mailto:chaceclaborn@gmail.com">
+                <i class="fas fa-envelope"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

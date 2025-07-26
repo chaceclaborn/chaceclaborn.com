@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio - Chace Claborn</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/quotes.css" />
+    <link rel="stylesheet" href="css/auth-styles.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="content-page">
+      <!-- Modern Header -->
+      <header class="site-header">
+        <div class="header-container">
+          <div class="logo">
+            <span class="logo-text">chaceclaborn.com</span>
+          </div>
+
+          <div class="nav-wrapper">
+            <nav class="main-nav">
+              <a href="index.html" class="nav-link">Home</a>
+              <a href="portfolio.html" class="nav-link active">Portfolio</a>
+              <a href="resume.html" class="nav-link">Resume</a>
+
+              <!-- Member Navigation (Hidden by default) -->
+              <div class="member-nav" id="memberNav" style="display: none">
+                <a href="private-projects.html" class="nav-link"
+                  >Private Projects</a
+                >
+                <a href="games.html" class="nav-link">Games</a>
+              </div>
+            </nav>
+
+            <!-- Sign In Button -->
+            <a href="#" class="btn-modern" id="signInBtn">Sign In</a>
+
+            <!-- User Info (Hidden by default) -->
+            <div class="user-info" id="userInfo" style="display: none">
+              <img
+                class="user-avatar"
+                id="userAvatar"
+                src=""
+                alt="User Avatar"
+              />
+              <span
+                class="user-email"
+                id="userEmail"
+                style="display: none"
+              ></span>
+              <a href="#" class="btn-modern" id="signOutLink">Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div
+          style="
+            position: relative;
+            margin: -4rem -2rem 3rem -2rem;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 0 0 12px 12px;
+          "
+        >
+          <img
+            src="images/hotfire.jpg"
+            alt="Rocket Engine Hot Fire Test"
+            style="width: 100%; height: 100%; object-fit: cover"
+          />
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.3),
+                rgba(0, 0, 0, 0.7)
+              );
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <div style="text-align: center; color: white">
+              <h1 style="font-size: 3rem; margin-bottom: 0.5rem">
+                My Portfolio
+              </h1>
+              <p style="font-size: 1.2rem">
+                My professional and private projects in manufacturing,
+                aerospace, coding, etc.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="portfolio-grid">
+          <!-- GitHub Projects -->
+          <div class="portfolio-card">
+            <h3>🚀 My On-Going Career Presentation</h3>
+            <p>
+              A comprehensive overview of my career journey, skills, and
+              specific projects within the manufacturing and aerospace
+              industries.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://docs.google.com/presentation/d/[YOUR-PRESENTATION-ID]"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fas fa-file-powerpoint"></i> View Presentation
+              </a>
+            </div>
+          </div>
+
+          <div class="portfolio-card">
+            <h3>📊 Github Portfolio</h3>
+            <div class="project-links">
+              <a
+                href="https://github.com/chaceclaborn/chaceclaborn.com"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> My Website Source Code
+              </a>
+
+              <a
+                href="https://github.com/chaceclaborn/Bonsai-Assistant"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> Bonsai Assisstant
+              </a>
+
+              <a
+                href="https://github.com/chaceclaborn/Stock-App"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> Chace's Stock App
+              </a>
+
+              <a
+                href="https://github.com/chaceclaborn/Propulsion-App"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> Propulsion App
+              </a>
+            </div>
+          </div>
+
+          <div class="portfolio-card">
+            <h3>🎯 Bonsai Assistant</h3>
+            <p>
+              Project where I developed an automation system for bonsai tree
+              care, utilizing Raspberry Pi and Python. This page shows in-depth
+              the details, design, and the struggles I faced while building the
+              system.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://chaceclaborn.com/bonsai-assistant"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> Bonsai Assistant Page
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chatbot-botui.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script type="module" src="js/auth-init.js"></script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chace Claborn - Mechanical Engineer</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/quotes.css" />
+    <link rel="stylesheet" href="css/auth-styles.css" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Modern Header -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="logo">
+          <span class="logo-text">chaceclaborn.com</span>
+        </div>
+
+        <div class="nav-wrapper">
+          <nav class="main-nav">
+            <a href="index.html" class="nav-link active">Home</a>
+            <a href="portfolio.html" class="nav-link">Portfolio</a>
+            <a href="resume.html" class="nav-link">Resume</a>
+
+            <!-- Member Navigation (Hidden by default) -->
+            <div class="member-nav" id="memberNav" style="display: none">
+              <a href="private-projects.html" class="nav-link"
+                >Private Projects</a
+              >
+              <a href="games.html" class="nav-link">Games</a>
+            </div>
+          </nav>
+
+          <!-- Sign In Button -->
+          <a href="#" class="btn-modern" id="signInBtn">Sign In</a>
+
+          <!-- User Info (Hidden by default) -->
+          <div class="user-info" id="userInfo" style="display: none">
+            <img class="user-avatar" id="userAvatar" src="" alt="User Avatar" />
+            <span
+              class="user-email"
+              id="userEmail"
+              style="display: none"
+            ></span>
+            <a href="#" class="btn-modern" id="signOutLink">Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+      <div class="content-wrapper">
+        <!-- Left Panel -->
+        <div class="info-panel">
+          <div class="profile-section">
+            <img
+              src="images/Professional Photo.jpg"
+              alt="Chace Claborn"
+              class="profile-image"
+            />
+
+            <h1>Chace Claborn</h1>
+            <p class="title">Mechanical Engineer</p>
+
+            <!-- Social Links -->
+            <div class="social-links">
+              <a
+                href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+                target="_blank"
+                title="LinkedIn"
+              >
+                <i class="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://github.com/chaceclaborn"
+                target="_blank"
+                title="GitHub"
+              >
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="mailto:chaceclaborn@gmail.com" title="Email">
+                <i class="fas fa-envelope"></i>
+              </a>
+            </div>
+
+            <!-- About Me Section -->
+            <div class="about-section">
+              <h2>About Me</h2>
+              <p>
+                I am currently a Manufacturing Engineer at Blue Origin. I
+                graduated from Auburn University with a Bachelor of Science in
+                Mechanical Engineering. This is a portfolio website to show what
+                I enjoy doing and what I have learned along the way.
+              </p>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="cta-buttons">
+              <a href="portfolio.html" class="btn-modern">View Portfolio</a>
+              <a href="resume.html" class="btn-modern">Resume</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - Image Slider -->
+        <div class="image-panel">
+          <div class="image-slider">
+            <div class="slide active">
+              <img src="images/manufacturing.png" alt="Manufacturing" />
+            </div>
+            <div class="slide">
+              <img src="images/hotfire.jpg" alt="Hot Fire Test" />
+            </div>
+            <div class="slide">
+              <img src="images/graduation.jpeg" alt="Graduation" />
+            </div>
+          </div>
+
+          <!-- Slide Indicators -->
+          <div class="slide-indicators">
+            <span class="indicator active" data-slide="0"></span>
+            <span class="indicator" data-slide="1"></span>
+            <span class="indicator" data-slide="2"></span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modern Footer with Quotes -->
+    <footer class="site-footer">
+      <!-- Quotes Carousel -->
+      <div class="quotes-carousel-container">
+        <div class="quotes-slider">
+          <!-- Quote slides will be dynamically generated by JavaScript -->
+        </div>
+        <div class="quote-indicators">
+          <!-- Quote indicators will be dynamically generated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Footer Content -->
+      <div class="footer-container">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+              target="_blank"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/chaceclaborn" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="mailto:chaceclaborn@gmail.com">
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/carousel.js"></script>
+    <script src="js/quotes.js"></script>
+    <script src="js/chatbot-botui.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script type="module" src="js/auth-init.js"></script>
+  </body>
+</html>
