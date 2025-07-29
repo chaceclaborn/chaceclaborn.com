@@ -1,4 +1,4 @@
-// js/auth-init.js - Authentication with tier system
+// js/auth-init.js - Authentication with Tier System (Updated for Firebase v12)
 import { auth } from './firebase/config.js';
 import { signInWithGoogle, signOutUser } from './firebase/auth-service.js';
 import { 
@@ -8,7 +8,7 @@ import {
     getUserTier, 
     TIERS 
 } from './firebase/auth-tiers.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 // DOM elements
 const loginBtn = document.getElementById('login-btn');
@@ -18,157 +18,114 @@ const userName = document.getElementById('user-name');
 const userEmail = document.getElementById('user-email');
 const userPhoto = document.getElementById('user-photo');
 
-// Sign in function with tier initialization
+// --- SIGN IN ---
 async function handleSignIn() {
     try {
         const user = await signInWithGoogle();
         if (user) {
-            // Initialize user document with tier
+            // Initialize user document with tier only if needed
             await initializeUserTier(user);
-            
-            // Auto-assign tier based on email
             await autoAssignTier(user);
-            
-            console.log('User signed in:', user.email);
+            console.log('✅ User signed in & tier initialized:', user.email);
         }
     } catch (error) {
-        console.error('Error during sign in:', error);
-        
-        // Show user-friendly error message
+        console.error('❌ Error during sign in:', error);
         if (error.code === 'auth/popup-blocked') {
             alert('Please allow popups for this site to sign in.');
-        } else if (error.code === 'auth/cancelled-popup-request') {
-            // User cancelled, no need to show error
-        } else {
+        } else if (error.code !== 'auth/cancelled-popup-request') {
             alert('Error signing in. Please try again.');
         }
     }
 }
 
-// Sign out function
+// --- SIGN OUT ---
 async function handleSignOut() {
     try {
         await signOutUser();
-        console.log('User signed out');
-        
-        // Redirect to home page after sign out if on protected page
+        console.log('✅ User signed out');
+
+        // Redirect if on a protected page
         if (window.location.pathname.includes('/pages/')) {
             window.location.href = '../index.html';
         }
     } catch (error) {
-        console.error('Error signing out:', error);
+        console.error('❌ Error signing out:', error);
         alert('Error signing out. Please try again.');
     }
 }
 
-// Update UI based on auth state and tier
+// --- UI UPDATES ---
 async function updateUI(user) {
     if (user) {
-        // User is signed in
+        // Show user info
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'block';
         if (userInfo) userInfo.style.display = 'block';
-        
+
         if (userName) userName.textContent = user.displayName || 'User';
         if (userEmail) userEmail.textContent = user.email;
-        
-        // Set user photo if available
-        if (userPhoto && user.photoURL) {
-            userPhoto.src = user.photoURL;
+
+        if (userPhoto) {
+            userPhoto.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=617140&color=fff`;
             userPhoto.alt = user.displayName || 'User photo';
             userPhoto.style.display = 'inline-block';
         }
-        
-        // Get user tier (for functionality, not display)
+
+        // Apply tier visibility
         const tier = await getUserTier();
-        
-        // Apply tier-based visibility
         await applyTierVisibility();
-        
-        // Show tier-specific navigation
         showTierNavigation(tier);
-        
-        // Log user tier for debugging
-        console.log(`User ${user.email} has tier: ${tier}`);
+        console.log(`🔑 User tier: ${tier}`);
     } else {
-        // User is signed out
+        // Reset UI for signed-out state
         if (loginBtn) loginBtn.style.display = 'block';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (userInfo) userInfo.style.display = 'none';
-        
-        // Hide user photo when signed out
         if (userPhoto) {
             userPhoto.style.display = 'none';
             userPhoto.src = '';
         }
-        
-        // Apply public tier visibility
         await applyTierVisibility();
-        
-        // Hide all tier-specific navigation
         hideTierNavigation();
-        
-        // Set body class to public
         document.body.className = 'tier-public';
     }
 }
 
-// Show navigation items based on tier
+// --- NAVIGATION BASED ON TIER ---
 function showTierNavigation(tier) {
-    // Hide all tier nav items first
-    document.querySelectorAll('.tier-nav').forEach(item => {
-        item.style.display = 'none';
-    });
-    
-    // Show appropriate nav items based on tier hierarchy
+    document.querySelectorAll('.tier-nav').forEach(item => item.style.display = 'none');
     switch(tier) {
         case TIERS.ADMIN:
-            document.querySelectorAll('.admin-nav').forEach(item => {
-                item.style.display = '';
-            });
-            // Fall through to show family items too
+            document.querySelectorAll('.admin-nav').forEach(item => item.style.display = '');
         case TIERS.FAMILY:
-            document.querySelectorAll('.family-nav').forEach(item => {
-                item.style.display = '';
-            });
-            // Fall through to show authenticated items too
+            document.querySelectorAll('.family-nav').forEach(item => item.style.display = '');
         case TIERS.AUTHENTICATED:
-            document.querySelectorAll('.auth-nav').forEach(item => {
-                item.style.display = '';
-            });
+            document.querySelectorAll('.auth-nav').forEach(item => item.style.display = '');
             break;
     }
 }
 
-// Hide all tier navigation
 function hideTierNavigation() {
-    document.querySelectorAll('.tier-nav').forEach(item => {
-        item.style.display = 'none';
-    });
+    document.querySelectorAll('.tier-nav').forEach(item => item.style.display = 'none');
 }
 
-// Initialize auth state listener
+// --- INIT AUTH STATE ---
 function initializeAuth() {
-    // Listen for auth state changes
-    onAuthStateChanged(auth, (user) => {
-        updateUI(user);
+    onAuthStateChanged(auth, async (user) => {
+        await updateUI(user);
+        if (user) {
+            // Ensure tier assignment only runs once per login
+            await autoAssignTier(user);
+        }
     });
-    
-    // Check for auth action in URL
+
     const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    
-    if (action === 'signin') {
-        handleSignIn();
-    }
+    if (urlParams.get('action') === 'signin') handleSignIn();
 }
 
-// Event listeners
+// --- EVENT LISTENERS ---
 if (loginBtn) loginBtn.addEventListener('click', handleSignIn);
 if (logoutBtn) logoutBtn.addEventListener('click', handleSignOut);
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', initializeAuth);
-
-// Export functions for use in other modules
-export { handleSignIn, handleSignOut };
+// Initialize on load
+initializeAuth();

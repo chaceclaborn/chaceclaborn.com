@@ -1,165 +1,172 @@
-// js/firebase/auth-service.js - Fixed to match original working version
+// js/firebase/auth-service.js - Authentication & User Profile Management (v12+)
 import { auth, db } from './config.js';
 import { 
+  GoogleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
-  sendPasswordResetEmail,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { 
   doc,
   setDoc,
+  getDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-// Current user state
-let currentUser = null;
+import databaseService from './database.js';
 
-// Google provider - CREATE ONCE AT MODULE LEVEL (like your original)
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
+const provider = new GoogleAuthProvider();
 
-// Sign in with Google - EXACTLY like your original
+/**
+ * Google Sign-In
+ */
 export async function signInWithGoogle() {
   try {
     console.log('🔄 Starting Google sign-in...');
-    const result = await signInWithPopup(auth, googleProvider);
-    console.log('✅ Google sign-in successful:', result.user.email);
-    
-    await saveUserToFirestore(result.user, 'google');
-    
-    return result.user;
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Ensure Firestore user profile exists
+    await createOrUpdateUserProfile(user);
+
+    console.log(`✅ Google sign-in successful: ${user.email}`);
+    return user;
   } catch (error) {
     console.error('❌ Google sign-in error:', error);
     throw error;
   }
 }
 
-// Sign in with email - EXACTLY like your original
+/**
+ * Email/Password Sign-In
+ */
 export async function signInWithEmail(email, password) {
   try {
+    console.log(`🔄 Signing in with email: ${email}`);
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log('✅ Email sign-in successful:', result.user.email);
-    
-    await saveUserToFirestore(result.user, 'email');
-    
-    return result.user;
+    const user = result.user;
+
+    await createOrUpdateUserProfile(user);
+
+    console.log(`✅ Email sign-in successful: ${user.email}`);
+    return user;
   } catch (error) {
     console.error('❌ Email sign-in error:', error);
     throw error;
   }
 }
 
-// Create account - EXACTLY like your original
-export async function createAccount(email, password, displayName = null) {
+/**
+ * Create Account (Email/Password)
+ */
+export async function createAccount(email, password) {
   try {
+    console.log(`🔄 Creating account for: ${email}`);
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('✅ Account created:', result.user.email);
-    
-    if (displayName) {
-      await updateProfile(result.user, { displayName });
-    }
-    
-    await saveUserToFirestore(result.user, 'email', true);
-    
-    return result.user;
+    const user = result.user;
+
+    await createOrUpdateUserProfile(user);
+
+    console.log(`✅ Account created: ${user.email}`);
+    return user;
   } catch (error) {
-    console.error('❌ Create account error:', error);
+    console.error('❌ Account creation error:', error);
     throw error;
   }
 }
 
-// Sign out - EXACTLY like your original
+/**
+ * Sign Out
+ */
 export async function signOutUser() {
   try {
+    console.log('🔄 Signing out user...');
     await signOut(auth);
-    console.log('✅ Signed out successfully');
+    console.log('✅ User signed out');
   } catch (error) {
     console.error('❌ Sign out error:', error);
     throw error;
   }
 }
 
-// Save user to Firestore - FROM YOUR ORIGINAL
-async function saveUserToFirestore(user, method = 'unknown', isNewUser = false) {
-  try {
-    const userRef = doc(db, 'users', user.uid);
-    await setDoc(userRef, {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || user.email.split('@')[0],
-      photoURL: user.photoURL || null,
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp(),
-      authMethod: method
-    }, { merge: true });
-    console.log('📝 User saved to Firestore');
-  } catch (error) {
-    console.error('❌ Firestore error:', error);
-  }
-}
-
-// Auth state observer - EXACTLY like your original
+/**
+ * Auth State Observer
+ */
 export function observeAuthState(callback) {
-  return onAuthStateChanged(auth, (user) => {
-    currentUser = user;
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      console.log(`👤 Auth state: Signed in as ${user.email}`);
+      // Ensure profile is initialized before firing callback
+      await createOrUpdateUserProfile(user);
+    } else {
+      console.log('🚪 Auth state: Signed out');
+    }
     callback(user);
   });
 }
 
-// Get current user - EXACTLY like your original
-export function getCurrentUser() {
-  return currentUser;
-}
+/**
+ * Create or Update User Profile (Single Source of Truth)
+ */
+async function createOrUpdateUserProfile(user) {
+  if (!user || !user.uid) return;
 
-// Get error message - FROM YOUR ORIGINAL
-export function getErrorMessage(error) {
-  switch (error.code) {
-    case 'auth/popup-closed-by-user':
-      return 'Sign-in popup was closed';
-    case 'auth/user-not-found':
-      return 'No account found with this email';
-    case 'auth/wrong-password':
-      return 'Incorrect password';
-    case 'auth/invalid-email':
-      return 'Invalid email address';
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists';
-    case 'auth/weak-password':
-      return 'Password should be at least 6 characters';
-    default:
-      return error.message;
-  }
-}
-
-// Additional functions from auth-service.js
-export async function resetPassword(email) {
   try {
-    await sendPasswordResetEmail(auth, email);
-    console.log('✅ Password reset email sent:', email);
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      // Create new user profile if it doesn't exist
+      const newProfile = {
+        email: user.email,
+        displayName: user.displayName || 'New User',
+        photoURL: user.photoURL || '',
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        provider: user.providerData[0]?.providerId || 'unknown',
+        tier: 'authenticated', // default tier, adjusted later in auth-tiers
+        testData: false
+      };
+      await setDoc(userRef, newProfile);
+      console.log(`🆕 User profile created: ${user.email}`);
+    } else {
+      // Update last login if profile exists
+      await setDoc(
+        userRef,
+        { lastLogin: serverTimestamp(), photoURL: user.photoURL || '' },
+        { merge: true }
+      );
+      console.log(`🔄 User profile updated: ${user.email}`);
+    }
   } catch (error) {
-    console.error('❌ Password reset error:', error);
+    console.error('❌ Error creating/updating user profile:', error);
     throw error;
   }
 }
 
-// For backward compatibility with auth-service.js imports
-const authService = {
-  signInWithGoogle,
-  signInWithEmail,
-  createAccount,
-  signOut: signOutUser,
-  resetPassword,
-  getCurrentUser,
-  isAuthenticated: () => currentUser !== null,
-  onAuthStateChanged: observeAuthState,
-  getErrorMessage
-};
+/**
+ * Get Current Authenticated User
+ */
+export function getCurrentUser() {
+  return auth.currentUser;
+}
 
-export default authService;
+/**
+ * Utility: Error Message Mapper
+ */
+export function getErrorMessage(error) {
+  const errorMap = {
+    'auth/email-already-in-use': 'This email is already in use.',
+    'auth/invalid-email': 'The email address is not valid.',
+    'auth/user-disabled': 'This user has been disabled.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password. Try again.',
+    'auth/popup-blocked': 'Please allow popups for this site.',
+    'auth/popup-closed-by-user': 'The popup was closed before sign-in.',
+  };
+  return errorMap[error.code] || 'An unexpected error occurred.';
+}
+
+export { createOrUpdateUserProfile }; // Exported for tier init modules if needed

@@ -1,15 +1,9 @@
 // js/firebase/auth-tiers.js - Tier Management System
 import { auth, db } from './config.js';
 import { 
-    doc, 
-    getDoc, 
-    setDoc, 
-    updateDoc, 
-    collection, 
-    query, 
-    where, 
-    getDocs 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  doc, setDoc, getDoc, updateDoc, addDoc, collection, query, where, orderBy, limit, getDocs, onSnapshot, serverTimestamp, increment, arrayUnion, arrayRemove
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 // Tier levels
 const TIERS = {
