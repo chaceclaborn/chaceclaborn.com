@@ -2,15 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portfolio - Chace Claborn</title>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/quotes.css" />
-    <link rel="stylesheet" href="css/auth-styles.css" />
-    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/auth-styles.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -18,7 +15,7 @@
   </head>
   <body>
     <div class="content-page">
-      <!-- Modern Header -->
+      <!-- Header -->
       <header class="site-header">
         <div class="header-container">
           <div class="logo">
@@ -27,7 +24,7 @@
 
           <div class="nav-wrapper">
             <nav class="main-nav">
-              <a href="index.html" class="nav-link">Home</a>
+              <a href="../index.html" class="nav-link">Home</a>
               <a href="portfolio.html" class="nav-link active">Portfolio</a>
               <a href="resume.html" class="nav-link">Resume</a>
 
@@ -38,67 +35,43 @@
                 >
                 <a href="games.html" class="nav-link">Games</a>
               </div>
+
+              <!-- Tier Navigation (Hidden by default) -->
+              <a href="dashboard.html" class="nav-link tier-nav auth-nav"
+                >Dashboard</a
+              >
+              <a href="family.html" class="nav-link tier-nav family-nav"
+                >Family</a
+              >
+              <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
             </nav>
 
             <!-- Sign In Button -->
-            <a href="#" class="btn-modern" id="signInBtn">Sign In</a>
+            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
 
             <!-- User Info (Hidden by default) -->
-            <div class="user-info" id="userInfo" style="display: none">
+            <div class="user-info" id="user-info" style="display: none">
               <img
                 class="user-avatar"
-                id="userAvatar"
+                id="user-photo"
                 src=""
                 alt="User Avatar"
               />
-              <span
-                class="user-email"
-                id="userEmail"
-                style="display: none"
-              ></span>
-              <a href="#" class="btn-modern" id="signOutLink">Sign Out</a>
+              <span id="user-name" style="display: none"></span>
+              <span id="user-email" style="display: none"></span>
+              <a href="#" class="btn-modern" id="logout-btn">Sign Out</a>
             </div>
           </div>
         </div>
       </header>
 
       <main class="main-content">
-        <div
-          style="
-            position: relative;
-            margin: -4rem -2rem 3rem -2rem;
-            height: 300px;
-            overflow: hidden;
-            border-radius: 0 0 12px 12px;
-          "
-        >
-          <img
-            src="images/hotfire.jpg"
-            alt="Rocket Engine Hot Fire Test"
-            style="width: 100%; height: 100%; object-fit: cover"
-          />
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0.3),
-                rgba(0, 0, 0, 0.7)
-              );
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <div style="text-align: center; color: white">
-              <h1 style="font-size: 3rem; margin-bottom: 0.5rem">
-                My Portfolio
-              </h1>
-              <p style="font-size: 1.2rem">
+        <!-- Portfolio Hero Section -->
+        <div class="portfolio-hero">
+          <div class="hero-overlay">
+            <div class="hero-content">
+              <h1>My Portfolio</h1>
+              <p>
                 My professional and private projects in manufacturing,
                 aerospace, coding, etc.
               </p>
@@ -106,8 +79,9 @@
           </div>
         </div>
 
+        <!-- Portfolio Grid -->
         <div class="portfolio-grid">
-          <!-- GitHub Projects -->
+          <!-- Career Presentation Card -->
           <div class="portfolio-card">
             <h3>🚀 My On-Going Career Presentation</h3>
             <p>
@@ -117,7 +91,7 @@
             </p>
             <div class="project-links">
               <a
-                href="https://docs.google.com/presentation/d/[YOUR-PRESENTATION-ID]"
+                href="../files/Career Technical Presentation - On-Going.pptx"
                 target="_blank"
                 class="project-link"
               >
@@ -126,8 +100,12 @@
             </div>
           </div>
 
+          <!-- GitHub Portfolio Card -->
           <div class="portfolio-card">
             <h3>📊 Github Portfolio</h3>
+            <p>
+              Check out my various coding projects and contributions on GitHub.
+            </p>
             <div class="project-links">
               <a
                 href="https://github.com/chaceclaborn/chaceclaborn.com"
@@ -136,15 +114,13 @@
               >
                 <i class="fab fa-github"></i> My Website Source Code
               </a>
-
               <a
-                href="https://github.com/chaceclaborn/Bonsai-Assistant"
+                href="https://github.com/chaceclaborn/Bonsai_Assistant"
                 target="_blank"
                 class="project-link"
               >
-                <i class="fab fa-github"></i> Bonsai Assisstant
+                <i class="fab fa-github"></i> Bonsai Assistant
               </a>
-
               <a
                 href="https://github.com/chaceclaborn/Stock-App"
                 target="_blank"
@@ -152,7 +128,6 @@
               >
                 <i class="fab fa-github"></i> Chace's Stock App
               </a>
-
               <a
                 href="https://github.com/chaceclaborn/Propulsion-App"
                 target="_blank"
@@ -163,6 +138,7 @@
             </div>
           </div>
 
+          <!-- Bonsai Assistant Card -->
           <div class="portfolio-card">
             <h3>🎯 Bonsai Assistant</h3>
             <p>
@@ -172,27 +148,48 @@
               system.
             </p>
             <div class="project-links">
-              <a
-                href="https://chaceclaborn.com/bonsai-assistant"
-                target="_blank"
-                class="project-link"
-              >
-                <i class="fab fa-github"></i> Bonsai Assistant Page
+              <a href="bonsai-assistant.html" class="project-link">
+                <i class="fas fa-tree"></i> Bonsai Assistant Page
               </a>
             </div>
           </div>
         </div>
       </main>
 
-      <footer>
-        <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+          <div class="footer-links">
+            <a
+              href="https://www.linkedin.com/in/chace-claborn-3b4b1017b/"
+              target="_blank"
+              title="LinkedIn"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a
+              href="https://github.com/chaceclaborn"
+              target="_blank"
+              title="GitHub"
+            >
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="mailto:chaceclaborn@gmail.com" title="Email">
+              <i class="fas fa-envelope"></i>
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
 
     <!-- JavaScript -->
-    <script src="js/chatbot-botui.js"></script>
+    <script src="../js/chatbot-botui.js"></script>
 
     <!-- Firebase Authentication -->
-    <script type="module" src="js/auth-init.js"></script>
+    <script type="module" src="../js/firebase/config.js"></script>
+    <script type="module" src="../js/firebase/auth-service.js"></script>
+    <script type="module" src="../js/firebase/auth-tiers.js"></script>
+    <script type="module" src="../js/auth-init.js"></script>
   </body>
 </html>

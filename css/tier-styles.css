@@ -1,0 +1,11 @@
+/* Tier System Styles - ONLY tier-specific rules */
+
+/* Hide tier-restricted content by default */
+[data-tier] {
+    display: none;
+}
+
+/* Hide tier navigation by default */
+.tier-nav {
+    display: none;
+}
