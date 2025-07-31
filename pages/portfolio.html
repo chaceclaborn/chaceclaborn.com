@@ -23,7 +23,7 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav">
+            <nav class="main-nav" id="mainNav">
               <a href="../index.html" class="nav-link">Home</a>
               <a href="portfolio.html" class="nav-link active">Portfolio</a>
               <a href="resume.html" class="nav-link">Resume</a>
@@ -46,9 +46,6 @@
               <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
             </nav>
 
-            <!-- Sign In Button -->
-            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
-
             <!-- User Info (Hidden by default) -->
             <div class="user-info" id="user-info" style="display: none">
               <img
@@ -61,6 +58,16 @@
               <span id="user-email" style="display: none"></span>
               <a href="#" class="btn-modern" id="logout-btn">Sign Out</a>
             </div>
+
+            <!-- Sign In Button -->
+            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </div>
       </header>
@@ -186,6 +193,7 @@
     <!-- JavaScript -->
     <script src="../js/chatbot-botui.js"></script>
     <script src="../js/ai-assistant.js"></script>
+    <script src="../js/mobile-menu.js"></script>
 
     <!-- Firebase Authentication -->
     <script type="module" src="../js/firebase/config.js"></script>

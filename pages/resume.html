@@ -23,7 +23,7 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav">
+            <nav class="main-nav" id="mainNav">
               <a href="../index.html" class="nav-link">Home</a>
               <a href="portfolio.html" class="nav-link">Portfolio</a>
               <a href="resume.html" class="nav-link active">Resume</a>
@@ -46,9 +46,6 @@
               <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
             </nav>
 
-            <!-- Sign In Button -->
-            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
-
             <!-- User Info (Hidden by default) -->
             <div class="user-info" id="user-info" style="display: none">
               <img
@@ -61,6 +58,16 @@
               <span id="user-email" style="display: none"></span>
               <a href="#" class="btn-modern" id="logout-btn">Sign Out</a>
             </div>
+
+            <!-- Sign In Button -->
+            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </div>
       </header>
@@ -216,92 +223,51 @@
                   CNC operations in support of rocket engine hardware.
                 </li>
                 <li>
-                  Designed and implemented CNC probing routines and macros to
-                  streamline setup processes, reduce manual intervention, and
-                  eliminate variation in critical dimensions.
+                  Created Python applications and scripts to automate data
+                  analysis, reporting, and visualization for manufacturing
+                  metrics.
                 </li>
                 <li>
-                  Led iterative NPI process refinement, utilizing root cause
-                  analysis and continuous feedback loops to optimize machining
-                  techniques and drive successful production outcomes.
+                  Utilize ERP/MES queries to track production metrics, identify
+                  bottlenecks, and improve throughput—delivering data-driven
+                  insights.
                 </li>
                 <li>
-                  Collaborate with external vendors to implement cutting tool
-                  trials and enhance software (e.g., Vericut for CNC simulation,
-                  PLC programming for Hydroforming press) to improve machining
-                  precision and process efficiency.
+                  Programmed CNC lathes, mills, and 5-axis machines using G-code
+                  and conversational programming; optimized cycle times while
+                  meeting quality standards.
                 </li>
                 <li>
-                  Organize best practices, conduct RCCAs, and facilitate
-                  knowledge transfer among machinists and programmers.
+                  Supported hydroforming exotic materials to meet Blue Origin's
+                  current and future engine requirements.
                 </li>
                 <li>
-                  Track project milestones and collaborate with cross-functional
-                  teams to ensure on-time delivery of insourced components,
-                  driving vertical integration and enhancing production
-                  workflow.
-                </li>
-              </ul>
-
-              <h4
-                style="
-                  margin-top: 1.5rem;
-                  margin-bottom: 0.75rem;
-                  color: var(--vibrant-green);
-                  font-size: 1.1rem;
-                "
-              >
-                Component Manufacturing Engineer I-II
-              </h4>
-              <ul>
-                <li>
-                  Develop and update manufacturing work instructions and support
-                  the shop floor for BE-4 and BE-3U rocket engine components
-                  such as turbomachinery, valves, and various other components.
+                  Established standard work instructions, inspection criteria,
+                  and quality control plans for critical operations to ensure
+                  process stability.
                 </li>
                 <li>
-                  Perform comprehensive engineering analysis and dispositions of
-                  non-conformances, applying advanced problem-solving techniques
-                  to ensure compliance with design specifications and production
-                  standards.
-                </li>
-                <li>
-                  Defines, develops, implements, and optimizes Hydroformed parts
-                  and equipment consisting of exotic materials, dies, and other
-                  supporting tooling; operates, troubleshoots, and programs
-                  recipes for new hardware.
-                </li>
-                <li>
-                  Utilize Python and SQL for data analysis, creating queries and
-                  scripts to identify trends, track non-conformances, and
-                  support manufacturing improvements (e.g., building dashboards
-                  and visualizations on Redash and Databricks)
-                </li>
-                <li>
-                  Apply Lean manufacturing principles to streamline workflows
-                  and drive continuous improvement, utilizing ITS JIRA to track
-                  team progress, manage tasks, and align objectives with
-                  operational goals.
-                </li>
-                <li>
-                  Track project milestones and collaborate with cross-functional
-                  teams to ensure on-time delivery of insourced components,
-                  driving vertical integration and enhancing production
-                  workflow.
+                  Work with technicians to manage CNC machines and mentor peers,
+                  and cross-functional teams in a fast-paced production
+                  environment.
                 </li>
               </ul>
             </div>
 
             <div class="resume-item">
-              <h3>Systems/Test Engineer Intern</h3>
+              <h3>Propulsion Intern</h3>
               <p>
-                <strong>Aerojet Rocketdyne</strong>, Huntsville/Decatur, AL |
+                <strong>Aerojet Rocketdyne</strong>, Huntsville, AL |
                 <span class="date">May 2021 to August 2021 (40 hrs/week)</span>
               </p>
               <ul>
                 <li>
-                  Reviewed and updated Field Service Manuals that specified
-                  rocket engine test procedures for Atlas/Delta RL10.
+                  Conducted hot-fire testing of liquid rocket engines and
+                  recorded operational data to evaluate engine performance.
+                </li>
+                <li>
+                  Calculated performance parameters for propulsion systems using
+                  test data, supporting design validation efforts.
                 </li>
                 <li>
                   Monitored rocket engine testing & assembly to ensure
@@ -392,6 +358,7 @@
     <!-- JavaScript -->
     <script src="../js/chatbot-botui.js"></script>
     <script src="../js/ai-assistant.js"></script>
+    <script src="../js/mobile-menu.js"></script>
 
     <!-- Firebase Authentication -->
     <script type="module" src="../js/firebase/config.js"></script>
