@@ -12,6 +12,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
+    
+
   </head>
   <body>
     <!-- Header -->
@@ -208,20 +210,39 @@
       </div>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- Core JavaScript (non-module scripts) -->
     <script src="js/carousel.js"></script>
     <script src="js/quotes.js"></script>
     <script src="js/chatbot-botui.js"></script>
     <script src="js/ai-assistant.js"></script>
     <script src="js/mobile-menu.js"></script>
 
-    <!-- Feedback Widget -->
-    <script type="module" src="js/feedback-widget.js"></script>
-
-    <!-- Firebase Authentication -->
-    <script type="module" src="js/firebase/config.js"></script>
-    <script type="module" src="js/firebase/auth-service.js"></script>
-    <script type="module" src="js/firebase/auth-tiers.js"></script>
-    <script type="module" src="js/auth-init.js"></script>
+    <!-- Firebase Configuration and Setup -->
+    <script type="module">
+      // Import Firebase modules with CORRECT paths for root directory
+      import { app, auth, db } from './js/firebase/config.js';
+      
+      // Expose Firebase globally for widgets and legacy code
+      window.firebaseApp = app;
+      window.auth = auth;
+      window.db = db;
+      
+      // Confirm Firebase is ready
+      console.log('🔥 Firebase initialized and exposed globally');
+      console.log('✅ Auth available:', !!window.auth);
+      console.log('✅ Firestore available:', !!window.db);
+      
+      // Import authentication services
+      import('./js/firebase/auth-service.js');
+      import('./js/firebase/auth-tiers.js');
+      import('./js/auth-init.js');
+      
+      // Initialize feedback widget after Firebase is ready
+      import('./js/feedback-widget.js').then(() => {
+        console.log('📊 Feedback widget module loaded');
+      }).catch(error => {
+        console.error('Error loading feedback widget:', error);
+      });
+    </script>
   </body>
 </html>

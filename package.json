@@ -1,25 +1,37 @@
 {
-  "name": "chaceclaborn-website",
-  "version": "1.0.0",
-  "type": "module",
-  "private": true,
+  "name": "chaceclaborn-portfolio",
+  "version": "2.0.0",
+  "description": "Professional portfolio website with Firebase integration",
+  "main": "index.html",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "test:verbose": "vitest run --reporter=verbose",
-    "test:auth": "vitest run tests/unit/auth-service.test.js",
-    "test:db": "vitest run tests/unit/database.test.js",
-    "test:integration": "vitest run tests/integration",
-    "test:e2e": "vitest run tests/e2e"
+    "test:coverage": "vitest --coverage",
+    "deploy": "aws s3 sync . s3://chaceclaborn.com --exclude '.git/*' --exclude '.gitignore' --exclude '*.bat' --exclude 'dev/*' --exclude 'node_modules/*' --delete",
+    "serve": "python -m http.server 8000",
+    "lint": "eslint js/**/*.js",
+    "format": "prettier --write '**/*.{js,html,css,json}'"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaceclaborn/chaceclaborn.com.git"
+  },
+  "keywords": [
+    "portfolio",
+    "firebase",
+    "aws",
+    "web-development"
+  ],
+  "author": "Chace Claborn",
+  "license": "MIT",
   "devDependencies": {
-    "@testing-library/dom": "^9.3.4",
-    "@testing-library/user-event": "^14.5.2",
-    "@vitest/coverage-v8": "^1.2.0",
     "@vitest/ui": "^1.2.0",
+    "eslint": "^8.56.0",
     "jsdom": "^23.2.0",
+    "prettier": "^3.2.4",
     "vitest": "^1.2.0"
+  },
+  "dependencies": {
+    "firebase": "^10.7.1"
   }
 }
