@@ -1,0 +1,699 @@
+/* ai-assistant.css - Complete AI Assistant Styles with Mobile Enhancements */
+
+/* ============================================ */
+/* AI ASSISTANT LAUNCH BUTTON */
+/* ============================================ */
+.ai-assistant-button {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #617140 0%, #4a5930 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 9997;
+    border: none;
+    overflow: hidden;
+}
+
+.ai-assistant-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s;
+    opacity: 0;
+}
+
+.ai-assistant-button:hover::before {
+    animation: shimmer 0.5s ease-out;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+.ai-assistant-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(97, 113, 64, 0.3);
+}
+
+.ai-assistant-button.hidden {
+    display: none;
+}
+
+.ai-assistant-button .ai-icon {
+    font-size: 28px;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
+}
+
+/* ============================================ */
+/* AI ASSISTANT CONTAINER - FIXED POPUP */
+/* ============================================ */
+.ai-assistant-container {
+    position: fixed !important;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    height: 500px;
+    z-index: 9998;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ai-assistant-container.open {
+    display: flex;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================ */
+/* AI ASSISTANT HEADER */
+/* ============================================ */
+.ai-assistant-header {
+    background: linear-gradient(135deg, #617140 0%, #4a5930 100%);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ai-assistant-header .header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-assistant-header .ai-icon-small {
+    font-size: 20px;
+    animation: pulse 2s infinite;
+}
+
+.ai-assistant-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.ai-assistant-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================ */
+/* AI ASSISTANT BODY */
+/* ============================================ */
+.ai-assistant-body {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    /* Changed from center */
+    text-align: center;
+    background: linear-gradient(to bottom, #fafbf9, #f5f6f2);
+    overflow-y: auto;
+    /* Enable scrolling */
+    overflow-x: hidden;
+}
+
+/* ============================================ */
+/* COMING SOON CONTENT */
+/* ============================================ */
+.ai-coming-soon {
+    max-width: 300px;
+}
+
+.ai-coming-soon-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 4px 12px rgba(97, 113, 64, 0.2);
+    position: relative;
+}
+
+.ai-coming-soon-icon::after {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 2px solid rgba(97, 113, 64, 0.1);
+    border-radius: 50%;
+    animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+.ai-coming-soon-icon i {
+    font-size: 48px;
+    color: #617140;
+}
+
+/* ============================================ */
+/* ANIMATED ROBOT FACE */
+/* ============================================ */
+.robot-face {
+    width: 60px;
+    height: 60px;
+    position: relative;
+}
+
+.robot-eyes {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 15px;
+    margin-top: 15px;
+}
+
+.robot-eye {
+    width: 10px;
+    height: 10px;
+    background: #617140;
+    border-radius: 50%;
+    animation: blink 4s infinite;
+}
+
+@keyframes blink {
+    0%, 90%, 100% {
+        transform: scaleY(1);
+    }
+
+    95% {
+        transform: scaleY(0.1);
+    }
+}
+
+.robot-mouth {
+    width: 30px;
+    height: 8px;
+    background: #617140;
+    margin: 15px auto 0;
+    border-radius: 0 0 15px 15px;
+    animation: talk 2s infinite;
+    transform-origin: center top;
+}
+
+@keyframes talk {
+    0%, 100% {
+        transform: scaleY(1);
+        border-radius: 0 0 15px 15px;
+    }
+
+    25% {
+        transform: scaleY(1.5);
+        border-radius: 0 0 20px 20px;
+    }
+
+    50% {
+        transform: scaleY(0.5);
+        border-radius: 0 0 10px 10px;
+    }
+
+    75% {
+        transform: scaleY(1.2);
+        border-radius: 0 0 18px 18px;
+    }
+}
+
+.ai-coming-soon h2 {
+    color: #4a5930;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ai-coming-soon p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* ============================================ */
+/* FEATURES PREVIEW */
+/* ============================================ */
+.ai-features-preview {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
+.ai-features-preview h3 {
+    color: #617140;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.ai-features-preview ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.ai-features-preview li {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-features-preview li i {
+    color: #617140;
+    font-size: 0.9rem;
+}
+
+/* ============================================ */
+/* STATUS BADGE */
+/* ============================================ */
+.ai-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(97, 113, 64, 0.1);
+    color: #617140;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.ai-status-badge i {
+    font-size: 0.9rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================ */
+/* BUTTON STYLES (for close button) */
+/* ============================================ */
+.btn-modern {
+    background: linear-gradient(135deg, #617140 0%, #4a5930 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(97, 113, 64, 0.3);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(97, 113, 64, 0.4);
+}
+
+/* ============================================ */
+/* ENHANCED MOBILE RESPONSIVE */
+/* ============================================ */
+@media (max-width: 480px) {
+    .ai-assistant-container {
+        width: 100%;
+        height: 100%;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        border-radius: 0;
+        max-height: 100vh;
+        max-height: 100dvh;
+        z-index: 99999 !important;
+        /* Very high z-index */
+        position: fixed !important;
+    }
+
+    /* Force display when open */
+    .ai-assistant-container.open {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-assistant-header {
+        border-radius: 0;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #617140 0%, #4a5930 100%) !important;
+        color: white !important;
+    }
+
+    .ai-assistant-body {
+        padding: 1.5rem;
+        background: white !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Coming soon content visibility */
+    .ai-coming-soon {
+        max-width: 100%;
+        padding: 0 20px;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-coming-soon h2 {
+        color: #1e293b !important;
+        font-size: 20px !important;
+        margin-bottom: 1rem !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-coming-soon p {
+        color: #475569 !important;
+        font-size: 15px !important;
+        line-height: 1.6 !important;
+        margin-bottom: 1rem !important;
+        font-weight: 400 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-status-badge {
+        background: rgba(97, 113, 64, 0.15) !important;
+        color: #617140 !important;
+        font-size: 14px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-assistant-button {
+        bottom: 90px !important;
+        /* Aligned with chatbot button spacing */
+        right: 20px !important;
+        /* Same as chatbot button */
+        width: 60px !important;
+        /* Same size as chatbot button */
+        height: 60px !important;
+        /* Same size as chatbot button */
+        position: fixed !important;
+        z-index: 9997 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: linear-gradient(135deg, #617140 0%, #4a5930 100%) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .ai-assistant-button .ai-icon {
+        font-size: 28px !important;
+        /* Same as desktop */
+        color: white !important;
+    }
+
+    /* Ensure features list is visible */
+    .ai-features-preview {
+        background: #f8f9fa !important;
+        border: 1px solid #e5e7eb !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-features-preview h3 {
+        color: #1e293b !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-features-preview li {
+        color: #475569 !important;
+        font-size: 14px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-features-preview li i {
+        color: #617140 !important;
+    }
+
+    /* Button visibility */
+    .btn-modern {
+        font-size: 16px !important;
+        padding: 14px 24px !important;
+        background: linear-gradient(135deg, #617140 0%, #4a5930 100%) !important;
+        color: white !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Robot animation elements */
+    .robot-eye {
+        background: #617140 !important;
+    }
+
+    .robot-mouth {
+        background: #617140 !important;
+    }
+}
+
+/* ============================================ */
+/* SMALL MOBILE DEVICES */
+/* ============================================ */
+@media (max-width: 380px) {
+    .ai-assistant-body {
+        padding: 1rem;
+    }
+
+    .ai-coming-soon-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .robot-face {
+        width: 50px;
+        height: 50px;
+    }
+
+    .ai-coming-soon h2 {
+        font-size: 18px !important;
+        color: #1e293b !important;
+    }
+
+    .ai-coming-soon p {
+        font-size: 14px !important;
+        color: #475569 !important;
+    }
+
+    .ai-features-preview {
+        padding: 1rem;
+    }
+
+    .ai-features-preview li {
+        font-size: 13px !important;
+        color: #475569 !important;
+    }
+
+    /* Keep button same size on small screens */
+    .ai-assistant-button {
+        bottom: 90px !important;
+        right: 20px !important;
+        width: 60px !important;
+        height: 60px !important;
+    }
+}
+
+/* ============================================ */
+/* LANDSCAPE ORIENTATION */
+/* ============================================ */
+@media (max-width: 768px) and (orientation: landscape) {
+    .ai-assistant-container {
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    .ai-assistant-body {
+        padding: 1rem;
+    }
+
+    .ai-coming-soon-icon {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 1rem;
+    }
+
+    .ai-coming-soon h2 {
+        font-size: 18px !important;
+        margin-bottom: 0.5rem !important;
+        color: #1e293b !important;
+    }
+
+    .ai-coming-soon p {
+        font-size: 14px !important;
+        margin-bottom: 1rem !important;
+        color: #475569 !important;
+    }
+
+    .ai-features-preview {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+
+    /* Keep button properly positioned in landscape */
+    .ai-assistant-button {
+        bottom: 90px !important;
+        right: 20px !important;
+        width: 60px !important;
+        height: 60px !important;
+    }
+}
+
+/* ============================================ */
+/* IOS-SPECIFIC FIXES */
+/* ============================================ */
+@supports (-webkit-touch-callout: none) {
+    .ai-assistant-container {
+        height: 100vh;
+        height: -webkit-fill-available;
+    }
+}
+
+/* ============================================ */
+/* AGGRESSIVE MOBILE TEXT COLOR FIXES */
+/* ============================================ */
+@media screen and (max-width: 768px) {
+
+    /* Force all text in AI assistant to be visible */
+    .ai-assistant-container h2,
+    .ai-assistant-container p,
+    .ai-assistant-container span,
+    .ai-assistant-container li,
+    #ai-assistant-container h2,
+    #ai-assistant-container p,
+    #ai-assistant-container span,
+    #ai-assistant-container li {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .ai-coming-soon h2,
+    .ai-coming-soon h3 {
+        color: #1e293b !important;
+    }
+
+    .ai-coming-soon p,
+    .ai-coming-soon li {
+        color: #475569 !important;
+    }
+
+    .ai-features-preview h3 {
+        color: #1e293b !important;
+    }
+
+    .ai-features-preview li {
+        color: #475569 !important;
+    }
+
+    .ai-status-badge {
+        color: #617140 !important;
+    }
+
+    .btn-modern {
+        color: white !important;
+    }
+}

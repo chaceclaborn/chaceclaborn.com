@@ -1,4 +1,4 @@
-/* feedback-widget.css - Full Height Left Sidebar */
+/* feedback-widget.css - Full Height Left Sidebar with Mobile Enhancements */
 
 /* ============================================ */
 /* ADMIN NAVIGATION SPECIAL STYLING */
@@ -15,6 +15,129 @@
     gap: 6px !important;
     transition: all 0.3s !important;
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* ============================================ */
+/* GLOBAL MOBILE VISIBILITY FIXES */
+/* ============================================ */
+@media (max-width: 768px) {
+
+    /* Ensure collapsed widget is always visible and colored */
+    .feedback-collapsed {
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
+        color: white !important;
+    }
+
+    .feedback-collapsed * {
+        color: white !important;
+    }
+
+    /* AGGRESSIVE TEXT COLOR FIXES FOR FEEDBACK PANEL */
+    /* Force all text in feedback panel to be dark */
+    .feedback-panel p,
+    .feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
+    .feedback-panel h3:not(.feedback-header h3),
+    .feedback-panel label,
+    .feedback-panel div:not(.star-display):not(.avg-stars):not(.your-stars),
+    #feedback-panel p,
+    #feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
+    #feedback-panel h3:not(.feedback-header h3),
+    #feedback-panel label,
+    #rate-prompt,
+    .feedback-rate p {
+        color: #1e293b !important;
+    }
+
+    /* Specific fixes for problem areas */
+    .feedback-rate p,
+    #rate-prompt {
+        color: #1e293b !important;
+    }
+
+    .rate-message,
+    #widget-rate-message {
+        color: #475569 !important;
+    }
+
+    .rate-message.success,
+    #widget-rate-message.success {
+        color: #10b981 !important;
+    }
+
+    .rate-message.error,
+    #widget-rate-message.error {
+        color: #ef4444 !important;
+    }
+
+    .stat-title {
+        color: #64748b !important;
+    }
+
+    .big-rating {
+        color: #1e293b !important;
+    }
+
+    .rating-suffix {
+        color: #64748b !important;
+    }
+
+    .stat-count {
+        color: #64748b !important;
+    }
+
+    .form-toggle {
+        color: #475569 !important;
+    }
+
+    .char-count,
+    #widget-char-count {
+        color: #64748b !important;
+    }
+
+    /* Ensure form elements are visible */
+    .widget-feedback-form textarea,
+    .widget-feedback-form input,
+    #widget-feedback-text {
+        color: #1e293b !important;
+        background: white !important;
+    }
+
+    /* NUCLEAR OPTION - Force all non-icon text to be dark */
+    .feedback-panel *:not(i):not(.feedback-header):not(.feedback-header *):not(.star-display *):not(.avg-stars *):not(.your-stars *) {
+        color: #1e293b !important;
+    }
+
+    /* Then re-apply specific colors */
+    .feedback-header,
+    .feedback-header * {
+        color: white !important;
+    }
+
+    .stat-title {
+        color: #64748b !important;
+    }
+
+    .rating-suffix {
+        color: #64748b !important;
+    }
+
+    .rate-message.success {
+        color: #10b981 !important;
+    }
+
+    .rate-message.error {
+        color: #ef4444 !important;
+    }
+
+    .form-toggle i {
+        color: #475569 !important;
+    }
+
+    .star-display i,
+    .avg-stars i,
+    .your-stars i {
+        color: inherit !important;
+    }
 }
 
 .admin-special-link:hover {
@@ -691,7 +814,7 @@
 }
 
 /* ============================================ */
-/* MOBILE RESPONSIVE (max-width: 768px) */
+/* ENHANCED MOBILE RESPONSIVE (max-width: 768px) */
 /* ============================================ */
 @media (max-width: 768px) {
 
@@ -705,10 +828,12 @@
 
     /* Vertical mobile tab like desktop but smaller */
     .feedback-collapsed {
-        padding: 12px 6px;
-        border-radius: 0 12px 12px 0;
-        min-height: 80px;
-        width: 40px;
+        padding: 12px 6px !important;
+        border-radius: 0 12px 12px 0 !important;
+        min-height: 80px !important;
+        width: 40px !important;
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
+        color: white !important;
     }
 
     .feedback-collapsed:hover {
@@ -717,10 +842,24 @@
     }
 
     .toggle-content {
-        gap: 6px;
-        flex-direction: column;
-        /* Vertical layout */
-        padding: 4px 0;
+        gap: 6px !important;
+        flex-direction: column !important;
+        padding: 4px 0 !important;
+        color: white !important;
+    }
+
+    .feedback-toggle {
+        background: none !important;
+        border: none !important;
+        color: white !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
     }
 
     /* Hide user rating indicator on mobile collapsed view */
@@ -752,27 +891,49 @@
     }
 
     .rating-value-display span#collapsed-rating {
-        font-size: 18px;
+        font-size: 18px !important;
         writing-mode: horizontal-tb !important;
-        /* Keep number horizontal */
+        color: white !important;
+        font-weight: bold !important;
     }
 
     .star-display {
-        font-size: 14px;
+        font-size: 14px !important;
+        color: #ffc107 !important;
     }
 
     .expand-icon {
-        display: block;
-        font-size: 12px;
-        margin-left: 0;
-        margin-top: 4px;
+        display: block !important;
+        font-size: 12px !important;
+        margin-left: 0 !important;
+        margin-top: 4px !important;
+        color: white !important;
     }
 
-    /* Full screen panel for mobile */
+    /* Full screen panel for mobile - REDUCED HEIGHT */
     .feedback-panel {
         width: 100%;
         max-width: 100%;
         left: -100%;
+        background: white !important;
+        z-index: 10000 !important;
+        /* Ensure it's on top */
+        height: 85vh;
+        /* Reduced from 100% */
+        height: 85dvh;
+        /* Dynamic viewport height */
+        max-height: 600px;
+        /* Max height for iPhone compatibility */
+        top: auto;
+        /* Override desktop full-height style */
+        bottom: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scrolling on iOS */
+        border-radius: 16px 16px 0 0;
+        /* Rounded top corners on mobile */
+        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+        /* Shadow from top */
     }
 
     .feedback-panel.open {
@@ -780,19 +941,29 @@
     }
 
     .feedback-header {
-        padding: 16px;
-        /* Reduced padding */
+        padding: 16px !important;
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
+        color: white !important;
+        border-radius: 16px 16px 0 0 !important;
+        /* Match panel radius */
     }
 
     .feedback-header h3 {
-        font-size: 17px;
-        gap: 6px;
+        font-size: 17px !important;
+        gap: 6px !important;
+        color: white !important;
+        font-weight: 600 !important;
+    }
+
+    .feedback-header h3 i {
+        color: #ffc107 !important;
     }
 
     .feedback-close {
         width: 30px;
         height: 30px;
         font-size: 16px;
+        color: white !important;
     }
 
     .stats-section {
@@ -811,36 +982,61 @@
     }
 
     .stat-title {
-        font-size: 10px;
-        margin-bottom: 6px;
+        font-size: 10px !important;
+        margin-bottom: 6px !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
     }
 
     .big-rating {
-        font-size: 26px;
-        margin-bottom: 6px;
+        font-size: 26px !important;
+        margin-bottom: 6px !important;
+        color: #1e293b !important;
+        font-weight: 800 !important;
     }
 
     .rating-suffix {
-        font-size: 16px;
+        font-size: 16px !important;
+        color: #64748b !important;
     }
 
     .avg-stars, .your-stars {
-        font-size: 16px;
-        margin-bottom: 4px;
+        font-size: 16px !important;
+        margin-bottom: 4px !important;
     }
 
-    .stat-count {
-        font-size: 10px;
+    .avg-stars i {
+        color: #ffc107 !important;
+    }
+
+    .your-stars i {
+        color: #10b981 !important;
+    }
+
+    .stat-count,
+    .stat-count * {
+        font-size: 10px !important;
+        color: #64748b !important;
+    }
+
+    .stat-count a {
+        color: #617140 !important;
+        text-decoration: none !important;
     }
 
     .feedback-rate {
-        padding: 12px;
+        padding: 12px !important;
         /* Reduced padding */
     }
 
+    /* Fix text visibility in feedback form */
     .feedback-rate p {
-        font-size: 13px;
-        margin-bottom: 10px;
+        font-size: 13px !important;
+        margin-bottom: 10px !important;
+        color: #1e293b !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     .rate-stars {
@@ -849,9 +1045,32 @@
         margin-bottom: 10px;
     }
 
+    .rate-stars i {
+        color: #e5e7eb !important;
+        cursor: pointer !important;
+    }
+
+    .rate-stars i:hover,
+    .rate-stars i.hover,
+    .rate-stars i.selected {
+        color: #ffc107 !important;
+    }
+
     .rate-message {
-        font-size: 12px;
-        margin-top: 8px;
+        font-size: 12px !important;
+        margin-top: 8px !important;
+        color: #475569 !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .rate-message.success {
+        color: #10b981 !important;
+    }
+
+    .rate-message.error {
+        color: #ef4444 !important;
     }
 
     .feedback-form-section {
@@ -860,14 +1079,51 @@
         margin-bottom: 12px;
     }
 
-    .form-toggle {
-        padding: 8px 12px;
-        font-size: 12px;
+    .feedback-form-section label,
+    .feedback-form-section h3,
+    .feedback-form-section h4 {
+        color: #1e293b !important;
     }
 
+    .form-toggle {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+        color: #475569 !important;
+        font-weight: 500 !important;
+        background: linear-gradient(145deg, #f8f9fa 0%, #f1f5f9 100%) !important;
+        border: 1px solid #e2e8f0 !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .form-toggle i {
+        color: #475569 !important;
+    }
+
+    /* Enhanced text input visibility for mobile */
     .widget-feedback-form textarea {
-        padding: 10px;
-        font-size: 13px;
+        padding: 12px !important;
+        font-size: 16px !important;
+        /* Prevent zoom */
+        background: white !important;
+        border: 2px solid #e5e7eb !important;
+        color: #1e293b !important;
+        -webkit-appearance: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .widget-feedback-form textarea:focus {
+        border-color: #94a3b8 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1) !important;
+    }
+
+    .widget-feedback-form textarea::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
     }
 
     .form-footer {
@@ -879,17 +1135,39 @@
     .char-count {
         text-align: center;
         font-size: 11px;
+        color: #64748b !important;
     }
 
     .btn-submit {
         padding: 10px;
         font-size: 13px;
         justify-content: center;
+        background: #617140 !important;
+        color: white !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .btn-submit:active {
+        background: #536036 !important;
+        transform: scale(0.95) !important;
     }
 
     .form-message {
         font-size: 12px;
         margin-top: 8px;
+        color: #475569 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .form-message.success {
+        color: #10b981 !important;
+    }
+
+    .form-message.error {
+        color: #ef4444 !important;
     }
 }
 
@@ -934,6 +1212,10 @@
 
     .feedback-panel {
         width: 100%;
+        height: 80vh;
+        /* Smaller for small phones */
+        height: 80dvh;
+        max-height: 500px;
     }
 
     .feedback-header {
@@ -977,8 +1259,9 @@
     }
 
     .widget-feedback-form textarea {
-        padding: 8px;
-        font-size: 12px;
+        padding: 8px !important;
+        font-size: 16px !important;
+        /* Still 16px to prevent zoom */
     }
 
     .btn-submit {
@@ -1016,7 +1299,13 @@
     }
 
     .feedback-panel {
-        max-height: 100vh;
+        max-height: 90vh;
+        /* Reduced for landscape */
+        max-height: 90dvh;
+        height: 90vh;
+        height: 90dvh;
+        max-height: 400px;
+        /* Even smaller in landscape */
     }
 
     .stats-section {
