@@ -3,44 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Raeha's Tab - Chace Claborn</title>
-
-    <!-- Stylesheets -->
+    <title>Raeha's Personal Tab - Chace Claborn</title>
+    
+    <!-- CSS Files -->
     <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/auth-styles.css" />
+    <link rel="stylesheet" href="../css/navigation.css" />
     <link rel="stylesheet" href="../css/tier-styles.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
     <style>
+      /* Raeha's Page Styles */
       .raeha-container {
         max-width: 1200px;
-        margin: 0 auto;
-        padding: 40px 20px;
+        margin: 100px auto 40px;
+        padding: 0 20px;
       }
 
       .welcome-section {
-        text-align: center;
-        margin-bottom: 50px;
-        padding: 40px;
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        /* Changed from purple gradient to match site theme */
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
         color: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
 
       .welcome-section h1 {
         font-size: 2.5rem;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+        color: white;
+      }
+
+      .welcome-section p {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.1rem;
       }
 
       .content-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         gap: 30px;
-        margin-top: 40px;
+        margin-bottom: 40px;
       }
 
       .content-card {
@@ -57,7 +62,7 @@
       }
 
       .content-card h2 {
-        color: #7c3aed;
+        color: #617140;
         margin-bottom: 15px;
         font-size: 1.5rem;
         display: flex;
@@ -67,7 +72,7 @@
 
       .content-card i {
         font-size: 1.5rem;
-        color: #8b5cf6;
+        color: #7a8a5a;
       }
 
       .customization-form {
@@ -97,17 +102,18 @@
         border-radius: 8px;
         font-size: 1rem;
         transition: border-color 0.3s;
+        box-sizing: border-box;
       }
 
       .form-group input:focus,
       .form-group textarea:focus,
       .form-group select:focus {
         outline: none;
-        border-color: #8b5cf6;
+        border-color: #617140;
       }
 
       .submit-btn {
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
         color: white;
         padding: 12px 30px;
         border: none;
@@ -120,7 +126,7 @@
 
       .submit-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+        box-shadow: 0 5px 20px rgba(97, 113, 64, 0.3);
       }
 
       .feature-list {
@@ -130,10 +136,10 @@
 
       .feature-list li {
         padding: 10px 0;
-        border-bottom: 1px solid #e5e7eb;
         display: flex;
         align-items: center;
         gap: 10px;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .feature-list li:last-child {
@@ -142,29 +148,81 @@
 
       .feature-list i {
         color: #10b981;
-        font-size: 1.2rem;
+      }
+
+      .future-features {
+        background: #f9fafb;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+      }
+
+      .future-features h2 {
+        color: #617140;
+        margin-bottom: 20px;
+      }
+
+      .future-features ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .future-features li {
+        padding: 10px 0;
+        position: relative;
+        padding-left: 25px;
+      }
+
+      .future-features li::before {
+        content: '✨';
+        position: absolute;
+        left: 0;
       }
 
       .loading {
-        text-align: center;
-        padding: 100px 20px;
-        font-size: 1.2rem;
-        color: #666;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
+        color: white;
       }
 
       .spinner {
-        display: inline-block;
+        font-size: 3rem;
         animation: spin 1s linear infinite;
       }
 
       @keyframes spin {
+        from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
+      }
+
+      .special-message {
+        background: #fef3c7;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+      }
+
+      .special-message p {
+        color: #92400e;
+        font-style: italic;
+        margin: 0;
       }
     </style>
   </head>
   <body>
-    <div class="content-page">
-      <!-- Header -->
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+      <i class="fas fa-spinner spinner"></i>
+      <p>Checking access...</p>
+    </div>
+
+    <!-- Main Content (hidden until authentication) -->
+    <div id="raeha-content" style="display: none">
+      <!-- Header - Fixed Structure -->
       <header class="site-header">
         <div class="header-container">
           <div class="logo">
@@ -172,134 +230,112 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav" id="mainNav">
-              <a href="../index.html" class="nav-link">Home</a>
-              <a href="about.html" class="nav-link">About</a>
-              <a href="portfolio.html" class="nav-link">Portfolio</a>
-              <a href="resume.html" class="nav-link">Resume</a>
-
-              <!-- Tier Navigation -->
-              <a href="dashboard.html" class="nav-link tier-nav auth-nav">Dashboard</a>
-              <a href="family.html" class="nav-link tier-nav family-nav">Family</a>
-              <a href="girlfriend.html" class="nav-link tier-nav girlfriend-nav active">Raeha's Tab</a>
-              <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
-            </nav>
+            <!-- Navigation will be injected here -->
+            <nav class="main-nav" id="mainNav"></nav>
 
             <!-- User Info -->
             <div class="user-info" id="user-info" style="display: none">
               <img class="user-avatar" id="user-photo" src="" alt="User Avatar" />
-              <span class="user-name" id="user-name"></span>
-              <span class="user-tier-indicator" id="user-tier-indicator"></span>
-              <a href="#" id="logout-btn" class="logout-link">
-                <i class="fas fa-sign-out-alt"></i>
-              </a>
+              <span id="user-name" style="display: none"></span>
+              <span id="user-email" style="display: none"></span>
+              <a href="#" class="btn-modern sign-out-btn" id="logout-btn">Sign Out</a>
             </div>
+
+            <!-- Sign In Button -->
+            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
       <main class="raeha-container">
-        <div id="loading" class="loading">
-          <i class="fas fa-spinner spinner"></i>
-          <p>Loading your custom tab...</p>
-        </div>
+        <!-- Welcome Section with Site Theme Colors -->
+        <section class="welcome-section">
+          <h1>Welcome to Your Custom Tab, Raeha!</h1>
+          <p>This is your personal space to request customizations and features for the website.</p>
+        </section>
 
-        <div id="raeha-content" style="display: none">
-          <!-- Welcome Section -->
-          <section class="welcome-section">
-            <h1>Welcome to Your Custom Tab, Raeha!</h1>
-            <p>This is your personal space to request customizations and features for the website.</p>
-          </section>
-
-          <!-- Content Grid -->
-          <div class="content-grid">
-            <!-- Customization Request Card -->
-            <div class="content-card">
-              <h2><i class="fas fa-paint-brush"></i> Request Customizations</h2>
-              <p>Want something changed or added? Let me know what you'd like to see!</p>
-              <div class="customization-form">
-                <form id="customization-form">
-                  <div class="form-group">
-                    <label for="request-type">Type of Request</label>
-                    <select id="request-type" name="request-type">
-                      <option value="">Select a type...</option>
-                      <option value="design">Design Change</option>
-                      <option value="content">Content Update</option>
-                      <option value="feature">New Feature</option>
-                      <option value="photo">Photo/Media</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="request-details">Details</label>
-                    <textarea id="request-details" name="request-details" rows="4" 
-                      placeholder="Describe what you'd like..."></textarea>
-                  </div>
-                  <button type="submit" class="submit-btn">
-                    <i class="fas fa-paper-plane"></i> Send Request
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            <!-- Current Features Card -->
-            <div class="content-card">
-              <h2><i class="fas fa-star"></i> Your Current Features</h2>
-              <ul class="feature-list">
-                <li><i class="fas fa-check-circle"></i> Custom tab access</li>
-                <li><i class="fas fa-check-circle"></i> Priority feature requests</li>
-                <li><i class="fas fa-check-circle"></i> Custom content sections</li>
-                <li><i class="fas fa-check-circle"></i> Photo galleries (coming soon)</li>
-                <li><i class="fas fa-check-circle"></i> Private messaging (coming soon)</li>
-              </ul>
-            </div>
-
-            <!-- Quick Actions Card -->
-            <div class="content-card">
-              <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
-              <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                <button class="submit-btn" onclick="alert('Feature coming soon!')">
-                  <i class="fas fa-images"></i> Upload Photos
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Customization Request Card -->
+          <div class="content-card">
+            <h2><i class="fas fa-paint-brush"></i> Request Customizations</h2>
+            <p>Want something changed or added? Let me know what you'd like to see!</p>
+            <div class="customization-form">
+              <form id="customization-form">
+                <div class="form-group">
+                  <label for="request-type">Type of Request</label>
+                  <select id="request-type" name="request-type" required>
+                    <option value="">Select a type...</option>
+                    <option value="design">Design Change</option>
+                    <option value="content">Content Update</option>
+                    <option value="feature">New Feature</option>
+                    <option value="photo">Photo/Media</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="request-details">Details</label>
+                  <textarea id="request-details" name="request-details" rows="4" 
+                    placeholder="Describe what you'd like..." required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">
+                  <i class="fas fa-paper-plane"></i> Send Request
                 </button>
-                <button class="submit-btn" onclick="alert('Feature coming soon!')">
-                  <i class="fas fa-palette"></i> Change Theme
-                </button>
-                <button class="submit-btn" onclick="alert('Feature coming soon!')">
-                  <i class="fas fa-cog"></i> Settings
-                </button>
-              </div>
-            </div>
-
-            <!-- Ideas Board Card -->
-            <div class="content-card">
-              <h2><i class="fas fa-lightbulb"></i> Ideas Board</h2>
-              <p>Here are some things you could customize:</p>
-              <ul style="margin-top: 15px; padding-left: 20px;">
-                <li>Color schemes and themes</li>
-                <li>Custom photo galleries</li>
-                <li>Personal notes or messages</li>
-                <li>Special date reminders</li>
-                <li>Favorite links or resources</li>
-                <li>Custom widgets or features</li>
-              </ul>
+              </form>
             </div>
           </div>
 
-          <!-- Additional Section -->
-          <section class="content-card" style="margin-top: 40px">
-            <h2><i class="fas fa-info-circle"></i> How This Works</h2>
-            <p>
-              This tab is completely customizable based on your preferences. 
-              Use the request form above to ask for any changes, additions, or new features you'd like.
-              I'll implement them as soon as possible and they'll appear here in your personal tab.
-            </p>
-            <p style="margin-top: 15px;">
-              <strong>Response Time:</strong> Usually within 24-48 hours<br>
-              <strong>Request Limit:</strong> Unlimited - ask for anything you want!
-            </p>
-          </section>
+          <!-- Current Features Card -->
+          <div class="content-card">
+            <h2><i class="fas fa-star"></i> Your Current Features</h2>
+            <ul class="feature-list">
+              <li><i class="fas fa-check-circle"></i> Custom tab access</li>
+              <li><i class="fas fa-check-circle"></i> Priority feature requests</li>
+              <li><i class="fas fa-check-circle"></i> Custom content sections</li>
+              <li><i class="fas fa-check-circle"></i> Photo galleries (coming soon)</li>
+              <li><i class="fas fa-check-circle"></i> Private messaging (coming soon)</li>
+            </ul>
+          </div>
+
+          <!-- Quick Actions Card -->
+          <div class="content-card">
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                <i class="fas fa-images"></i> Upload Photos
+              </button>
+              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                <i class="fas fa-palette"></i> Change Theme
+              </button>
+              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                <i class="fas fa-envelope"></i> Send Message
+              </button>
+            </div>
+          </div>
+
         </div>
+
+        <!-- Future Features -->
+        <section class="future-features">
+          <h2><i class="fas fa-sparkles"></i> Coming Soon</h2>
+          <ul>
+            <li>...</li>
+            
+          </ul>
+          <p>
+            Have an idea for something you'd like to see here? 
+            Use the request form above to let me know!
+            I'll implement them as soon as possible and they'll appear here in your personal tab.
+          </p>
+        </section>
       </main>
 
       <!-- Footer -->
@@ -310,52 +346,95 @@
       </footer>
     </div>
 
-    <!-- Protection Script -->
-    <script type="module">
-      import { auth } from "../js/firebase/config.js";
-      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-      import { protectPage, TIERS } from "../js/firebase/auth-tiers.js";
-
-      // Protect the page
-      onAuthStateChanged(auth, async (user) => {
-        const loading = document.getElementById("loading");
-        const content = document.getElementById("raeha-content");
-
-        if (user) {
-          const hasAccess = await protectPage(TIERS.GIRLFRIEND, "girlfriend");
-          if (hasAccess) {
-            loading.style.display = "none";
-            content.style.display = "block";
-          }
-        } else {
-          // Redirect to home if not logged in
-          window.location.href = "../index.html?action=signin";
-        }
-      });
-
-      // Handle customization form
-      document.getElementById('customization-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const type = document.getElementById('request-type').value;
-        const details = document.getElementById('request-details').value;
-        
-        if (!type || !details) {
-          alert('Please fill in all fields');
-          return;
-        }
-        
-        // In a real implementation, this would save to Firestore
-        alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
-        
-        // Clear form
-        e.target.reset();
-      });
-    </script>
-
-    <!-- Firebase Authentication -->
+    <!-- Scripts in Correct Order -->
+    <!-- Firebase Core FIRST -->
     <script type="module" src="../js/firebase/config.js"></script>
     <script type="module" src="../js/firebase/auth-service.js"></script>
     <script type="module" src="../js/firebase/auth-tiers.js"></script>
+    
+    <!-- Auth Init SECOND -->
     <script type="module" src="../js/auth-init.js"></script>
+    
+    <!-- Navigation Component THIRD -->
+    <script type="module" src="../js/components/navigation.js"></script>
+
+    <!-- Page-Specific Protection and Form Handler -->
+    <script type="module">
+      import { auth, db } from "../js/firebase/config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      import { getUserTier, TIERS } from "../js/firebase/auth-tiers.js";
+      import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', () => {
+        // Protect the page - Allow admin OR girlfriend tier
+        onAuthStateChanged(auth, async (user) => {
+          const loading = document.getElementById("loading");
+          const content = document.getElementById("raeha-content");
+
+          if (user) {
+            const userTier = await getUserTier();
+            // Allow access if user is girlfriend tier OR admin
+            const hasAccess = userTier === TIERS.GIRLFRIEND || userTier === TIERS.ADMIN;
+            
+            if (hasAccess) {
+              loading.style.display = "none";
+              content.style.display = "block";
+            } else {
+              // Redirect if no access
+              window.location.href = "../index.html?error=access-denied";
+            }
+          } else {
+            // Redirect to home if not logged in
+            window.location.href = "../index.html?action=signin";
+          }
+        });
+
+        // Handle customization form
+        const form = document.getElementById('customization-form');
+        if (form) {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const type = document.getElementById('request-type').value;
+            const details = document.getElementById('request-details').value;
+            
+            if (!type || !details) {
+              alert('Please fill in all fields');
+              return;
+            }
+            
+            try {
+              // Save to Firestore
+              const requestData = {
+                type: type,
+                details: details,
+                email: auth.currentUser?.email || 'anonymous',
+                displayName: auth.currentUser?.displayName || 'Anonymous',
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                userId: auth.currentUser?.uid || null
+              };
+              
+              await addDoc(collection(db, 'customization_requests'), requestData);
+              
+              alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
+              
+              // Clear form
+              e.target.reset();
+            } catch (error) {
+              console.error('Error submitting request:', error);
+              alert('Error submitting request. Please try again.');
+            }
+          });
+        }
+      });
+    </script>
+    
+    <!-- Optional: Raeha Customization Script -->
+    <script type="module" src="../js/raeha-customization.js"></script>
+    
+    <!-- Optional: Feedback Widget -->
+    <script type="module" src="../js/firebase/feedback-service.js"></script>
   </body>
 </html>

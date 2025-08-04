@@ -23,28 +23,7 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav" id="mainNav">
-              <a href="../index.html" class="nav-link">Home</a>
-              <a href="portfolio.html" class="nav-link active">Portfolio</a>
-              <a href="resume.html" class="nav-link">Resume</a>
-
-              <!-- Member Navigation (Hidden by default) -->
-              <div class="member-nav" id="memberNav" style="display: none">
-                <a href="private-projects.html" class="nav-link"
-                  >Private Projects</a
-                >
-                <a href="games.html" class="nav-link">Games</a>
-              </div>
-
-              <!-- Tier Navigation (Hidden by default) -->
-              <a href="dashboard.html" class="nav-link tier-nav auth-nav"
-                >Dashboard</a
-              >
-              <a href="family.html" class="nav-link tier-nav family-nav"
-                >Family</a
-              >
-              <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
-            </nav>
+              <nav class="main-nav" id="mainNav"></nav>
 
             <!-- User Info (Hidden by default) -->
             <div class="user-info" id="user-info" style="display: none">
@@ -200,5 +179,8 @@
     <script type="module" src="../js/firebase/auth-service.js"></script>
     <script type="module" src="../js/firebase/auth-tiers.js"></script>
     <script type="module" src="../js/auth-init.js"></script>
+
+    <!-- Navigation Component (MUST come after auth-init) -->
+    <script type="module" src="../js/components/navigation.js"></script>
   </body>
 </html>

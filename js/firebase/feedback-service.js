@@ -1,4 +1,4 @@
-// js/feedback-widget.js - Modular Feedback Widget with Enhanced Visibility
+// js/firebase/feedback-service.js - Fixed with Correct Firestore Paths
 // Drop this into any page for instant feedback functionality
 
 class FeedbackWidget {
@@ -61,7 +61,7 @@ class FeedbackWidget {
     while (attempts < maxAttempts) {
       // Check if Firebase is available through imports
       try {
-        const { auth, db } = await import('./firebase/config.js');
+        const { auth, db } = await import('./config.js');
         if (auth && db) {
           this.auth = auth;
           this.db = db;
@@ -70,740 +70,444 @@ class FeedbackWidget {
           
           // Watch auth state
           onAuthStateChanged(auth, (user) => {
-            console.log('👤 Feedback Widget: Auth state changed:', user ? user.email : 'signed out');
-            this.onAuthChange(user);
+            console.log('👤 Feedback Widget: Auth state changed:', user ? user.email : 'Signed out');
+            this.currentUser = user;
+            this.checkUserRating();
           });
           
+          console.log('✅ Firebase loaded successfully');
           return;
         }
-      } catch (error) {
-        // Try again
+      } catch (e) {
+        // Firebase not ready yet
       }
       
-      // Also check window.firebase (older method)
-      if (window.firebase && window.firebase.auth && window.firebase.firestore) {
-        this.auth = window.firebase.auth();
-        this.db = window.firebase.firestore();
+      // Check global window object
+      if (window.auth && window.db) {
+        this.auth = window.auth;
+        this.db = window.db;
+        console.log('✅ Firebase found in window');
         return;
       }
       
-      attempts++;
+      // Wait 100ms before next attempt
       await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
     }
     
-    console.warn('⚠️ Feedback Widget: Firebase not found, running in demo mode');
+    throw new Error('Firebase failed to load after 5 seconds');
   }
 
   createWidget() {
-    // Remove any existing widget first
-    const existingWidget = document.getElementById('feedback-widget');
-    if (existingWidget) {
-      existingWidget.remove();
-    }
-    
-    // Create widget container
     const widgetHTML = `
-      <!-- Feedback Widget -->
-      <div id="feedback-widget" class="feedback-widget" style="opacity: 0;">
-        <!-- Toggle Button -->
-        <button id="feedback-toggle" class="feedback-toggle" aria-label="Give Feedback" title="Rate this portfolio">
-          <i class="fas fa-comment-dots"></i>
-          <span class="feedback-badge" id="rating-badge" style="display: none;">0.0</span>
+      <div id="feedback-widget" style="opacity: 0; transition: opacity 0.5s;">
+        <!-- Floating Button -->
+        <button id="feedback-btn" class="feedback-float-btn" aria-label="Feedback">
+          <span class="feedback-icon">💬</span>
+          <span class="feedback-label">Feedback</span>
         </button>
-        
+
         <!-- Feedback Panel -->
         <div id="feedback-panel" class="feedback-panel">
-          <!-- Header -->
           <div class="feedback-header">
-            <h3><i class="fas fa-star"></i> Rate This Portfolio</h3>
-            <button id="feedback-close" class="feedback-close" aria-label="Close">
-              <i class="fas fa-times"></i>
-            </button>
+            <h3>We'd Love Your Feedback!</h3>
+            <button id="close-feedback" class="feedback-close" aria-label="Close">×</button>
           </div>
-          
-          <!-- Average Rating -->
-          <div class="feedback-avg">
-            <div class="avg-number">
-              <span id="widget-avg-rating">0.0</span>
-              <span class="avg-max">/5</span>
-            </div>
-            <div class="avg-stars" id="widget-avg-stars">
-              <i class="far fa-star"></i>
-              <i class="far fa-star"></i>
-              <i class="far fa-star"></i>
-              <i class="far fa-star"></i>
-              <i class="far fa-star"></i>
-            </div>
-            <div class="avg-count">
-              Based on <span id="widget-rating-count">0</span> ratings
-            </div>
-          </div>
-          
-          <!-- User Rating -->
+
+          <!-- Rating Section -->
           <div class="feedback-rate">
-            <p id="rate-prompt">Click to rate:</p>
-            <div class="rate-stars" id="widget-rate-stars">
+            <p id="rate-prompt">How would you rate your experience?</p>
+            <div id="widget-rate-stars" class="rate-stars">
               <i class="far fa-star" data-rating="1"></i>
               <i class="far fa-star" data-rating="2"></i>
               <i class="far fa-star" data-rating="3"></i>
               <i class="far fa-star" data-rating="4"></i>
               <i class="far fa-star" data-rating="5"></i>
             </div>
-            <p class="rate-message" id="widget-rate-message"></p>
+            <div id="widget-rate-message" class="feedback-message"></div>
           </div>
-          
-          <!-- Feedback Form -->
-          <div class="feedback-form-section">
-            <h4><i class="fas fa-envelope"></i> Leave Feedback</h4>
-            <form id="widget-feedback-form" class="widget-feedback-form">
+
+          <!-- Average Rating Display -->
+          <div class="feedback-stats">
+            <div class="avg-rating">
+              <span id="widget-avg-rating">0.0</span>
+              <div id="widget-avg-stars" class="avg-stars">
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+              <span id="widget-rating-count">(0 ratings)</span>
+            </div>
+          </div>
+
+          <!-- Text Feedback Section -->
+          <div class="feedback-form">
+            <form id="widget-feedback-form">
+              <label for="widget-feedback-text">Share your thoughts (optional):</label>
               <textarea 
                 id="widget-feedback-text" 
-                placeholder="Share your thoughts..."
+                rows="4" 
                 maxlength="500"
-                rows="3"
+                placeholder="Tell us what you think..."
               ></textarea>
               <div class="form-footer">
-                <span class="char-count">
-                  <span id="widget-char-count">0</span>/500
-                </span>
-                <button type="submit" class="btn-submit">
-                  <i class="fas fa-paper-plane"></i> Send
-                </button>
+                <span id="widget-char-count">0</span>/500
+                <button type="submit" class="btn-submit">Send Feedback</button>
               </div>
+              <div id="widget-form-message" class="feedback-message"></div>
             </form>
-            <p class="form-message" id="widget-form-message"></p>
           </div>
         </div>
       </div>
     `;
-    
-    // Add styles if not already present
-    if (!document.getElementById('feedback-widget-styles')) {
-      const styles = `
-        <style id="feedback-widget-styles">
-          /* Feedback Widget Styles - High Z-Index for Visibility */
-          .feedback-widget {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 10000 !important; /* Very high z-index */
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            transition: opacity 0.5s ease;
-          }
-          
-          /* Ensure widget is above everything */
-          .feedback-widget * {
-            z-index: 10001 !important;
-          }
-          
-          /* Toggle Button */
-          .feedback-toggle {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10002 !important;
-          }
-          
-          /* Pulse animation to draw attention */
-          @keyframes pulse {
-            0% {
-              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            }
-            50% {
-              box-shadow: 0 4px 30px rgba(97, 113, 64, 0.6);
-            }
-            100% {
-              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            }
-          }
-          
-          .feedback-toggle {
-            animation: pulse 2s infinite;
-          }
-          
-          .feedback-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
-            animation: none;
-          }
-          
-          .feedback-toggle:active {
-            transform: scale(0.95);
-          }
-          
-          .feedback-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ffc107;
-            color: #333;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-          }
-          
-          /* Feedback Panel */
+
+    // Add CSS styles
+    const styles = `
+      <style>
+        #feedback-widget {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 10000;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .feedback-float-btn {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 50px;
+          padding: 15px 25px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.3s ease;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+
+        .feedback-float-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .feedback-icon {
+          font-size: 20px;
+        }
+
+        .feedback-panel {
+          position: absolute;
+          bottom: 80px;
+          right: 0;
+          width: 380px;
+          max-width: 90vw;
+          background: white;
+          border-radius: 15px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(20px);
+          transition: all 0.3s ease;
+        }
+
+        .feedback-panel.open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .feedback-header {
+          padding: 20px;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .feedback-header h3 {
+          margin: 0;
+          font-size: 18px;
+          color: #1f2937;
+        }
+
+        .feedback-close {
+          background: none;
+          border: none;
+          font-size: 28px;
+          color: #6b7280;
+          cursor: pointer;
+          line-height: 1;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+        }
+
+        .feedback-rate {
+          padding: 20px;
+          text-align: center;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .feedback-rate p {
+          margin: 0 0 15px 0;
+          color: #4b5563;
+        }
+
+        .rate-stars {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+
+        .rate-stars i {
+          font-size: 28px;
+          color: #d1d5db;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .rate-stars i:hover,
+        .rate-stars i.hover {
+          color: #fbbf24;
+          transform: scale(1.2);
+        }
+
+        .rate-stars i.selected {
+          color: #fbbf24;
+        }
+
+        .feedback-stats {
+          padding: 15px 20px;
+          background: #f9fafb;
+          text-align: center;
+        }
+
+        .avg-rating {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          color: #6b7280;
+          font-size: 14px;
+        }
+
+        #widget-avg-rating {
+          font-size: 20px;
+          font-weight: bold;
+          color: #1f2937;
+        }
+
+        .avg-stars {
+          display: flex;
+          gap: 2px;
+        }
+
+        .avg-stars i {
+          font-size: 14px;
+          color: #fbbf24;
+        }
+
+        .feedback-form {
+          padding: 20px;
+        }
+
+        .feedback-form label {
+          display: block;
+          margin-bottom: 10px;
+          color: #4b5563;
+          font-size: 14px;
+        }
+
+        .feedback-form textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          resize: vertical;
+          font-family: inherit;
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+
+        .feedback-form textarea:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 10px;
+        }
+
+        #widget-char-count {
+          color: #9ca3af;
+          font-size: 12px;
+        }
+
+        .btn-submit {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .feedback-message {
+          margin-top: 10px;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          display: none;
+        }
+
+        .feedback-message.success {
+          background: #d1fae5;
+          color: #065f46;
+          display: block;
+        }
+
+        .feedback-message.error {
+          background: #fee2e2;
+          color: #991b1b;
+          display: block;
+        }
+
+        .feedback-loading {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border: 2px solid #ffffff;
+          border-radius: 50%;
+          border-top-color: transparent;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
           .feedback-panel {
-            position: absolute;
-            bottom: 80px;
-            left: 0;
-            width: 320px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px) scale(0.9);
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 10003 !important;
-            max-height: 80vh;
-            overflow-y: auto;
+            width: calc(100vw - 20px);
+            right: 10px;
+            left: 10px;
           }
-          
-          .feedback-panel.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scale(1);
-          }
-          
-          /* Panel Header */
-          .feedback-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            background: #f8f9fa;
-            border-radius: 16px 16px 0 0;
-            position: sticky;
-            top: 0;
-            z-index: 10004;
-          }
-          
-          .feedback-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-          
-          .feedback-header h3 i {
-            color: #ffc107;
-          }
-          
-          .feedback-close {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            color: #666;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          }
-          
-          .feedback-close:hover {
-            background: #f44336;
-            color: white;
-            transform: rotate(90deg);
-          }
-          
-          /* Average Rating Section */
-          .feedback-avg {
-            padding: 20px;
-            text-align: center;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-          }
-          
-          .avg-number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #617140;
-            margin-bottom: 10px;
-          }
-          
-          .avg-max {
-            font-size: 20px;
-            color: #999;
-          }
-          
-          .avg-stars {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            font-size: 20px;
-            margin-bottom: 8px;
-          }
-          
-          .avg-stars i {
-            color: #ddd;
-            transition: color 0.3s;
-          }
-          
-          .avg-stars i.filled {
-            color: #ffc107;
-            animation: starPop 0.3s ease;
-          }
-          
-          @keyframes starPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-          }
-          
-          .avg-count {
-            font-size: 13px;
-            color: #666;
-          }
-          
-          /* User Rating Section */
-          .feedback-rate {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #e0e0e0;
-            background: white;
-          }
-          
-          #rate-prompt {
-            margin: 0 0 15px 0;
-            color: #666;
-            font-size: 14px;
-          }
-          
-          .rate-stars {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
-          }
-          
-          .rate-stars i {
-            font-size: 28px;
-            color: #ddd;
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-          
-          .rate-stars i:hover {
-            color: #ffc107;
-            transform: scale(1.2);
-          }
-          
-          .rate-stars i.selected {
-            color: #ffc107;
-            animation: starSelect 0.4s ease;
-          }
-          
-          @keyframes starSelect {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.4) rotate(10deg); }
-            100% { transform: scale(1) rotate(0deg); }
-          }
-          
-          .rate-message {
-            font-size: 13px;
-            font-weight: 500;
-            min-height: 20px;
-            margin: 0;
-          }
-          
-          .rate-message.success {
-            color: #4CAF50;
-          }
-          
-          .rate-message.error {
-            color: #f44336;
-          }
-          
-          /* Feedback Form Section */
-          .feedback-form-section {
-            padding: 20px;
-            background: white;
-            border-radius: 0 0 16px 16px;
-          }
-          
-          .feedback-form-section h4 {
-            margin: 0 0 15px 0;
-            font-size: 14px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-          
-          .feedback-form-section h4 i {
-            color: #617140;
-          }
-          
-          .widget-feedback-form {
-            margin: 0;
-          }
-          
-          #widget-feedback-text {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            resize: none;
-            font-family: inherit;
-            transition: all 0.2s;
-            background: #f8f9fa;
-          }
-          
-          #widget-feedback-text:focus {
-            outline: none;
-            border-color: #617140;
-            box-shadow: 0 0 0 3px rgba(97, 113, 64, 0.1);
-            background: white;
-          }
-          
-          .form-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-          }
-          
-          .char-count {
-            font-size: 12px;
-            color: #999;
-          }
-          
-          .btn-submit {
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          }
-          
-          .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(97, 113, 64, 0.4);
-          }
-          
-          .btn-submit:active {
-            transform: translateY(0);
-          }
-          
-          .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-          }
-          
-          .form-message {
-            margin: 10px 0 0 0;
-            font-size: 13px;
-            font-weight: 500;
-            text-align: center;
-          }
-          
-          .form-message.success {
-            color: #4CAF50;
-          }
-          
-          .form-message.error {
-            color: #f44336;
-          }
-          
-          /* Loading state */
-          .feedback-loading {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #617140;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 8px;
-          }
-          
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          
-          /* Mobile Responsive */
-          @media (max-width: 380px) {
-            .feedback-widget {
-              left: 10px;
-              bottom: 10px;
-            }
-            
-            .feedback-panel {
-              width: calc(100vw - 20px);
-              left: 50%;
-              transform: translateX(-50%) translateY(20px) scale(0.9);
-            }
-            
-            .feedback-panel.active {
-              transform: translateX(-50%) translateY(0) scale(1);
-            }
-          }
-          
-          /* Dark overlay when panel is open */
-          .feedback-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-          }
-          
-          .feedback-overlay.active {
-            opacity: 1;
-            visibility: visible;
-          }
-        </style>
-      `;
-      document.head.insertAdjacentHTML('beforeend', styles);
-    }
-    
-    // Add overlay div
-    const overlayHTML = '<div id="feedback-overlay" class="feedback-overlay"></div>';
-    document.body.insertAdjacentHTML('beforeend', overlayHTML);
-    
-    // Add widget HTML to body
+        }
+      </style>
+    `;
+
+    // Add to page
+    document.head.insertAdjacentHTML('beforeend', styles);
     document.body.insertAdjacentHTML('beforeend', widgetHTML);
-    
-    // Log successful creation
-    const widget = document.getElementById('feedback-widget');
-    if (widget) {
-      console.log('✅ Feedback widget element created and added to DOM');
-      console.log('📍 Widget location:', {
-        bottom: '20px',
-        left: '20px',
-        zIndex: window.getComputedStyle(widget).zIndex
-      });
-    } else {
-      console.error('❌ Failed to create feedback widget element');
-    }
   }
 
   setupEventListeners() {
-    // Toggle button
-    const toggleBtn = document.getElementById('feedback-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        console.log('🔘 Toggle button clicked');
-        this.togglePanel();
-      });
-    }
-    
-    // Close button
-    const closeBtn = document.getElementById('feedback-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        this.closePanel();
-      });
-    }
-    
-    // Overlay click to close
-    const overlay = document.getElementById('feedback-overlay');
-    if (overlay) {
-      overlay.addEventListener('click', () => {
-        this.closePanel();
-      });
-    }
+    // Toggle panel
+    document.getElementById('feedback-btn')?.addEventListener('click', () => this.togglePanel());
+    document.getElementById('close-feedback')?.addEventListener('click', () => this.closePanel());
     
     // Rating stars
     const stars = document.querySelectorAll('.rate-stars i');
     stars.forEach(star => {
-      star.addEventListener('click', (e) => this.handleRating(e));
+      star.addEventListener('click', (e) => this.handleStarClick(e));
       star.addEventListener('mouseenter', (e) => this.handleStarHover(e));
     });
     
-    document.querySelector('.rate-stars').addEventListener('mouseleave', () => {
+    document.querySelector('.rate-stars')?.addEventListener('mouseleave', () => {
       this.updateRatingDisplay();
     });
     
     // Feedback form
-    const form = document.getElementById('widget-feedback-form');
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        this.handleFeedbackSubmit(e);
-      });
-    }
+    document.getElementById('widget-feedback-form')?.addEventListener('submit', (e) => this.handleFeedbackSubmit(e));
     
-    // Character count
-    const textarea = document.getElementById('widget-feedback-text');
-    const charCount = document.getElementById('widget-char-count');
-    if (textarea && charCount) {
-      textarea.addEventListener('input', () => {
-        charCount.textContent = textarea.value.length;
-      });
-    }
+    // Character counter
+    document.getElementById('widget-feedback-text')?.addEventListener('input', (e) => {
+      document.getElementById('widget-char-count').textContent = e.target.value.length;
+    });
   }
 
   togglePanel() {
-    this.isOpen = !this.isOpen;
+    this.isOpen ? this.closePanel() : this.openPanel();
+  }
+
+  openPanel() {
     const panel = document.getElementById('feedback-panel');
-    const toggle = document.getElementById('feedback-toggle');
-    const overlay = document.getElementById('feedback-overlay');
-    
-    if (this.isOpen) {
-      panel.classList.add('active');
-      overlay.classList.add('active');
-      toggle.innerHTML = '<i class="fas fa-times"></i>';
-      toggle.style.animation = 'none';
-      console.log('📂 Feedback panel opened');
-    } else {
-      panel.classList.remove('active');
-      overlay.classList.remove('active');
-      toggle.innerHTML = `
-        <i class="fas fa-comment-dots"></i>
-        ${this.hasRated ? `<span class="feedback-badge" id="rating-badge">${(this.currentAverage || 0).toFixed(1)}</span>` : ''}
-      `;
-      toggle.style.animation = 'pulse 2s infinite';
-      console.log('📁 Feedback panel closed');
+    if (panel) {
+      panel.classList.add('open');
+      this.isOpen = true;
     }
   }
 
   closePanel() {
-    this.isOpen = false;
     const panel = document.getElementById('feedback-panel');
-    const toggle = document.getElementById('feedback-toggle');
-    const overlay = document.getElementById('feedback-overlay');
-    
-    panel.classList.remove('active');
-    overlay.classList.remove('active');
-    toggle.innerHTML = `
-      <i class="fas fa-comment-dots"></i>
-      ${this.hasRated ? `<span class="feedback-badge" id="rating-badge">${(this.currentAverage || 0).toFixed(1)}</span>` : ''}
-    `;
-    toggle.style.animation = 'pulse 2s infinite';
-  }
-
-  async subscribeToRatings() {
-    if (!this.db) {
-      console.warn('⚠️ No database connection for ratings subscription');
-      return;
-    }
-    
-    try {
-      const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js');
-      const statsRef = doc(this.db, 'feedback/stats/aggregate');
-      
-      onSnapshot(statsRef, (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          this.updateAverageDisplay(data.averageRating || 0, data.totalRatings || 0);
-        }
-      });
-    } catch (error) {
-      console.error('Error subscribing to ratings:', error);
+    if (panel) {
+      panel.classList.remove('open');
+      this.isOpen = false;
     }
   }
 
-  updateAverageDisplay(average, count) {
-    this.currentAverage = average;
-    
-    // Update average number
-    const avgRating = document.getElementById('widget-avg-rating');
-    const ratingCount = document.getElementById('widget-rating-count');
-    
-    if (avgRating) avgRating.textContent = average.toFixed(1);
-    if (ratingCount) ratingCount.textContent = count;
-    
-    // Update average stars
-    const stars = document.querySelectorAll('#widget-avg-stars i');
-    stars.forEach((star, index) => {
-      if (index < Math.round(average)) {
-        star.classList.add('filled', 'fas');
-        star.classList.remove('far');
-      } else {
-        star.classList.remove('filled');
-        star.classList.add('far');
-        star.classList.remove('fas');
-      }
-    });
-    
-    // Update badge if rated
-    if (this.hasRated && !this.isOpen) {
-      const badge = document.getElementById('rating-badge');
-      if (badge) {
-        badge.textContent = average.toFixed(1);
-        badge.style.display = 'block';
-      }
-    }
-  }
-
-  async handleRating(e) {
+  async handleStarClick(e) {
     const rating = parseInt(e.target.dataset.rating);
-    console.log('⭐ Rating clicked:', rating);
     
-    if (!this.auth || !this.auth.currentUser) {
+    if (!this.auth?.currentUser) {
       this.showMessage('widget-rate-message', 'Please sign in to rate', 'error');
       return;
     }
     
+    this.currentRating = rating;
+    const isUpdate = this.hasRated;
+    
     try {
       const { doc, setDoc, getDoc, serverTimestamp, increment } = await import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js');
       
-      // Check if user already has a rating
-      const ratingRef = doc(this.db, 'feedback/ratings', this.auth.currentUser.uid);
-      const existingRating = await getDoc(ratingRef);
+      // Check if updating existing rating
+      const existingDoc = await getDoc(doc(this.db, 'feedback_ratings', this.auth.currentUser.uid));
+      const updateCount = existingDoc.exists() ? (existingDoc.data().updateCount || 1) + 1 : 1;
       
-      const isUpdate = existingRating.exists();
-      const previousRating = isUpdate ? existingRating.data().rating : null;
-      
-      // Save/update rating (one per user)
-      await setDoc(ratingRef, {
+      // FIXED: Use flat collection path 'feedback_ratings' instead of nested 'feedback/ratings'
+      await setDoc(doc(this.db, 'feedback_ratings', this.auth.currentUser.uid), {
         rating: rating,
-        userId: this.auth.currentUser.uid,
-        userEmail: this.auth.currentUser.email,
+        email: this.auth.currentUser.email,
         displayName: this.auth.currentUser.displayName || 'Anonymous',
-        photoURL: this.auth.currentUser.photoURL || null,
         timestamp: serverTimestamp(),
-        previousRating: previousRating,
-        updateCount: isUpdate ? increment(1) : 1,
-        isUpdate: isUpdate,
-        createdAt: isUpdate ? existingRating.data().createdAt : serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updateCount: updateCount,
+        lastUpdated: serverTimestamp()
       });
       
-      this.currentRating = rating;
       this.hasRated = true;
-      this.updateRatingDisplay();
       
       // Show appropriate message
       if (isUpdate) {
         this.showMessage('widget-rate-message', `Rating updated to ${rating} stars!`, 'success');
       } else {
-        this.showMessage('widget-rate-message', 'Thanks for rating!', 'success');
+        this.showMessage('widget-rate-message', `Thank you! You rated ${rating} stars`, 'success');
       }
       
       // Update stats
@@ -881,7 +585,8 @@ class FeedbackWidget {
         currentPage: window.location.pathname
       };
       
-      const docRef = await addDoc(collection(this.db, 'feedback/comments'), feedbackData);
+      // FIXED: Use flat collection path 'feedback_comments' instead of nested 'feedback/comments'
+      const docRef = await addDoc(collection(this.db, 'feedback_comments'), feedbackData);
       
       console.log(`✅ Feedback submitted with ID: ${docRef.id}`);
       
@@ -921,7 +626,9 @@ class FeedbackWidget {
     
     try {
       const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js');
-      const ratingDoc = await getDoc(doc(this.db, 'feedback/ratings', this.auth.currentUser.uid));
+      
+      // FIXED: Use flat collection path 'feedback_ratings' instead of nested 'feedback/ratings'
+      const ratingDoc = await getDoc(doc(this.db, 'feedback_ratings', this.auth.currentUser.uid));
       
       if (ratingDoc.exists()) {
         const data = ratingDoc.data();
@@ -947,7 +654,8 @@ class FeedbackWidget {
     try {
       const { collection, getDocs, doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js');
       
-      const ratingsSnapshot = await getDocs(collection(this.db, 'feedback/ratings'));
+      // FIXED: Use flat collection path 'feedback_ratings' instead of nested 'feedback/ratings'
+      const ratingsSnapshot = await getDocs(collection(this.db, 'feedback_ratings'));
       
       let total = 0;
       let count = 0;
@@ -965,71 +673,92 @@ class FeedbackWidget {
         }
       });
       
-      const average = count > 0 ? total / count : 0;
+      const average = count > 0 ? (total / count) : 0;
       
-      await setDoc(doc(this.db, 'feedback/stats/aggregate'), {
+      // FIXED: Use flat collection path 'feedback_stats' instead of nested 'feedback/stats'
+      await setDoc(doc(this.db, 'feedback_stats', 'aggregate'), {
         averageRating: average,
         totalRatings: count,
-        totalSum: total,
+        totalScore: total,
         distribution: distribution,
         totalUpdates: totalUpdates,
-        lastUpdated: serverTimestamp(),
-        lastUpdatedBy: this.auth?.currentUser?.email || 'anonymous'
+        lastUpdated: serverTimestamp()
       });
       
-      console.log('📊 Stats updated:', { 
-        average: average.toFixed(2), 
-        count,
-        distribution 
-      });
+      // Update display
+      this.updateAverageDisplay(average, count);
+      
     } catch (error) {
       console.error('Error updating stats:', error);
-      // Don't throw - this is a best-effort operation
     }
+  }
+
+  async subscribeToRatings() {
+    if (!this.db) return;
+    
+    try {
+      const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js');
+      
+      // FIXED: Use flat collection path 'feedback_stats' instead of nested 'feedback/stats'
+      onSnapshot(doc(this.db, 'feedback_stats', 'aggregate'), (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          this.updateAverageDisplay(data.averageRating || 0, data.totalRatings || 0);
+        }
+      });
+    } catch (error) {
+      console.error('Error subscribing to ratings:', error);
+    }
+  }
+
+  updateAverageDisplay(average, count) {
+    // Update text
+    const avgElement = document.getElementById('widget-avg-rating');
+    const countElement = document.getElementById('widget-rating-count');
+    
+    if (avgElement) avgElement.textContent = average.toFixed(1);
+    if (countElement) countElement.textContent = `(${count} rating${count !== 1 ? 's' : ''})`;
+    
+    // Update stars
+    const stars = document.querySelectorAll('#widget-avg-stars i');
+    const fullStars = Math.floor(average);
+    const hasHalfStar = (average % 1) >= 0.5;
+    
+    stars.forEach((star, index) => {
+      star.classList.remove('far', 'fas', 'fa-star-half-alt');
+      
+      if (index < fullStars) {
+        star.classList.add('fas', 'fa-star');
+      } else if (index === fullStars && hasHalfStar) {
+        star.classList.add('fas', 'fa-star-half-alt');
+      } else {
+        star.classList.add('far', 'fa-star');
+      }
+    });
   }
 
   showMessage(elementId, message, type) {
     const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    element.textContent = message;
-    element.className = element.className.split(' ')[0] + ' ' + type;
-    
-    setTimeout(() => {
-      element.textContent = '';
-      element.className = element.className.split(' ')[0];
-    }, 3000);
-  }
-
-  onAuthChange(user) {
-    const prompt = document.getElementById('rate-prompt');
-    if (prompt) {
-      if (user) {
-        if (this.hasRated) {
-          prompt.textContent = 'Update your rating:';
-        } else {
-          prompt.textContent = 'Click to rate:';
-        }
-        this.checkUserRating();
-      } else {
-        prompt.textContent = 'Sign in to rate:';
-        this.currentRating = 0;
-        this.hasRated = false;
-        this.updateRatingDisplay();
-      }
+    if (element) {
+      element.textContent = message;
+      element.className = `feedback-message ${type}`;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        element.className = 'feedback-message';
+      }, 5000);
     }
   }
 }
 
 // Initialize widget when DOM is ready
-console.log('📋 Feedback Widget: Script loaded, waiting for DOM...');
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM ready, initializing Feedback Widget...');
     window.feedbackWidget = new FeedbackWidget();
   });
 } else {
-  console.log('🚀 DOM already ready, initializing Feedback Widget...');
   window.feedbackWidget = new FeedbackWidget();
 }
+
+// Export for use in other modules if needed
+export default FeedbackWidget;

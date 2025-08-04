@@ -1,4 +1,4 @@
-// js/firebase/auth-tiers.js - Complete Secure Tier Management System
+// js/firebase/auth-tiers.js - Complete Secure Tier Management System with Admin Override
 import { auth, db } from './config.js';
 import { 
   doc, setDoc, getDoc, updateDoc, addDoc, collection, query, where, orderBy, limit, getDocs, onSnapshot, serverTimestamp, increment, arrayUnion, arrayRemove
@@ -83,6 +83,18 @@ export async function getUserTier(userId = null) {
         const uid = userId || auth.currentUser?.uid;
         if (!uid) return TIERS.PUBLIC;
         
+        // ADMIN OVERRIDE: Always return admin for admin email
+        if (auth.currentUser?.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
+            console.log('👑 Admin override - returning admin tier');
+            return TIERS.ADMIN;
+        }
+        
+        // GIRLFRIEND OVERRIDE: Always return girlfriend for Raeha's email
+        if (auth.currentUser?.email?.toLowerCase() === 'raehaberbert@gmail.com') {
+            console.log('💝 Girlfriend override - returning girlfriend tier');
+            return TIERS.GIRLFRIEND;
+        }
+        
         const userDoc = await getDoc(doc(db, 'users', uid));
         if (userDoc.exists()) {
             const tier = userDoc.data().tier;
@@ -98,9 +110,16 @@ export async function getUserTier(userId = null) {
     }
 }
 
-// Check if user has minimum required tier
+// Check if user has minimum required tier (WITH ADMIN OVERRIDE)
 export async function hasMinimumTier(requiredTier) {
     const userTier = await getUserTier();
+    
+    // ADMIN OVERRIDE: Admin has access to everything
+    if (userTier === TIERS.ADMIN) {
+        await logPageAccess(requiredTier, true);
+        return true;
+    }
+    
     const hasAccess = TIER_LEVELS[userTier] >= TIER_LEVELS[requiredTier];
     
     // Log the access attempt
@@ -129,10 +148,10 @@ export async function setUserTier(targetUserId, newTier) {
         await updateDoc(doc(db, 'users', targetUserId), {
             tier: newTier,
             tierUpdatedAt: serverTimestamp(),
-            tierUpdatedBy: auth.currentUser.uid
+            updatedBy: auth.currentUser.email
         });
         
-        console.log(`Updated user ${targetUserId} to tier: ${newTier}`);
+        console.log(`✅ User tier updated to ${newTier}`);
         return true;
     } catch (error) {
         console.error('Error setting user tier:', error);
@@ -140,187 +159,194 @@ export async function setUserTier(targetUserId, newTier) {
     }
 }
 
-// Determine tier based on email (for initial setup only)
-function determineTierByEmail(email) {
-    const lowerEmail = email.toLowerCase();
+// Check user's tier from email (for initial assignment)
+export function checkUserTier(email) {
+    const normalizedEmail = email?.toLowerCase();
     
-    if (lowerEmail === ADMIN_EMAIL) {
-        return TIERS.ADMIN;
-    } else if (GIRLFRIEND_EMAILS.includes(lowerEmail)) {
-        return TIERS.GIRLFRIEND;
-    } else if (FAMILY_EMAILS.includes(lowerEmail)) {
-        return TIERS.FAMILY;
-    } else {
-        return TIERS.AUTHENTICATED;
-    }
+    if (!normalizedEmail) return TIERS.AUTHENTICATED;
+    
+    // Check tiers in order of priority
+    if (normalizedEmail === ADMIN_EMAIL) return TIERS.ADMIN;
+    if (GIRLFRIEND_EMAILS.includes(normalizedEmail)) return TIERS.GIRLFRIEND;
+    if (FAMILY_EMAILS.includes(normalizedEmail)) return TIERS.FAMILY;
+    
+    return TIERS.AUTHENTICATED;
 }
 
 // Initialize user document with tier
 export async function initializeUserTier(user) {
-    console.log('🔧 Initializing user tier for:', user.email);
+    if (!user) return;
     
     try {
         const userRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userRef);
         
         if (!userDoc.exists()) {
-            // Determine initial tier based on email
-            const initialTier = determineTierByEmail(user.email);
-            
-            // Create user document
+            // New user - create document
+            const tier = checkUserTier(user.email);
             await setDoc(userRef, {
-                uid: user.uid,
                 email: user.email,
-                displayName: user.displayName || 'Anonymous',
-                photoURL: user.photoURL || null,
-                tier: initialTier,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                tier: tier,
                 createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp(),
-                loginCount: 1,
-                emailVerified: user.emailVerified || false
+                lastLogin: serverTimestamp()
             });
-            
-            console.log(`✅ New user ${user.email} initialized with tier: ${initialTier}`);
+            console.log(`✅ New user initialized with tier: ${tier}`);
         } else {
-            // Update last login
+            // Existing user - update last login
             await updateDoc(userRef, {
-                lastLogin: serverTimestamp(),
-                loginCount: increment(1),
-                emailVerified: user.emailVerified || false
+                lastLogin: serverTimestamp()
             });
-            
-            // Auto-upgrade tier if email matches higher tier
-            await autoAssignTier(user);
         }
     } catch (error) {
         console.error('Error initializing user tier:', error);
-        throw error; // Re-throw to handle in calling function
     }
 }
 
-// Auto-assign tiers based on email (for upgrades only)
+// Auto-assign tier based on email (for existing users)
 export async function autoAssignTier(user) {
+    if (!user) return;
+    
     try {
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
+        const expectedTier = checkUserTier(user.email);
+        const currentTier = await getUserTier(user.uid);
         
-        if (userDoc.exists()) {
-            const currentTier = userDoc.data().tier;
-            const emailTier = determineTierByEmail(user.email);
-            
-            // Only upgrade, never downgrade
-            if (TIER_LEVELS[emailTier] > TIER_LEVELS[currentTier]) {
-                await updateDoc(userRef, { 
-                    tier: emailTier,
-                    tierAutoUpgraded: true,
-                    tierUpgradedAt: serverTimestamp()
-                });
-                console.log(`✅ Auto-upgraded ${user.email} from ${currentTier} to ${emailTier}`);
+        // Only update if tier doesn't match expected
+        if (currentTier !== expectedTier) {
+            // Don't downgrade admin users
+            if (currentTier === TIERS.ADMIN) {
+                console.log('⚠️ Admin tier protected from auto-assignment');
+                return;
             }
+            
+            await updateDoc(doc(db, 'users', user.uid), {
+                tier: expectedTier,
+                tierAutoAssigned: true,
+                tierAssignedAt: serverTimestamp()
+            });
+            console.log(`✅ Tier auto-assigned: ${expectedTier}`);
         }
     } catch (error) {
         console.error('Error auto-assigning tier:', error);
     }
 }
 
-// Apply tier-based visibility to UI elements
-export async function applyTierVisibility() {
-    const userTier = await getUserTier();
-    const tierLevel = TIER_LEVELS[userTier];
+// Apply tier-based visibility to the page (WITH ADMIN OVERRIDE)
+export async function applyTierVisibility(userTier = null) {
+    const tier = userTier || await getUserTier();
     
-    console.log(`🔐 Applying visibility for tier: ${userTier} (level ${tierLevel})`);
+    // Update body class for CSS rules
+    document.body.className = document.body.className.replace(/tier-\w+/g, '');
+    document.body.classList.add(`tier-${tier}`);
     
-    // Hide all tier-restricted elements first
-    document.querySelectorAll('[data-tier]').forEach(element => {
-        element.style.display = 'none';
-        element.setAttribute('aria-hidden', 'true');
-    });
+    // ADMIN OVERRIDE: Show all navigation items for admin
+    if (tier === TIERS.ADMIN) {
+        // Show ALL tier navigation items
+        document.querySelectorAll('.tier-nav').forEach(nav => {
+            nav.style.display = '';
+            nav.style.visibility = 'visible';
+        });
+        
+        // Update tier indicator
+        const tierIndicator = document.getElementById('user-tier-indicator');
+        if (tierIndicator) {
+            tierIndicator.textContent = 'Admin (Full Access)';
+            tierIndicator.className = `user-tier-indicator tier-${tier}`;
+        }
+        
+        console.log('👑 Admin: All navigation items visible');
+        return;
+    }
     
-    // Show elements user has access to
-    Object.entries(TIER_LEVELS).forEach(([tier, level]) => {
-        if (tierLevel >= level) {
-            document.querySelectorAll(`[data-tier="${tier}"]`).forEach(element => {
-                element.style.display = '';
-                element.removeAttribute('aria-hidden');
-            });
+    // For non-admin users, show/hide based on tier hierarchy
+    const visibleTiers = [];
+    const tierLevel = TIER_LEVELS[tier];
+    
+    for (const [tierName, level] of Object.entries(TIER_LEVELS)) {
+        if (level <= tierLevel) {
+            visibleTiers.push(tierName);
+        }
+    }
+    
+    // Show/hide tier-specific navigation
+    document.querySelectorAll('.tier-nav').forEach(nav => {
+        const navTier = Array.from(nav.classList).find(c => c.endsWith('-nav'))?.replace('-nav', '');
+        if (navTier && visibleTiers.includes(navTier.replace('auth', 'authenticated'))) {
+            nav.style.display = '';
+            nav.style.visibility = 'visible';
+        } else {
+            nav.style.display = 'none';
+            nav.style.visibility = 'hidden';
         }
     });
     
-    // Apply tier-specific classes to body
-    document.body.className = document.body.className.replace(/tier-\w+/g, '');
-    document.body.classList.add(`tier-${userTier}`);
-    
-    // Update tier indicator if exists
+    // Update tier indicator
     const tierIndicator = document.getElementById('user-tier-indicator');
     if (tierIndicator) {
-        tierIndicator.textContent = TIER_NAMES[userTier];
-        tierIndicator.className = `tier-badge tier-${userTier}`;
+        tierIndicator.textContent = TIER_NAMES[tier] || tier;
+        tierIndicator.className = `user-tier-indicator tier-${tier}`;
     }
 }
 
-// Protect entire pages by tier with secure redirect
-export async function protectPage(requiredTier, pageName = '') {
-    const hasAccess = await hasMinimumTier(requiredTier);
-    
-    if (!hasAccess) {
-        // Log unauthorized access attempt
-        console.warn(`⚠️ Unauthorized access attempt to ${pageName || requiredTier} page`);
+// Protect page based on required tier (WITH ADMIN OVERRIDE)
+export async function protectPage(requiredTier, pageName = 'this page') {
+    try {
+        const hasAccess = await hasMinimumTier(requiredTier);
         
-        // Clear any sensitive content immediately
-        document.body.style.display = 'none';
-        
-        // Show access denied message
-        document.body.innerHTML = `
-            <div style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-                font-family: Arial, sans-serif;
-                background: #f5f5f5;
-            ">
-                <div style="
-                    text-align: center;
-                    padding: 40px;
-                    background: white;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    max-width: 400px;
-                ">
-                    <h1 style="color: #d32f2f; margin-bottom: 20px;">
-                        🔒 Access Denied
-                    </h1>
-                    <p style="color: #666; margin-bottom: 10px;">
-                        You don't have permission to view this page.
-                    </p>
-                    <p style="color: #999; font-size: 14px; margin-bottom: 30px;">
-                        Required access level: <strong>${TIER_NAMES[requiredTier]}</strong>
-                    </p>
-                    <a href="../index.html" style="
-                        display: inline-block;
-                        padding: 12px 24px;
-                        background: #617140;
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        transition: background 0.3s;
-                    " onmouseover="this.style.background='#4a5a30'"
-                       onmouseout="this.style.background='#617140'">
-                        Return to Home
-                    </a>
+        if (!hasAccess) {
+            // Check if user is signed in
+            if (!auth.currentUser) {
+                console.log('❌ Not signed in - redirecting to login');
+                window.location.href = '../index.html?action=signin';
+                return false;
+            }
+            
+            // User is signed in but lacks required tier
+            const userTier = await getUserTier();
+            console.log(`❌ Access denied: User tier (${userTier}) < Required tier (${requiredTier})`);
+            
+            // Show access denied message
+            document.body.innerHTML = `
+                <div class="access-denied">
+                    <div class="access-denied-content">
+                        <div class="access-denied-icon">🔒</div>
+                        <h1>Access Restricted</h1>
+                        <p>This content requires <span class="access-denied-tier">${TIER_NAMES[requiredTier]}</span> access.</p>
+                        <p>Your current tier: <span class="tier-badge tier-${userTier}">${TIER_NAMES[userTier]}</span></p>
+                        <a href="../index.html" class="access-denied-button">Return Home</a>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+            return false;
+        }
         
-        // Redirect after 3 seconds
-        setTimeout(() => {
-            window.location.href = '../index.html';
-        }, 3000);
-        
-        document.body.style.display = 'block';
+        console.log(`✅ Access granted to ${pageName}`);
+        return true;
+    } catch (error) {
+        console.error('Error protecting page:', error);
+        window.location.href = '../index.html';
+        return false;
     }
+}
+
+// Subscribe to user tier changes
+export function subscribeTierChanges(userId, callback) {
+    if (!userId) return null;
     
-    return hasAccess;
+    return onSnapshot(doc(db, 'users', userId), (doc) => {
+        if (doc.exists()) {
+            const tier = doc.data().tier;
+            callback(tier);
+            applyTierVisibility(tier);
+        }
+    });
+}
+
+// Check if current user is admin
+export async function isAdmin() {
+    const tier = await getUserTier();
+    return tier === TIERS.ADMIN;
 }
 
 // Get all users with their tiers (admin only)

@@ -1,9 +1,8 @@
-// js/admin-customization-response.js - Admin Panel for Responding to Raeha's Requests
-// Add this to your admin.html page
-
+// js/raeha-customization.js - Handles both form submission and admin panel
 import { auth, db } from './firebase/config.js';
 import { 
     collection, 
+    addDoc, 
     getDocs, 
     query, 
     orderBy, 
@@ -13,7 +12,104 @@ import {
     serverTimestamp,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+// ========================================
+// FORM HANDLER FOR RAEHA'S PAGE
+// ========================================
+class CustomizationFormHandler {
+    constructor() {
+        this.form = null;
+        this.currentUser = null;
+        this.init();
+    }
+
+    init() {
+        // Only initialize on girlfriend.html page
+        if (!window.location.pathname.includes('girlfriend.html')) {
+            return;
+        }
+
+        console.log('💝 Initializing Raeha\'s form handler...');
+        
+        // Wait for auth and DOM
+        onAuthStateChanged(auth, (user) => {
+            this.currentUser = user;
+            if (user) {
+                this.setupForm();
+            }
+        });
+    }
+
+    setupForm() {
+        // Wait for DOM if needed
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.attachFormListener());
+        } else {
+            this.attachFormListener();
+        }
+    }
+
+    attachFormListener() {
+        this.form = document.getElementById('customization-form');
+        
+        if (!this.form) {
+            console.log('No customization form found on this page');
+            return;
+        }
+
+        console.log('✅ Found customization form');
+        
+        this.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleSubmit();
+        });
+    }
+
+    async handleSubmit() {
+        const type = document.getElementById('request-type')?.value;
+        const details = document.getElementById('request-details')?.value;
+        
+        if (!type || !details) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        try {
+            const requestData = {
+                type: type,
+                details: details,
+                email: this.currentUser?.email || 'anonymous',
+                displayName: this.currentUser?.displayName || 'Anonymous',
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                userId: this.currentUser?.uid || null
+            };
+            
+            const docRef = await addDoc(collection(db, 'customization_requests'), requestData);
+            console.log('✅ Request saved with ID:', docRef.id);
+            
+            alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
+            this.form.reset();
+            
+        } catch (error) {
+            console.error('❌ Error:', error);
+            alert('Error submitting request. Please try again.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+}
+
+// ========================================
+// ADMIN PANEL FOR VIEWING REQUESTS
+// ========================================
 class AdminCustomizationPanel {
     constructor() {
         this.requests = [];
@@ -22,10 +118,15 @@ class AdminCustomizationPanel {
     }
 
     async init() {
-        // Only initialize if admin
-        auth.onAuthStateChanged(async (user) => {
-            if (user && user.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
-                console.log('👨‍💼 Admin panel initialized');
+        // Only initialize on admin.html page
+        if (!window.location.pathname.includes('admin.html')) {
+            return;
+        }
+
+        // Wait for auth
+        onAuthStateChanged(auth, async (user) => {
+            if (user?.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
+                console.log('👨‍💼 Admin panel initializing...');
                 this.setupAdminPanel();
                 this.subscribeToRequests();
             }
@@ -33,30 +134,54 @@ class AdminCustomizationPanel {
     }
 
     setupAdminPanel() {
-        // Add admin panel to the page
-        const adminSection = document.createElement('div');
-        adminSection.className = 'admin-customization-panel';
-        adminSection.innerHTML = `
-            <div class="admin-panel-header">
-                <h2><i class="fas fa-user-cog"></i> Raeha's Customization Requests</h2>
-                <div class="admin-stats">
-                    <span class="stat-badge pending-count">0 Pending</span>
-                    <span class="stat-badge progress-count">0 In Progress</span>
+        // Find or create container
+        let container = document.getElementById('customization-panel-container');
+        if (!container) {
+            // If no specific container, add after the header
+            const adminHeader = document.querySelector('.admin-header');
+            if (adminHeader) {
+                container = document.createElement('div');
+                container.id = 'customization-panel-container';
+                adminHeader.insertAdjacentElement('afterend', container);
+            }
+        }
+
+        if (!container) {
+            console.error('Could not find place to insert admin panel');
+            return;
+        }
+
+        // Add the panel HTML
+        container.innerHTML = `
+            <div class="admin-customization-panel">
+                <div class="admin-panel-header">
+                    <h2><i class="fas fa-user-cog"></i> Raeha's Customization Requests</h2>
+                    <div class="admin-stats">
+                        <span class="stat-badge pending-count">0 Pending</span>
+                        <span class="stat-badge progress-count">0 In Progress</span>
+                        <span class="stat-badge completed-count">0 Completed</span>
+                    </div>
                 </div>
-            </div>
-            <div id="admin-requests-list" class="admin-requests-list">
-                <div class="loading-admin">Loading requests...</div>
+                <div id="admin-requests-list" class="admin-requests-list">
+                    <div class="loading-admin">Loading requests...</div>
+                </div>
             </div>
         `;
 
-        // Add styles
+        this.addStyles();
+    }
+
+    addStyles() {
+        if (document.getElementById('admin-panel-styles')) return;
+        
         const styles = `
-            <style>
+            <style id="admin-panel-styles">
                 .admin-customization-panel {
                     background: white;
                     border-radius: 15px;
                     padding: 30px;
-                    margin: 30px 0;
+                    margin: 30px auto;
+                    max-width: 1200px;
                     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
                 }
 
@@ -70,16 +195,14 @@ class AdminCustomizationPanel {
                 }
 
                 .admin-panel-header h2 {
-                    color: #374151;
+                    color: #1f2937;
+                    font-size: 1.8rem;
                     margin: 0;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
                 }
 
                 .admin-stats {
                     display: flex;
-                    gap: 10px;
+                    gap: 15px;
                 }
 
                 .stat-badge {
@@ -99,46 +222,24 @@ class AdminCustomizationPanel {
                     color: #1e40af;
                 }
 
-                .admin-request-item {
+                .completed-count {
+                    background: #d1fae5;
+                    color: #065f46;
+                }
+
+                .request-item {
                     background: #f9fafb;
-                    border: 1px solid #e5e7eb;
                     border-radius: 12px;
                     padding: 20px;
                     margin-bottom: 20px;
-                    transition: all 0.3s;
+                    border: 1px solid #e5e7eb;
                 }
 
-                .admin-request-item:hover {
-                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-                }
-
-                .request-header-admin {
+                .request-header {
                     display: flex;
                     justify-content: space-between;
-                    align-items: flex-start;
+                    align-items: start;
                     margin-bottom: 15px;
-                }
-
-                .request-info {
-                    flex: 1;
-                }
-
-                .request-from {
-                    font-weight: 600;
-                    color: #8b5cf6;
-                    margin-bottom: 5px;
-                }
-
-                .request-timestamp {
-                    color: #6b7280;
-                    font-size: 0.9rem;
-                }
-
-                .request-content {
-                    margin: 15px 0;
-                    padding: 15px;
-                    background: white;
-                    border-radius: 8px;
                 }
 
                 .request-type-badge {
@@ -147,7 +248,7 @@ class AdminCustomizationPanel {
                     border-radius: 6px;
                     font-size: 0.85rem;
                     font-weight: 600;
-                    margin-bottom: 10px;
+                    margin-right: 10px;
                 }
 
                 .type-design { background: #fce7f3; color: #be185d; }
@@ -156,24 +257,28 @@ class AdminCustomizationPanel {
                 .type-photo { background: #f3e8ff; color: #7c3aed; }
                 .type-other { background: #f3f4f6; color: #4b5563; }
 
-                .priority-indicator {
-                    display: inline-block;
-                    margin-left: 10px;
-                    padding: 3px 8px;
-                    border-radius: 4px;
-                    font-size: 0.75rem;
+                .status-badge {
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 0.85rem;
                     font-weight: 600;
                 }
 
-                .priority-urgent { background: #fee2e2; color: #dc2626; }
-                .priority-high { background: #fed7aa; color: #c2410c; }
-                .priority-normal { background: #dbeafe; color: #2563eb; }
-                .priority-low { background: #f3f4f6; color: #6b7280; }
+                .status-pending { background: #fef3c7; color: #92400e; }
+                .status-in-progress { background: #dbeafe; color: #1e40af; }
+                .status-completed { background: #d1fae5; color: #065f46; }
+
+                .request-details {
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 15px 0;
+                }
 
                 .admin-actions {
                     display: flex;
                     gap: 10px;
-                    margin-top: 20px;
+                    margin-top: 15px;
                 }
 
                 .admin-btn {
@@ -184,96 +289,16 @@ class AdminCustomizationPanel {
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
                 }
 
-                .btn-accept {
-                    background: #10b981;
-                    color: white;
-                }
-
-                .btn-accept:hover {
-                    background: #059669;
-                }
-
-                .btn-complete {
+                .btn-progress {
                     background: #3b82f6;
                     color: white;
                 }
 
-                .btn-complete:hover {
-                    background: #2563eb;
-                }
-
-                .btn-reject {
-                    background: #ef4444;
+                .btn-complete {
+                    background: #10b981;
                     color: white;
-                }
-
-                .btn-reject:hover {
-                    background: #dc2626;
-                }
-
-                .response-form {
-                    margin-top: 15px;
-                    padding: 15px;
-                    background: white;
-                    border-radius: 8px;
-                    display: none;
-                }
-
-                .response-form.active {
-                    display: block;
-                }
-
-                .response-textarea {
-                    width: 100%;
-                    padding: 10px;
-                    border: 2px solid #e5e7eb;
-                    border-radius: 8px;
-                    font-size: 0.95rem;
-                    margin-bottom: 10px;
-                    resize: vertical;
-                }
-
-                .response-textarea:focus {
-                    outline: none;
-                    border-color: #8b5cf6;
-                }
-
-                .response-submit {
-                    background: #8b5cf6;
-                    color: white;
-                    padding: 8px 20px;
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-weight: 600;
-                }
-
-                .response-submit:hover {
-                    background: #7c3aed;
-                }
-
-                .existing-response {
-                    margin-top: 15px;
-                    padding: 12px;
-                    background: #f0fdf4;
-                    border-left: 3px solid #10b981;
-                    border-radius: 6px;
-                }
-
-                .response-label {
-                    font-weight: 600;
-                    color: #10b981;
-                    margin-bottom: 5px;
-                    font-size: 0.9rem;
-                }
-
-                .response-text {
-                    color: #374151;
                 }
 
                 .loading-admin {
@@ -284,14 +309,7 @@ class AdminCustomizationPanel {
             </style>
         `;
 
-        // Add to page
         document.head.insertAdjacentHTML('beforeend', styles);
-        
-        const adminContainer = document.querySelector('.admin-container') || 
-                               document.querySelector('main');
-        if (adminContainer) {
-            adminContainer.insertAdjacentHTML('afterbegin', adminSection.outerHTML);
-        }
     }
 
     subscribeToRequests() {
@@ -310,6 +328,11 @@ class AdminCustomizationPanel {
             });
             this.displayRequests();
             this.updateStats();
+        }, (error) => {
+            console.error('Error loading requests:', error);
+            document.getElementById('admin-requests-list').innerHTML = `
+                <div class="loading-admin">Error loading requests: ${error.message}</div>
+            `;
         });
     }
 
@@ -323,44 +346,32 @@ class AdminCustomizationPanel {
         }
 
         container.innerHTML = this.requests.map(request => {
-            const date = request.createdAt?.toDate ? request.createdAt.toDate() : new Date();
-            const hasResponse = request.responses && request.responses.length > 0;
-
+            const date = request.createdAt?.toDate ? 
+                request.createdAt.toDate() : 
+                new Date(request.timestamp || Date.now());
+                
             return `
-                <div class="admin-request-item" data-id="${request.id}">
-                    <div class="request-header-admin">
-                        <div class="request-info">
-                            <div class="request-from">From: ${request.createdBy.name || request.createdBy.email}</div>
-                            <div class="request-timestamp">${this.formatDate(date)}</div>
+                <div class="request-item">
+                    <div class="request-header">
+                        <div>
+                            <span class="request-type-badge type-${request.type}">${request.type}</span>
+                            <span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span>
                         </div>
-                        <span class="request-status-badge status-${request.status}">
-                            ${request.status}
-                        </span>
+                        <div style="text-align: right;">
+                            <div style="color: #6b7280; font-size: 0.9rem;">${request.email}</div>
+                            <div style="color: #9ca3af; font-size: 0.8rem;">${this.formatDate(date)}</div>
+                        </div>
                     </div>
                     
-                    <div class="request-content">
-                        <span class="request-type-badge type-${request.type}">
-                            ${request.type.toUpperCase()}
-                        </span>
-                        <span class="priority-indicator priority-${request.priority}">
-                            ${request.priority.toUpperCase()} PRIORITY
-                        </span>
-                        <div style="margin-top: 10px; color: #374151;">
-                            ${request.details}
-                        </div>
+                    <div class="request-details">
+                        <strong>Request:</strong><br>
+                        ${this.escapeHtml(request.details)}
                     </div>
-
-                    ${hasResponse ? `
-                        <div class="existing-response">
-                            <div class="response-label">Your Response:</div>
-                            <div class="response-text">${request.responses[request.responses.length - 1].message}</div>
-                        </div>
-                    ` : ''}
-
+                    
                     <div class="admin-actions">
-                        ${request.status === 'pending' ? `
-                            <button class="admin-btn btn-accept" onclick="adminPanel.updateStatus('${request.id}', 'in-progress')">
-                                <i class="fas fa-play"></i> Start Working
+                        ${request.status !== 'in-progress' && request.status !== 'completed' ? `
+                            <button class="admin-btn btn-progress" onclick="adminPanel.updateStatus('${request.id}', 'in-progress')">
+                                <i class="fas fa-clock"></i> Mark In Progress
                             </button>
                         ` : ''}
                         
@@ -369,28 +380,6 @@ class AdminCustomizationPanel {
                                 <i class="fas fa-check"></i> Mark Complete
                             </button>
                         ` : ''}
-                        
-                        ${request.status !== 'completed' ? `
-                            <button class="admin-btn btn-reject" onclick="adminPanel.updateStatus('${request.id}', 'rejected')">
-                                <i class="fas fa-times"></i> Reject
-                            </button>
-                        ` : ''}
-                        
-                        <button class="admin-btn" onclick="adminPanel.toggleResponseForm('${request.id}')">
-                            <i class="fas fa-reply"></i> Respond
-                        </button>
-                    </div>
-
-                    <div class="response-form" id="response-form-${request.id}">
-                        <textarea 
-                            class="response-textarea" 
-                            id="response-text-${request.id}"
-                            placeholder="Write your response to Raeha..."
-                            rows="3"
-                        ></textarea>
-                        <button class="response-submit" onclick="adminPanel.sendResponse('${request.id}')">
-                            Send Response
-                        </button>
                     </div>
                 </div>
             `;
@@ -401,65 +390,27 @@ class AdminCustomizationPanel {
         try {
             await updateDoc(doc(db, 'customization_requests', requestId), {
                 status: newStatus,
-                updatedAt: serverTimestamp(),
-                ...(newStatus === 'completed' ? { completed: true } : {})
+                updatedAt: serverTimestamp()
             });
-            
             console.log(`✅ Request ${requestId} updated to ${newStatus}`);
         } catch (error) {
             console.error('Error updating status:', error);
-        }
-    }
-
-    toggleResponseForm(requestId) {
-        const form = document.getElementById(`response-form-${requestId}`);
-        if (form) {
-            form.classList.toggle('active');
-            if (form.classList.contains('active')) {
-                document.getElementById(`response-text-${requestId}`)?.focus();
-            }
-        }
-    }
-
-    async sendResponse(requestId) {
-        const textarea = document.getElementById(`response-text-${requestId}`);
-        const message = textarea?.value.trim();
-        
-        if (!message) {
-            alert('Please enter a response');
-            return;
-        }
-
-        try {
-            const response = {
-                message: message,
-                timestamp: new Date(),
-                by: 'Chace'
-            };
-
-            await updateDoc(doc(db, 'customization_requests', requestId), {
-                responses: arrayUnion(response),
-                updatedAt: serverTimestamp()
-            });
-
-            textarea.value = '';
-            this.toggleResponseForm(requestId);
-            console.log('✅ Response sent');
-        } catch (error) {
-            console.error('Error sending response:', error);
-            alert('Error sending response');
+            alert('Error updating status');
         }
     }
 
     updateStats() {
-        const pending = this.requests.filter(r => r.status === 'pending').length;
+        const pending = this.requests.filter(r => !r.status || r.status === 'pending').length;
         const inProgress = this.requests.filter(r => r.status === 'in-progress').length;
+        const completed = this.requests.filter(r => r.status === 'completed').length;
         
         const pendingBadge = document.querySelector('.pending-count');
         const progressBadge = document.querySelector('.progress-count');
+        const completedBadge = document.querySelector('.completed-count');
         
         if (pendingBadge) pendingBadge.textContent = `${pending} Pending`;
         if (progressBadge) progressBadge.textContent = `${inProgress} In Progress`;
+        if (completedBadge) completedBadge.textContent = `${completed} Completed`;
     }
 
     formatDate(date) {
@@ -480,6 +431,12 @@ class AdminCustomizationPanel {
         return date.toLocaleDateString();
     }
 
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
     destroy() {
         if (this.unsubscribe) {
             this.unsubscribe();
@@ -487,5 +444,22 @@ class AdminCustomizationPanel {
     }
 }
 
-// Initialize globally for onclick handlers
-window.adminPanel = new AdminCustomizationPanel();
+// ========================================
+// INITIALIZE BOTH BASED ON CURRENT PAGE
+// ========================================
+console.log('📄 Current page:', window.location.pathname);
+
+// Initialize form handler (only on girlfriend.html)
+const formHandler = new CustomizationFormHandler();
+
+// Initialize admin panel (only on admin.html)
+const adminPanel = new AdminCustomizationPanel();
+
+// Make admin panel globally available for onclick handlers
+window.adminPanel = adminPanel;
+
+// Export for debugging
+window.raehaCustomization = {
+    formHandler,
+    adminPanel
+};

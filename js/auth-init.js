@@ -1,4 +1,4 @@
-// js/auth-init.js - Authentication with Smart Auto-Redirect by Tier (FIXED)
+// js/auth-init.js - Authentication with Smart Auto-Redirect by Tier (FIXED EVENT LISTENERS)
 import { auth } from './firebase/config.js';
 import { signInWithGoogle, signOutUser } from './firebase/auth-service.js';
 import { 
@@ -10,15 +10,22 @@ import {
 } from './firebase/auth-tiers.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-// DOM elements
-const loginBtn = document.getElementById('login-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const userInfo = document.getElementById('user-info');
-const userName = document.getElementById('user-name');
-const userEmail = document.getElementById('user-email');
-const userPhoto = document.getElementById('user-photo');
+// --- HELPER FUNCTIONS ---
+function isProtectedPage() {
+    // These pages require authentication
+    const protectedPages = ['dashboard', 'family', 'girlfriend', 'admin'];
+    const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+    return protectedPages.includes(currentPage);
+}
 
-// --- SMART REDIRECT LOGIC ---
+function isPublicPage() {
+    // These pages are ALWAYS public
+    const publicPages = ['index', 'portfolio', 'resume', 'about', 'contact', ''];
+    const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+    return publicPages.includes(currentPage) || currentPage === '';
+}
+
+// --- SMART REDIRECT LOGIC (PRESERVED) ---
 function getRedirectPath(tier) {
     // Only redirect from homepage
     const currentPath = window.location.pathname;
@@ -44,8 +51,10 @@ function getRedirectPath(tier) {
     }
 }
 
-// --- SIGN IN ---
-async function handleSignIn() {
+// --- SIGN IN (PRESERVED) ---
+async function handleSignIn(e) {
+    if (e) e.preventDefault();
+    
     try {
         const user = await signInWithGoogle();
         if (user) {
@@ -77,18 +86,22 @@ async function handleSignIn() {
     }
 }
 
-// --- REMOVED WELCOME MESSAGE OVERLAY ---
-// This function has been removed to prevent the overlay popup
-
-// --- SIGN OUT ---
-async function handleSignOut() {
+// --- SIGN OUT (PRESERVED) ---
+async function handleSignOut(e) {
+    if (e) e.preventDefault();
+    
     try {
         await signOutUser();
         console.log('✅ User signed out');
 
-        // Redirect to homepage if on a protected page
-        if (window.location.pathname.includes('/pages/')) {
-            window.location.href = '../index.html';
+        // Only redirect if on a protected page
+        const protectedPages = ['dashboard', 'family', 'girlfriend', 'admin'];
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        
+        if (protectedPages.includes(currentPage)) {
+            window.location.href = window.location.pathname.includes('/pages/') 
+                ? '../index.html' 
+                : 'index.html';
         }
     } catch (error) {
         console.error('❌ Error signing out:', error);
@@ -96,8 +109,16 @@ async function handleSignOut() {
     }
 }
 
-// --- UI UPDATES ---
+// --- UI UPDATES (PRESERVED) ---
 async function updateUI(user) {
+    // Get elements fresh each time (in case DOM changed)
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
+    const userName = document.getElementById('user-name');
+    const userEmail = document.getElementById('user-email');
+    const userPhoto = document.getElementById('user-photo');
+    
     if (user) {
         // Show user info
         if (loginBtn) loginBtn.style.display = 'none';
@@ -113,18 +134,18 @@ async function updateUI(user) {
             userPhoto.style.display = 'inline-block';
         }
 
-        // Apply tier visibility
+        // Apply tier visibility (but not on public pages)
         const tier = await getUserTier();
-        await applyTierVisibility();
-        showTierNavigation(tier);
         console.log(`🔑 User tier: ${tier}`);
+        
+        // Don't override body class - let navigation.js handle it
+        // await applyTierVisibility();
         
         // Add tier-specific features
         if (tier === TIERS.ADMIN) {
             addAdminFeatures();
         }
         
-        // REMOVED: Dashboard button completely - no floating buttons
     } else {
         // Reset UI for signed-out state
         if (loginBtn) loginBtn.style.display = 'block';
@@ -134,82 +155,90 @@ async function updateUI(user) {
             userPhoto.style.display = 'none';
             userPhoto.src = '';
         }
-        await applyTierVisibility();
-        hideTierNavigation();
         
-        // Set body class for public users
-        document.body.className = 'tier-public';
+        // Don't apply tier visibility - let navigation.js handle it
+        // if (!isPublicPage()) {
+        //     await applyTierVisibility();
+        // }
+        
+        // Don't set body class - let navigation.js handle it
+        // document.body.className = document.body.className.replace(/tier-\w+/g, '');
+        // document.body.classList.add('tier-public');
         
         // Remove any tier-specific features
         removeAdminFeatures();
-        // REMOVED: Dashboard button removal - no floating buttons
     }
 }
 
-// --- DASHBOARD BUTTON REMOVED ---
-// The floating dashboard button has been completely removed
-// Users can access their dashboards through the navigation menu
-
 // --- NAVIGATION BASED ON TIER ---
+// NOTE: These functions are preserved but won't be called since navigation.js handles this
+// Keeping them in case you need them for other purposes
 function showTierNavigation(tier) {
-    // First hide ALL tier navigation
-    document.querySelectorAll('.tier-nav').forEach(item => {
-        item.style.display = 'none';
-        item.style.visibility = 'hidden';
-        item.style.opacity = '0';
-    });
-    
-    // Show navigation based on tier hierarchy
-    switch(tier) {
-        case TIERS.ADMIN:
-            document.querySelectorAll('.admin-nav').forEach(item => {
-                item.style.display = '';
-                item.style.visibility = 'visible';
-                item.style.opacity = '1';
-            });
-            // Fall through to show all lower tiers
-        case TIERS.GIRLFRIEND:
-            document.querySelectorAll('.girlfriend-nav').forEach(item => {
-                item.style.display = '';
-                item.style.visibility = 'visible';
-                item.style.opacity = '1';
-            });
-            // Fall through
-        case TIERS.FAMILY:
-            document.querySelectorAll('.family-nav').forEach(item => {
-                item.style.display = '';
-                item.style.visibility = 'visible';
-                item.style.opacity = '1';
-            });
-            // Fall through
-        case TIERS.AUTHENTICATED:
-            document.querySelectorAll('.auth-nav').forEach(item => {
-                item.style.display = '';
-                item.style.visibility = 'visible';
-                item.style.opacity = '1';
-            });
-            break;
-    }
+    // Navigation component handles this now, but keeping function for compatibility
+    console.log('Tier navigation is now handled by navigation.js component');
 }
 
 function hideTierNavigation() {
-    document.querySelectorAll('.tier-nav').forEach(item => {
-        item.style.display = 'none';
-        item.style.visibility = 'hidden';
-        item.style.opacity = '0';
-    });
+    // Navigation component handles this now, but keeping function for compatibility
+    console.log('Tier navigation is now handled by navigation.js component');
 }
 
-// --- ADMIN-ONLY FEATURES ---
+// --- ADMIN-ONLY FEATURES (PRESERVED) ---
 function addAdminFeatures() {
     // Admin features are now handled through navigation menu
+    // Add any additional admin-specific features here if needed
 }
 
 function removeAdminFeatures() {
     // Admin features cleanup if needed
 }
 
-// --- INIT AUTH STATE ---
+// --- SETUP EVENT LISTENERS (FIXED) ---
+function setupEventListeners() {
+    // Use event delegation on document body to catch clicks on login/logout buttons
+    // This ensures it works even if buttons are added/removed dynamically
+    
+    document.addEventListener('click', async (e) => {
+        // Check if clicked element is login button
+        if (e.target && (e.target.id === 'login-btn' || e.target.closest('#login-btn'))) {
+            e.preventDefault();
+            console.log('🔐 Login button clicked');
+            await handleSignIn(e);
+        }
+        
+        // Check if clicked element is logout button
+        if (e.target && (e.target.id === 'logout-btn' || e.target.closest('#logout-btn'))) {
+            e.preventDefault();
+            console.log('👋 Logout button clicked');
+            await handleSignOut(e);
+        }
+    });
+    
+    console.log('✅ Event listeners attached with delegation');
+}
+
+// --- MOBILE MENU FUNCTIONALITY (PRESERVED) ---
+function setupMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.querySelector('.main-nav');
+    
+    if (mobileMenuBtn && navMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('mobile-active');
+            mobileMenuBtn.classList.toggle('active');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                navMenu.classList.remove('mobile-active');
+                mobileMenuBtn.classList.remove('active');
+            }
+        });
+    }
+}
+
+// --- INIT AUTH STATE (PRESERVED) ---
 function initializeAuth() {
     onAuthStateChanged(auth, async (user) => {
         await updateUI(user);
@@ -242,13 +271,43 @@ function initializeAuth() {
     // Check for sign-in action in URL
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('action') === 'signin') {
-        handleSignIn();
+        setTimeout(() => {
+            handleSignIn();
+        }, 500);
     }
 }
 
-// --- EVENT LISTENERS ---
-if (loginBtn) loginBtn.addEventListener('click', handleSignIn);
-if (logoutBtn) logoutBtn.addEventListener('click', handleSignOut);
+// --- INITIALIZE EVERYTHING ---
+function initialize() {
+    console.log('🚀 Auth-init starting...');
+    
+    // Setup event listeners (MUST be first!)
+    setupEventListeners();
+    
+    // Setup mobile menu
+    setupMobileMenu();
+    
+    // Initialize auth state monitoring
+    initializeAuth();
+    
+    console.log('✅ Auth-init complete');
+}
 
-// Initialize on load
-initializeAuth();
+// Start when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+} else {
+    // DOM already loaded, initialize immediately
+    initialize();
+}
+
+// Export functions if needed by other modules
+export { handleSignIn, handleSignOut, getRedirectPath, initializeAuth };
+
+// Make functions available globally for debugging
+window.authFunctions = {
+    handleSignIn,
+    handleSignOut,
+    getUserTier,
+    getRedirectPath
+};

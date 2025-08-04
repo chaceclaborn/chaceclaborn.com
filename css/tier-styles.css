@@ -5,7 +5,7 @@
    These ensure content is hidden by default
    ================================ */
 
-/* Hide ALL tier-restricted content by default */
+/* Hide ALL tier-restricted CONTENT by default (but NOT navigation) */
 [data-tier] {
     display: none !important;
     visibility: hidden !important;
@@ -15,17 +15,15 @@
     left: -9999px !important;
 }
 
-/* Hide tier navigation by default */
-.tier-nav {
-    display: none !important;
-}
+/* ================================
+   NAVIGATION VISIBILITY
+   Let JavaScript control navigation visibility
+   ================================ */
 
-/* Tier-specific navigation items */
-.auth-nav,
-.family-nav,
-.girlfriend-nav,
-.admin-nav {
-    display: none !important;
+/* Remove the blanket hiding - JavaScript will control this */
+.tier-nav {
+    /* Navigation visibility controlled by JavaScript */
+    transition: opacity 0.3s ease;
 }
 
 /* ================================
@@ -43,10 +41,14 @@ body.tier-public [data-tier="public"] {
     left: auto !important;
 }
 
+/* Hide all tier nav for public users */
+body.tier-public .tier-nav {
+    display: none !important;
+}
+
 /* Authenticated tier */
 body.tier-authenticated [data-tier="public"],
-body.tier-authenticated [data-tier="authenticated"],
-body.tier-authenticated .auth-nav {
+body.tier-authenticated [data-tier="authenticated"] {
     display: initial !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -55,28 +57,47 @@ body.tier-authenticated .auth-nav {
     left: auto !important;
 }
 
+/* Show only dashboard for authenticated */
+body.tier-authenticated .auth-nav {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+body.tier-authenticated .family-nav,
+body.tier-authenticated .girlfriend-nav,
+body.tier-authenticated .admin-nav {
+    display: none !important;
+}
+
 /* Family tier */
 body.tier-family [data-tier="public"],
 body.tier-family [data-tier="authenticated"],
-body.tier-family [data-tier="family"],
-body.tier-family .auth-nav,
-body.tier-family .family-nav {
+body.tier-family [data-tier="family"] {
     display: initial !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     position: relative !important;
     left: auto !important;
+}
+
+/* Show dashboard and family for family tier */
+body.tier-family .auth-nav,
+body.tier-family .family-nav {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+body.tier-family .girlfriend-nav,
+body.tier-family .admin-nav {
+    display: none !important;
 }
 
 /* Girlfriend tier */
 body.tier-girlfriend [data-tier="public"],
 body.tier-girlfriend [data-tier="authenticated"],
 body.tier-girlfriend [data-tier="family"],
-body.tier-girlfriend [data-tier="girlfriend"],
-body.tier-girlfriend .auth-nav,
-body.tier-girlfriend .family-nav,
-body.tier-girlfriend .girlfriend-nav {
+body.tier-girlfriend [data-tier="girlfriend"] {
     display: initial !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -85,15 +106,37 @@ body.tier-girlfriend .girlfriend-nav {
     left: auto !important;
 }
 
-/* Admin tier */
-body.tier-admin [data-tier],
-body.tier-admin .tier-nav {
+/* Show dashboard, family, and girlfriend for girlfriend tier */
+body.tier-girlfriend .auth-nav,
+body.tier-girlfriend .family-nav,
+body.tier-girlfriend .girlfriend-nav {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+body.tier-girlfriend .admin-nav {
+    display: none !important;
+}
+
+/* Admin tier - SHOW EVERYTHING */
+body.tier-admin [data-tier] {
     display: initial !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     position: relative !important;
     left: auto !important;
+}
+
+/* Admin sees ALL navigation */
+body.tier-admin .tier-nav,
+body.tier-admin .auth-nav,
+body.tier-admin .family-nav,
+body.tier-admin .girlfriend-nav,
+body.tier-admin .admin-nav {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* ================================
@@ -277,16 +320,16 @@ body.tier-admin .tier-nav {
    ================================ */
 
 @media (max-width: 768px) {
-    .tier-nav {
-        display: none !important;
-    }
 
-    /* Show in mobile menu when appropriate */
-    body.tier-authenticated .mobile-menu .auth-nav,
-    body.tier-family .mobile-menu .family-nav,
-    body.tier-girlfriend .mobile-menu .girlfriend-nav,
-    body.tier-admin .mobile-menu .admin-nav {
+    /* On mobile, show appropriate tier nav based on body class */
+    body.tier-authenticated .auth-nav,
+    body.tier-family .family-nav,
+    body.tier-girlfriend .girlfriend-nav,
+    body.tier-admin .admin-nav {
         display: block !important;
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
     }
 
     .user-tier-indicator {
@@ -349,7 +392,25 @@ body.tier-admin .tier-nav {
     outline-offset: 2px;
 }
 
+/* ================================
+   SPECIAL ADMIN STYLING
+   Make admin navigation stand out
+   ================================ */
 
+body.tier-admin .admin-nav {
+    background: linear-gradient(135deg, #c62828 0%, #8e0000 100%);
+    color: white !important;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+body.tier-admin .admin-nav:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(198, 40, 40, 0.3);
+}
 
 /* ================================
    DEBUG MODE (Remove in production)
@@ -375,111 +436,3 @@ body.tier-admin .tier-nav {
     z-index: 9999;
 }
 */
-
-/* Add this to your style.css or tier-styles.css */
-
-/* Override to ensure admin navigation is visible when it should be */
-body.tier-admin .admin-nav {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    left: auto !important;
-}
-
-/* Highlight admin link */
-body.tier-admin .admin-nav {
-    background: linear-gradient(135deg, #c62828 0%, #8e0000 100%);
-    color: white !important;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 600;
-    margin-left: 10px;
-    transition: all 0.3s ease;
-}
-
-body.tier-admin .admin-nav:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(198, 40, 40, 0.3);
-}
-
-/* Ensure all tier navigation works properly */
-body.tier-authenticated .auth-nav,
-body.tier-family .auth-nav,
-body.tier-family .family-nav,
-body.tier-girlfriend .auth-nav,
-body.tier-girlfriend .family-nav,
-body.tier-girlfriend .girlfriend-nav,
-body.tier-admin .tier-nav {
-    display: block !important;
-    visibility: visible !important;
-}
-
-/* Mobile responsive admin button */
-@media (max-width: 768px) {
-    body.tier-admin .admin-nav {
-        display: block !important;
-        margin: 10px 0;
-        text-align: center;
-    }
-
-    /* Add this to the TOP of your tier-styles.css file */
-
-    /* CRITICAL: Hide admin content by default until JavaScript verifies */
-    .admin-nav,
-    a[href*="admin.html"],
-    [data-tier="admin"],
-    .tier-nav.admin-nav {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        position: absolute !important;
-        left: -9999px !important;
-    }
-
-    /* Only show admin content when body has verified admin class */
-    body.tier-admin .admin-nav,
-    body.tier-admin a[href*="admin.html"],
-    body.tier-admin [data-tier="admin"],
-    body.tier-admin .tier-nav.admin-nav {
-        display: initial !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        position: relative !important;
-        left: auto !important;
-    }
-
-    /* Hide girlfriend/family content by default too */
-    .girlfriend-nav,
-    [data-tier="girlfriend"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    .family-nav,
-    [data-tier="family"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* Only show when verified */
-    body.tier-girlfriend .girlfriend-nav,
-    body.tier-girlfriend [data-tier="girlfriend"],
-    body.tier-admin .girlfriend-nav,
-    body.tier-admin [data-tier="girlfriend"] {
-        display: initial !important;
-        visibility: visible !important;
-    }
-
-    body.tier-family .family-nav,
-    body.tier-family [data-tier="family"],
-    body.tier-girlfriend .family-nav,
-    body.tier-girlfriend [data-tier="family"],
-    body.tier-admin .family-nav,
-    body.tier-admin [data-tier="family"] {
-        display: initial !important;
-        visibility: visible !important;
-    }
-}

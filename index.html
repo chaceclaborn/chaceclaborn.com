@@ -24,30 +24,7 @@
         </div>
 
         <div class="nav-wrapper">
-          <nav class="main-nav" id="mainNav">
-            <a href="index.html" class="nav-link active">Home</a>
-            <a href="pages/portfolio.html" class="nav-link">Portfolio</a>
-            <a href="pages/resume.html" class="nav-link">Resume</a>
-
-            <!-- Member Navigation (Hidden by default) -->
-            <div class="member-nav" id="memberNav" style="display: none">
-              <a href="pages/private-projects.html" class="nav-link"
-                >Private Projects</a
-              >
-              <a href="pages/games.html" class="nav-link">Games</a>
-            </div>
-
-            <!-- Tier Navigation (Hidden by default) -->
-            <a href="pages/dashboard.html" class="nav-link tier-nav auth-nav"
-              >Dashboard</a
-            >
-            <a href="pages/family.html" class="nav-link tier-nav family-nav"
-              >Family</a
-            >
-            <a href="pages/admin.html" class="nav-link tier-nav admin-nav"
-              >Admin</a
-            >
-          </nav>
+         <nav class="main-nav" id="mainNav"></nav>
 
           <!-- User Info (Hidden by default) -->
           <div class="user-info" id="user-info" style="display: none">
@@ -236,6 +213,7 @@
       import('./js/firebase/auth-service.js');
       import('./js/firebase/auth-tiers.js');
       import('./js/auth-init.js');
+      import('/js/components/navigation.js');
       
       // Initialize feedback widget after Firebase is ready
       import('./js/feedback-widget.js').then(() => {
