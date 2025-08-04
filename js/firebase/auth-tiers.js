@@ -27,7 +27,7 @@ const TIER_NAMES = {
     'public': 'Public',
     'authenticated': 'Member',
     'family': 'Family',
-    'girlfriend': 'Special',
+    'girlfriend': 'Raeha',
     'admin': 'Administrator'
 };
 

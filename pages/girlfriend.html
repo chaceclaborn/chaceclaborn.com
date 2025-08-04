@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Special Access - Chace Claborn</title>
+    <title>Raeha's Tab - Chace Claborn</title>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css" />
@@ -15,7 +15,7 @@
     />
 
     <style>
-      .girlfriend-container {
+      .raeha-container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 40px 20px;
@@ -25,18 +25,18 @@
         text-align: center;
         margin-bottom: 50px;
         padding: 40px;
-        background: linear-gradient(135deg, #f5e6e8 0%, #e8d5d8 100%);
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        color: white;
       }
 
       .welcome-section h1 {
         font-size: 2.5rem;
         margin-bottom: 20px;
-        color: #d63384;
       }
 
-      .special-content {
+      .content-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 30px;
@@ -57,40 +57,92 @@
       }
 
       .content-card h2 {
-        color: #d63384;
+        color: #7c3aed;
         margin-bottom: 15px;
         font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .content-card i {
-        font-size: 3rem;
-        color: #d63384;
-        margin-bottom: 20px;
+        font-size: 1.5rem;
+        color: #8b5cf6;
       }
 
-      .photo-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-      }
-
-      .photo-placeholder {
-        aspect-ratio: 1;
-        background: linear-gradient(135deg, #f5e6e8 0%, #e8d5d8 100%);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #d63384;
-        font-weight: bold;
-      }
-
-      .notes-section {
-        background: #fef5f7;
+      .customization-form {
+        background: #f9fafb;
         padding: 20px;
         border-radius: 10px;
         margin-top: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #8b5cf6;
+      }
+
+      .submit-btn {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .feature-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .feature-list li:last-child {
+        border-bottom: none;
+      }
+
+      .feature-list i {
+        color: #10b981;
+        font-size: 1.2rem;
       }
 
       .loading {
@@ -100,27 +152,13 @@
         color: #666;
       }
 
-      .heart-animation {
+      .spinner {
         display: inline-block;
-        animation: heartbeat 1.5s ease-in-out infinite;
+        animation: spin 1s linear infinite;
       }
 
-      @keyframes heartbeat {
-        0% {
-          transform: scale(1);
-        }
-        14% {
-          transform: scale(1.3);
-        }
-        28% {
-          transform: scale(1);
-        }
-        42% {
-          transform: scale(1.3);
-        }
-        70% {
-          transform: scale(1);
-        }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
     </style>
   </head>
@@ -134,34 +172,22 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav">
+            <nav class="main-nav" id="mainNav">
               <a href="../index.html" class="nav-link">Home</a>
+              <a href="about.html" class="nav-link">About</a>
               <a href="portfolio.html" class="nav-link">Portfolio</a>
               <a href="resume.html" class="nav-link">Resume</a>
 
               <!-- Tier Navigation -->
-              <a href="dashboard.html" class="nav-link tier-nav auth-nav"
-                >Dashboard</a
-              >
-              <a href="family.html" class="nav-link tier-nav family-nav"
-                >Family</a
-              >
-              <a
-                href="girlfriend.html"
-                class="nav-link tier-nav girlfriend-nav active"
-                >Special</a
-              >
+              <a href="dashboard.html" class="nav-link tier-nav auth-nav">Dashboard</a>
+              <a href="family.html" class="nav-link tier-nav family-nav">Family</a>
+              <a href="girlfriend.html" class="nav-link tier-nav girlfriend-nav active">Raeha's Tab</a>
               <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
             </nav>
 
             <!-- User Info -->
             <div class="user-info" id="user-info" style="display: none">
-              <img
-                class="user-avatar"
-                id="user-photo"
-                src=""
-                alt="User Avatar"
-              />
+              <img class="user-avatar" id="user-photo" src="" alt="User Avatar" />
               <span class="user-name" id="user-name"></span>
               <span class="user-tier-indicator" id="user-tier-indicator"></span>
               <a href="#" id="logout-btn" class="logout-link">
@@ -173,80 +199,104 @@
       </header>
 
       <!-- Main Content -->
-      <main class="girlfriend-container">
+      <main class="raeha-container">
         <div id="loading" class="loading">
-          <i class="fas fa-heart heart-animation"></i>
-          <p>Checking access...</p>
+          <i class="fas fa-spinner spinner"></i>
+          <p>Loading your custom tab...</p>
         </div>
 
-        <div id="girlfriend-content" style="display: none">
+        <div id="raeha-content" style="display: none">
           <!-- Welcome Section -->
           <section class="welcome-section">
-            <h1>Welcome Raeha! <i class="fas fa-heart heart-animation"></i></h1>
-            <p>This is your special section of the website ❤️</p>
+            <h1>Welcome to Your Custom Tab, Raeha!</h1>
+            <p>This is your personal space to request customizations and features for the website.</p>
           </section>
 
-          <!-- Special Content Grid -->
-          <div class="special-content">
-            <!-- Our Photos Card -->
+          <!-- Content Grid -->
+          <div class="content-grid">
+            <!-- Customization Request Card -->
             <div class="content-card">
-              <i class="fas fa-camera"></i>
-              <h2>Our Photos</h2>
-              <p>Special memories just for us</p>
-              <div class="photo-gallery">
-                <div class="photo-placeholder">Photo 1</div>
-                <div class="photo-placeholder">Photo 2</div>
-                <div class="photo-placeholder">Photo 3</div>
-                <div class="photo-placeholder">Photo 4</div>
+              <h2><i class="fas fa-paint-brush"></i> Request Customizations</h2>
+              <p>Want something changed or added? Let me know what you'd like to see!</p>
+              <div class="customization-form">
+                <form id="customization-form">
+                  <div class="form-group">
+                    <label for="request-type">Type of Request</label>
+                    <select id="request-type" name="request-type">
+                      <option value="">Select a type...</option>
+                      <option value="design">Design Change</option>
+                      <option value="content">Content Update</option>
+                      <option value="feature">New Feature</option>
+                      <option value="photo">Photo/Media</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="request-details">Details</label>
+                    <textarea id="request-details" name="request-details" rows="4" 
+                      placeholder="Describe what you'd like..."></textarea>
+                  </div>
+                  <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Send Request
+                  </button>
+                </form>
               </div>
             </div>
 
-            <!-- Love Notes Card -->
+            <!-- Current Features Card -->
             <div class="content-card">
-              <i class="fas fa-envelope-heart"></i>
-              <h2>Love Notes</h2>
-              <div class="notes-section">
-                <p>💕 Thank you for being amazing!</p>
-                <p>🌟 You make every day better</p>
-                <p>😊 I love you!</p>
-              </div>
-            </div>
-
-            <!-- Our Plans Card -->
-            <div class="content-card">
-              <i class="fas fa-calendar-heart"></i>
-              <h2>Our Plans</h2>
-              <ul style="list-style: none; padding: 0">
-                <li>📅 Date night ideas</li>
-                <li>🎬 Movies to watch together</li>
-                <li>🍽️ Restaurants to try</li>
-                <li>✈️ Places to visit</li>
+              <h2><i class="fas fa-star"></i> Your Current Features</h2>
+              <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Custom tab access</li>
+                <li><i class="fas fa-check-circle"></i> Priority feature requests</li>
+                <li><i class="fas fa-check-circle"></i> Custom content sections</li>
+                <li><i class="fas fa-check-circle"></i> Photo galleries (coming soon)</li>
+                <li><i class="fas fa-check-circle"></i> Private messaging (coming soon)</li>
               </ul>
             </div>
 
-            <!-- Special Dates Card -->
+            <!-- Quick Actions Card -->
             <div class="content-card">
-              <i class="fas fa-heart-circle"></i>
-              <h2>Special Dates</h2>
-              <ul style="list-style: none; padding: 0">
-                <li>💑 Our Anniversary</li>
-                <li>🎂 Your Birthday</li>
-                <li>🎉 Other celebrations</li>
+              <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+              <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                  <i class="fas fa-images"></i> Upload Photos
+                </button>
+                <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                  <i class="fas fa-palette"></i> Change Theme
+                </button>
+                <button class="submit-btn" onclick="alert('Feature coming soon!')">
+                  <i class="fas fa-cog"></i> Settings
+                </button>
+              </div>
+            </div>
+
+            <!-- Ideas Board Card -->
+            <div class="content-card">
+              <h2><i class="fas fa-lightbulb"></i> Ideas Board</h2>
+              <p>Here are some things you could customize:</p>
+              <ul style="margin-top: 15px; padding-left: 20px;">
+                <li>Color schemes and themes</li>
+                <li>Custom photo galleries</li>
+                <li>Personal notes or messages</li>
+                <li>Special date reminders</li>
+                <li>Favorite links or resources</li>
+                <li>Custom widgets or features</li>
               </ul>
             </div>
           </div>
 
-          <!-- Additional Content Section -->
+          <!-- Additional Section -->
           <section class="content-card" style="margin-top: 40px">
-            <h2>Just for You 💖</h2>
+            <h2><i class="fas fa-info-circle"></i> How This Works</h2>
             <p>
-              This section is completely private and only visible to you. I can
-              add anything here that you'd like - photos, notes, memories,
-              plans, or anything else that would make you smile!
+              This tab is completely customizable based on your preferences. 
+              Use the request form above to ask for any changes, additions, or new features you'd like.
+              I'll implement them as soon as possible and they'll appear here in your personal tab.
             </p>
-            <p>
-              Let me know what you'd like to see here and I'll customize it just
-              for you! 😊
+            <p style="margin-top: 15px;">
+              <strong>Response Time:</strong> Usually within 24-48 hours<br>
+              <strong>Request Limit:</strong> Unlimited - ask for anything you want!
             </p>
           </section>
         </div>
@@ -255,7 +305,7 @@
       <!-- Footer -->
       <footer class="site-footer">
         <div class="footer-content">
-          <p>&copy; 2025 Chace Claborn. Made with love ❤️</p>
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -269,7 +319,7 @@
       // Protect the page
       onAuthStateChanged(auth, async (user) => {
         const loading = document.getElementById("loading");
-        const content = document.getElementById("girlfriend-content");
+        const content = document.getElementById("raeha-content");
 
         if (user) {
           const hasAccess = await protectPage(TIERS.GIRLFRIEND, "girlfriend");
@@ -281,6 +331,24 @@
           // Redirect to home if not logged in
           window.location.href = "../index.html?action=signin";
         }
+      });
+
+      // Handle customization form
+      document.getElementById('customization-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const type = document.getElementById('request-type').value;
+        const details = document.getElementById('request-details').value;
+        
+        if (!type || !details) {
+          alert('Please fill in all fields');
+          return;
+        }
+        
+        // In a real implementation, this would save to Firestore
+        alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
+        
+        // Clear form
+        e.target.reset();
       });
     </script>
 
