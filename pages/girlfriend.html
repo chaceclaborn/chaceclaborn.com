@@ -358,12 +358,11 @@
     <!-- Navigation Component THIRD -->
     <script type="module" src="../js/components/navigation.js"></script>
 
-    <!-- Page-Specific Protection and Form Handler -->
+    <!-- Page-Specific Protection (WITHOUT duplicate form handler) -->
     <script type="module">
       import { auth, db } from "../js/firebase/config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
       import { getUserTier, TIERS } from "../js/firebase/auth-tiers.js";
-      import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
       // Wait for DOM to be ready
       document.addEventListener('DOMContentLoaded', () => {
@@ -390,48 +389,11 @@
           }
         });
 
-        // Handle customization form
-        const form = document.getElementById('customization-form');
-        if (form) {
-          form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const type = document.getElementById('request-type').value;
-            const details = document.getElementById('request-details').value;
-            
-            if (!type || !details) {
-              alert('Please fill in all fields');
-              return;
-            }
-            
-            try {
-              // Save to Firestore
-              const requestData = {
-                type: type,
-                details: details,
-                email: auth.currentUser?.email || 'anonymous',
-                displayName: auth.currentUser?.displayName || 'Anonymous',
-                status: 'pending',
-                createdAt: serverTimestamp(),
-                userId: auth.currentUser?.uid || null
-              };
-              
-              await addDoc(collection(db, 'customization_requests'), requestData);
-              
-              alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
-              
-              // Clear form
-              e.target.reset();
-            } catch (error) {
-              console.error('Error submitting request:', error);
-              alert('Error submitting request. Please try again.');
-            }
-          });
-        }
+        // REMOVED DUPLICATE FORM HANDLER - raeha-customization.js handles this
       });
     </script>
     
-    <!-- Optional: Raeha Customization Script -->
+    <!-- Raeha Customization Script (handles form submission) -->
     <script type="module" src="../js/raeha-customization.js"></script>
     
     <!-- Optional: Feedback Widget -->

@@ -51,9 +51,6 @@ class FeedbackWidget {
         await this.checkUserRating();
       }
       
-      // Add admin navigation if admin
-      this.updateAdminNavigation();
-      
       this.initialized = true;
       console.log('🎉 Feedback Widget: Fully initialized!');
       
@@ -125,48 +122,7 @@ class FeedbackWidget {
     });
   }
 
-  updateAdminNavigation() {
-    // Check if user is admin
-    if (this.currentUser && this.currentUser.email === 'chaceclaborn@gmail.com') {
-      // Add admin link to main navigation if not already there
-      const mainNav = document.getElementById('mainNav');
-      if (mainNav && !document.getElementById('admin-nav-link')) {
-        // Check if we're in pages folder or root
-        const isInPages = window.location.pathname.includes('/pages/');
-        const adminPath = isInPages ? 'admin.html' : 'pages/admin.html';
-        
-        // Create admin link with special styling
-        const adminLink = document.createElement('a');
-        adminLink.href = adminPath;
-        adminLink.className = 'nav-link admin-special-link';
-        adminLink.id = 'admin-nav-link';
-        adminLink.innerHTML = '<i class="fas fa-shield-alt"></i> Admin';
-        
-        // Insert before the tier navigation or at the end
-        const tierNav = mainNav.querySelector('.tier-nav');
-        if (tierNav) {
-          mainNav.insertBefore(adminLink, tierNav);
-        } else {
-          mainNav.appendChild(adminLink);
-        }
-      }
-      
-      // Also add to mobile menu if exists
-      const mobileNav = document.querySelector('.mobile-nav-menu');
-      if (mobileNav && !document.getElementById('mobile-admin-link')) {
-        const isInPages = window.location.pathname.includes('/pages/');
-        const adminPath = isInPages ? 'admin.html' : 'pages/admin.html';
-        
-        const mobileAdminLink = document.createElement('a');
-        mobileAdminLink.href = adminPath;
-        mobileAdminLink.className = 'mobile-nav-link admin-special-link';
-        mobileAdminLink.id = 'mobile-admin-link';
-        mobileAdminLink.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
-        
-        mobileNav.appendChild(mobileAdminLink);
-      }
-    }
-  }
+
 
   createWidget() {
     // Remove any existing widget first
@@ -364,7 +320,6 @@ class FeedbackWidget {
       onAuthStateChanged(this.auth, (user) => {
         this.currentUser = user;
         this.onAuthChange(user);
-        this.updateAdminNavigation();
       });
     }).catch(console.error);
   }

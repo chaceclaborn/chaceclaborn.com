@@ -75,6 +75,7 @@ class CustomizationFormHandler {
             return;
         }
 
+        // FIXED: Changed 'const subm' to 'const submitBtn'
         const submitBtn = this.form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
