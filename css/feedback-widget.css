@@ -17,129 +17,6 @@
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
 }
 
-/* ============================================ */
-/* GLOBAL MOBILE VISIBILITY FIXES */
-/* ============================================ */
-@media (max-width: 768px) {
-
-    /* Ensure collapsed widget is always visible and colored */
-    .feedback-collapsed {
-        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
-        color: white !important;
-    }
-
-    .feedback-collapsed * {
-        color: white !important;
-    }
-
-    /* AGGRESSIVE TEXT COLOR FIXES FOR FEEDBACK PANEL */
-    /* Force all text in feedback panel to be dark */
-    .feedback-panel p,
-    .feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
-    .feedback-panel h3:not(.feedback-header h3),
-    .feedback-panel label,
-    .feedback-panel div:not(.star-display):not(.avg-stars):not(.your-stars),
-    #feedback-panel p,
-    #feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
-    #feedback-panel h3:not(.feedback-header h3),
-    #feedback-panel label,
-    #rate-prompt,
-    .feedback-rate p {
-        color: #1e293b !important;
-    }
-
-    /* Specific fixes for problem areas */
-    .feedback-rate p,
-    #rate-prompt {
-        color: #1e293b !important;
-    }
-
-    .rate-message,
-    #widget-rate-message {
-        color: #475569 !important;
-    }
-
-    .rate-message.success,
-    #widget-rate-message.success {
-        color: #10b981 !important;
-    }
-
-    .rate-message.error,
-    #widget-rate-message.error {
-        color: #ef4444 !important;
-    }
-
-    .stat-title {
-        color: #64748b !important;
-    }
-
-    .big-rating {
-        color: #1e293b !important;
-    }
-
-    .rating-suffix {
-        color: #64748b !important;
-    }
-
-    .stat-count {
-        color: #64748b !important;
-    }
-
-    .form-toggle {
-        color: #475569 !important;
-    }
-
-    .char-count,
-    #widget-char-count {
-        color: #64748b !important;
-    }
-
-    /* Ensure form elements are visible */
-    .widget-feedback-form textarea,
-    .widget-feedback-form input,
-    #widget-feedback-text {
-        color: #1e293b !important;
-        background: white !important;
-    }
-
-    /* NUCLEAR OPTION - Force all non-icon text to be dark */
-    .feedback-panel *:not(i):not(.feedback-header):not(.feedback-header *):not(.star-display *):not(.avg-stars *):not(.your-stars *) {
-        color: #1e293b !important;
-    }
-
-    /* Then re-apply specific colors */
-    .feedback-header,
-    .feedback-header * {
-        color: white !important;
-    }
-
-    .stat-title {
-        color: #64748b !important;
-    }
-
-    .rating-suffix {
-        color: #64748b !important;
-    }
-
-    .rate-message.success {
-        color: #10b981 !important;
-    }
-
-    .rate-message.error {
-        color: #ef4444 !important;
-    }
-
-    .form-toggle i {
-        color: #475569 !important;
-    }
-
-    .star-display i,
-    .avg-stars i,
-    .your-stars i {
-        color: inherit !important;
-    }
-}
-
 .admin-special-link:hover {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
     transform: translateY(-1px) !important;
@@ -162,6 +39,8 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     transition: opacity 0.5s ease;
     user-select: none;
+    opacity: 0;
+    /* Start invisible - JS will fade in when ready */
 }
 
 /* ============================================ */
@@ -340,6 +219,10 @@
     flex-direction: column;
     border-radius: 0 20px 0 0;
     /* Top right corner rounded */
+    transform: translateZ(0);
+    /* ADDED: Force GPU acceleration */
+    -webkit-transform: translateZ(0);
+    /* ADDED: For Safari */
 }
 
 .feedback-panel.open {
@@ -634,6 +517,13 @@
     animation: slideDown 0.3s ease;
 }
 
+/* Ensure form content is visible when toggled open */
+.form-toggle.active+.form-content {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -818,12 +708,22 @@
 /* ============================================ */
 @media (max-width: 768px) {
 
+    /* Ensure panel content wrapper exists */
+    .feedback-panel-content {
+        overflow-y: auto;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 50px;
+        /* Extra space at bottom */
+    }
+
     /* Mobile positioning - aligned with chatbot icons */
     .feedback-widget {
         left: 0;
-        /* Flush with edge on mobile */
-        bottom: 80px;
-        /* Adjusted to align with chatbot */
+        bottom: 100px;
+        /* ADJUSTED: Moved up from 90px to better center with chatbot */
+        z-index: 9997;
+        /* Lower than chatbot to prevent overlap */
     }
 
     /* Vertical mobile tab like desktop but smaller */
@@ -834,6 +734,10 @@
         width: 40px !important;
         background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
         color: white !important;
+        position: fixed !important;
+        /* ADDED: Ensure it stays fixed */
+        z-index: 9996 !important;
+        /* ADDED: Below chatbot when open */
     }
 
     .feedback-collapsed:hover {
@@ -855,6 +759,7 @@
         cursor: pointer !important;
         padding: 0 !important;
         display: flex !important;
+        /* FIXED: This was the broken line */
         align-items: center !important;
         justify-content: center !important;
         position: relative !important;
@@ -910,30 +815,42 @@
         color: white !important;
     }
 
-    /* Full screen panel for mobile - REDUCED HEIGHT */
+    /* Full screen panel for mobile - FULLSCREEN */
     .feedback-panel {
         width: 100%;
         max-width: 100%;
         left: -100%;
         background: white !important;
         z-index: 10000 !important;
-        /* Ensure it's on top */
-        height: 85vh;
-        /* Reduced from 100% */
-        height: 85dvh;
-        /* Dynamic viewport height */
-        max-height: 600px;
-        /* Max height for iPhone compatibility */
-        top: auto;
-        /* Override desktop full-height style */
+        height: 100vh;
+        /* FULLSCREEN: Full viewport height */
+        height: 100dvh;
+        max-height: none;
+        /* Remove max-height limit */
+        position: fixed;
+        top: 0;
+        /* Start from top */
         bottom: 0;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        /* Smooth scrolling on iOS */
-        border-radius: 16px 16px 0 0;
-        /* Rounded top corners on mobile */
-        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
-        /* Shadow from top */
+        border-radius: 0;
+        /* No rounded corners for fullscreen */
+        box-shadow: none;
+        /* No shadow needed for fullscreen */
+        transition: left 0.3s ease-in-out !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Ensure content is scrollable */
+    .feedback-panel>* {
+        flex-shrink: 0;
+        /* Prevent content from shrinking */
+    }
+
+    /* Add safe area padding for mobile devices */
+    .feedback-panel {
+        padding-bottom: env(safe-area-inset-bottom, 20px);
     }
 
     .feedback-panel.open {
@@ -944,8 +861,11 @@
         padding: 16px !important;
         background: linear-gradient(135deg, #617140 0%, #4a5a30 100%) !important;
         color: white !important;
-        border-radius: 16px 16px 0 0 !important;
-        /* Match panel radius */
+        border-radius: 0 !important;
+        /* No rounded corners for fullscreen */
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
     }
 
     .feedback-header h3 {
@@ -960,9 +880,10 @@
     }
 
     .feedback-close {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
+        width: 40px !important;
+        /* Bigger for mobile */
+        height: 40px !important;
+        font-size: 20px !important;
         color: white !important;
     }
 
@@ -1039,6 +960,12 @@
         visibility: visible !important;
     }
 
+    /* Ensure ALL form elements are visible */
+    .feedback-form-section * {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
     .rate-stars {
         font-size: 30px;
         gap: 6px;
@@ -1075,8 +1002,13 @@
 
     .feedback-form-section {
         padding: 12px;
-        /* Reduced padding */
-        margin-bottom: 12px;
+        margin-bottom: 20px;
+        /* More margin to ensure it's not cut off */
+        padding-bottom: 30px;
+        /* Extra padding at bottom */
+        background: white !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
     .feedback-form-section label,
@@ -1110,9 +1042,14 @@
         background: white !important;
         border: 2px solid #e5e7eb !important;
         color: #1e293b !important;
+        appearance: none !important;
         -webkit-appearance: none !important;
         opacity: 1 !important;
         visibility: visible !important;
+        resize: none !important;
+        /* ADDED: Prevent resize on mobile */
+        touch-action: manipulation !important;
+        /* ADDED: Better touch handling */
     }
 
     .widget-feedback-form textarea:focus {
@@ -1130,6 +1067,8 @@
         flex-direction: column;
         gap: 8px;
         align-items: stretch;
+        margin-bottom: 10px;
+        /* Add margin to prevent cutoff */
     }
 
     .char-count {
@@ -1147,6 +1086,10 @@
         font-weight: 600 !important;
         opacity: 1 !important;
         visibility: visible !important;
+        width: 100% !important;
+        /* Full width on mobile */
+        display: flex !important;
+        align-items: center !important;
     }
 
     .btn-submit:active {
@@ -1169,6 +1112,150 @@
     .form-message.error {
         color: #ef4444 !important;
     }
+
+    /* AGGRESSIVE TEXT COLOR FIXES FOR FEEDBACK PANEL */
+    /* Force all text in feedback panel to be dark */
+    .feedback-panel p,
+    .feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
+    .feedback-panel h3:not(.feedback-header h3),
+    .feedback-panel label,
+    .feedback-panel div:not(.star-display):not(.avg-stars):not(.your-stars),
+    #feedback-panel p,
+    #feedback-panel span:not(#collapsed-rating):not(.star-display i):not(.expand-icon),
+    #feedback-panel h3:not(.feedback-header h3),
+    #feedback-panel label,
+    #rate-prompt,
+    .feedback-rate p {
+        color: #1e293b !important;
+    }
+
+    /* Specific fixes for problem areas */
+    .feedback-rate p,
+    #rate-prompt {
+        color: #1e293b !important;
+    }
+
+    .rate-message,
+    #widget-rate-message {
+        color: #475569 !important;
+    }
+
+    .rate-message.success,
+    #widget-rate-message.success {
+        color: #10b981 !important;
+    }
+
+    .rate-message.error,
+    #widget-rate-message.error {
+        color: #ef4444 !important;
+    }
+
+    .big-rating {
+        color: #1e293b !important;
+    }
+
+    .rating-suffix {
+        color: #64748b !important;
+    }
+
+    .stat-count {
+        color: #64748b !important;
+    }
+
+    .form-toggle {
+        color: #475569 !important;
+    }
+
+    .char-count,
+    #widget-char-count {
+        color: #64748b !important;
+    }
+
+    /* Ensure form elements are visible */
+    .widget-feedback-form textarea,
+    .widget-feedback-form input,
+    #widget-feedback-text {
+        color: #1e293b !important;
+        background: white !important;
+    }
+
+    /* Ensure dropdown form content is visible */
+    .form-content {
+        background: white !important;
+        color: #1e293b !important;
+        display: block !important;
+        /* Force display on mobile */
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Fix form content when hidden */
+    .form-content[style*="display: none"] {
+        display: none !important;
+        /* Respect inline style when actually hidden */
+    }
+
+    /* NUCLEAR OPTION - Force all non-icon text to be dark */
+    .feedback-panel *:not(i):not(.feedback-header):not(.feedback-header *):not(.star-display *):not(.avg-stars *):not(.your-stars *) {
+        color: #1e293b !important;
+    }
+
+    /* Force all feedback form text to be visible */
+    .feedback-form-section,
+    .feedback-form-section *,
+    .form-content,
+    .form-content *,
+    .widget-feedback-form,
+    .widget-feedback-form * {
+        color: #1e293b !important;
+    }
+
+    /* Specific overrides for interactive elements */
+    .form-toggle {
+        color: #475569 !important;
+        background: linear-gradient(145deg, #f8f9fa 0%, #f1f5f9 100%) !important;
+    }
+
+    .btn-submit {
+        color: white !important;
+        background: #617140 !important;
+    }
+
+    .btn-submit i {
+        color: white !important;
+    }
+
+    /* Then re-apply specific colors */
+    .feedback-header,
+    .feedback-header * {
+        color: white !important;
+    }
+
+    .stat-title {
+        color: #64748b !important;
+    }
+
+    .rating-suffix {
+        color: #64748b !important;
+    }
+
+    .rate-message.success {
+        color: #10b981 !important;
+    }
+
+    .rate-message.error {
+        color: #ef4444 !important;
+    }
+
+    .form-toggle i {
+        color: #475569 !important;
+    }
+
+    .star-display i,
+    .avg-stars i,
+    .your-stars i {
+        color: inherit !important;
+    }
 }
 
 /* ============================================ */
@@ -1177,8 +1264,8 @@
 @media (max-width: 380px) {
     .feedback-widget {
         left: 0;
-        bottom: 75px;
-        /* Aligned with chatbot for small screens */
+        bottom: 95px;
+        /* ADJUSTED: Moved up from 85px to maintain alignment */
     }
 
     .feedback-collapsed {
@@ -1212,10 +1299,10 @@
 
     .feedback-panel {
         width: 100%;
-        height: 80vh;
-        /* Smaller for small phones */
-        height: 80dvh;
-        max-height: 500px;
+        height: 100vh;
+        /* FULLSCREEN for small phones too */
+        height: 100dvh;
+        max-height: none;
     }
 
     .feedback-header {
@@ -1255,7 +1342,10 @@
 
     .feedback-form-section {
         padding: 10px;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
+        /* Ensure space at bottom */
+        padding-bottom: 30px;
+        /* Extra padding */
     }
 
     .widget-feedback-form textarea {
@@ -1277,6 +1367,7 @@
     .feedback-widget {
         left: 0;
         bottom: 20px;
+        /* Keep original landscape position */
     }
 
     .feedback-collapsed {
@@ -1299,13 +1390,16 @@
     }
 
     .feedback-panel {
-        max-height: 90vh;
-        /* Reduced for landscape */
-        max-height: 90dvh;
-        height: 90vh;
-        height: 90dvh;
-        max-height: 400px;
-        /* Even smaller in landscape */
+        height: 100vh;
+        /* FULLSCREEN in landscape too */
+        height: 100dvh;
+        max-height: none;
+    }
+
+    /* Make form more compact in landscape */
+    .widget-feedback-form textarea {
+        min-height: 60px !important;
+        /* Smaller in landscape */
     }
 
     .stats-section {
