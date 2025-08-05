@@ -20,7 +20,7 @@ class NavigationComponent {
                 { href: 'pages/resume.html', text: 'Resume', id: 'resume' }
             ],
             authenticated: [
-                { href: 'pages/dashboard.html', text: 'Dashboard', id: 'dashboard', tier: TIERS.AUTHENTICATED, class: 'tier-nav auth-nav' }
+                
             ],
             family: [
                 { href: 'pages/family.html', text: 'Family', id: 'family', tier: TIERS.FAMILY, class: 'tier-nav family-nav' }
@@ -162,9 +162,9 @@ class NavigationComponent {
                 break;
                 
             case TIERS.AUTHENTICATED:
-                // Authenticated users only see dashboard
+                // Authenticated users only see home, portfolio, and resume
                 visibleTiers = ['authenticated'];
-                console.log('✅ Authenticated: showing dashboard only');
+                console.log('✅ Authenticated: showing resume only');
                 break;
                 
             default:
@@ -267,7 +267,7 @@ class NavigationComponent {
                 el.style.display = 'none';
             });
         } else if (this.currentTier === TIERS.AUTHENTICATED) {
-            // Authenticated sees only dashboard
+            // Authenticated sees only home, portfolio, and resume
             document.querySelectorAll('.auth-nav').forEach(el => {
                 el.style.display = 'inline-block';
                 el.style.visibility = 'visible';
