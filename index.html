@@ -193,6 +193,8 @@
     <script src="js/chatbot-botui.js"></script>
     <script src="js/ai-assistant.js"></script>
     <script src="js/mobile-menu.js"></script>
+    <script type="module" src="js/firebase/terms-manager.js"></script>
+    
 
     <!-- Firebase Configuration and Setup -->
     <script type="module">
@@ -214,6 +216,7 @@
       import('./js/firebase/auth-tiers.js');
       import('./js/auth-init.js');
       import('/js/components/navigation.js');
+      
       
       // Initialize feedback widget after Firebase is ready
       import('./js/feedback-widget.js').then(() => {
