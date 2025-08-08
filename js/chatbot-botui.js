@@ -88,20 +88,32 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(vueScript);
 });
 
-// Toggle chat function
+// Toggle chat function - FIXED
 function toggleChat() {
     const container = document.getElementById('chatbot-container');
     const launcher = document.querySelector('.chat-launcher');
     
-    if (!container || !launcher) return;
+    if (!container || !launcher) {
+        console.error('Chatbot elements not found');
+        return;
+    }
     
-    if (container.classList.contains('active')) {
+    // Check for both 'active' and 'open' classes for compatibility
+    const isOpen = container.classList.contains('active') || container.classList.contains('open');
+    
+    if (isOpen) {
         // Close chat
-        container.classList.remove('active');
-        launcher.classList.remove('active');
+        container.classList.remove('active', 'open');
+        launcher.classList.remove('active', 'hidden');
     } else {
-        // Open chat
-        container.classList.add('active');
+        // Hide AI Assistant if open
+        const aiContainer = document.getElementById('ai-assistant-container');
+        if (aiContainer && aiContainer.classList.contains('open')) {
+            window.toggleAIAssistant();
+        }
+        
+        // Open chat - use both classes for compatibility
+        container.classList.add('active', 'open');
         launcher.classList.add('active');
         
         // Start chat if not started
@@ -155,26 +167,26 @@ function showMainMenuWithInput() {
         content: 'What would you like to know about?'
     }).then(function() {
         return botui.action.button({
-            delay: 300,
+            delay: 500,
             action: [
-                { text: '💼 Work Experience', value: 'experience' },
-                { text: '💻 Technical Skills', value: 'skills' },
-                { text: '🚀 Projects', value: 'projects' },
+                { text: '💼 Background', value: 'background' },
+                { text: '🛠️ Skills', value: 'skills' },
+                { text: '📁 Projects', value: 'projects' },
                 { text: '📞 Contact Info', value: 'contact' },
-                { text: '💬 Ask a Question', value: 'custom' }
+                { text: '💬 Type a Question', value: 'type_question' }
             ]
         });
     }).then(function(res) {
         switch(res.value) {
-            case 'experience':
-                return workExperience();
+            case 'background':
+                return backgroundInfo();
             case 'skills':
-                return technicalSkills();
+                return skillsInfo();
             case 'projects':
-                return projects();
+                return projectsInfo();
             case 'contact':
                 return contactInfo();
-            case 'custom':
+            case 'type_question':
                 return askUserQuestion();
             default:
                 return showMainMenuWithInput();
@@ -182,11 +194,11 @@ function showMainMenuWithInput() {
     });
 }
 
-// Custom question handler
+// Let user type their own question
 function askUserQuestion() {
     return botui.message.add({
         delay: 300,
-        content: 'What would you like to know? Type your question below:'
+        content: 'Go ahead and ask me anything about Chace!'
     }).then(function() {
         return botui.action.text({
             delay: 300,
@@ -195,125 +207,159 @@ function askUserQuestion() {
             }
         });
     }).then(function(res) {
-        // Process the question
-        const question = res.value.toLowerCase();
-        
-        // Simple keyword matching
-        if (question.includes('education') || question.includes('school') || question.includes('degree')) {
-            return botui.message.add({
-                delay: 500,
-                loading: true,
-                content: 'Chace has a B.S. in Mechanical Engineering from the University of Alabama in Huntsville (2019). He also completed advanced manufacturing training at Calhoun Community College.'
-            }).then(askFollowUpQuestion);
-        } else if (question.includes('location') || question.includes('where') || question.includes('live')) {
-            return botui.message.add({
-                delay: 500,
-                loading: true,
-                content: 'Chace is based in Huntsville, Alabama - the Rocket City! 🚀'
-            }).then(askFollowUpQuestion);
-        } else if (question.includes('hire') || question.includes('available') || question.includes('job')) {
-            return botui.message.add({
-                delay: 500,
-                loading: true,
-                content: 'For employment opportunities, please reach out via email at chaceclaborn@gmail.com or connect on LinkedIn!'
-            }).then(askFollowUpQuestion);
-        } else {
-            return botui.message.add({
-                delay: 500,
-                loading: true,
-                content: 'Great question! For specific inquiries, I recommend reaching out directly at chaceclaborn@gmail.com. Meanwhile, feel free to explore the menu options for more information!'
-            }).then(askFollowUpQuestion);
-        }
+        return handleUserQuestion(res.value);
     });
 }
 
-// Work Experience
-function workExperience() {
+// Handle custom questions
+function handleUserQuestion(question) {
+    const lowerQuestion = question.toLowerCase();
+    
+    // Check for keywords and respond accordingly
+    if (lowerQuestion.includes('experience') || lowerQuestion.includes('work')) {
+        return experienceResponse();
+    } else if (lowerQuestion.includes('education') || lowerQuestion.includes('school')) {
+        return educationResponse();
+    } else if (lowerQuestion.includes('hire') || lowerQuestion.includes('available')) {
+        return availabilityResponse();
+    } else if (lowerQuestion.includes('skill') || lowerQuestion.includes('technology')) {
+        return skillsInfo();
+    } else if (lowerQuestion.includes('project')) {
+        return projectsInfo();
+    } else if (lowerQuestion.includes('contact') || lowerQuestion.includes('email')) {
+        return contactInfo();
+    } else {
+        return genericResponse();
+    }
+}
+
+// Specific responses
+function experienceResponse() {
     return botui.message.add({
         delay: 300,
         loading: true,
-        content: 'Chace has extensive experience in aerospace and manufacturing!'
+        content: 'Chace has a diverse background in both technology and business...'
     }).then(function() {
         return botui.message.add({
-            delay: 800,
+            delay: 500,
             loading: true,
-            content: '🚀 Aerojet Rocketdyne (2021-Present)\nData Integration Specialist\n• Python automation & SQL analytics\n• Process optimization & reporting'
-        });
-    }).then(function() {
-        return botui.message.add({
-            delay: 800,
-            loading: true,
-            content: '✈️ Previous Roles:\n• Collins Aerospace (2020-2021)\n• WhiteFab Inc. (2017-2020)'
+            content: '• Tech Leadership at startups\n• Software development experience\n• Business consulting\n• Project management'
         });
     }).then(function() {
         return askFollowUpQuestion();
     });
 }
 
-// Technical Skills
-function technicalSkills() {
+function educationResponse() {
     return botui.message.add({
         delay: 300,
         loading: true,
-        content: "Chace has a diverse technical skill set..."
+        content: 'Chace has strong educational foundations in both technology and business.'
     }).then(function() {
         return botui.message.add({
-            delay: 800,
+            delay: 500,
             loading: true,
-            content: '💻 CAD/CAM Software:\nCreo, Siemens NX, SolidWorks, Windchill PLM, Vericut'
-        });
-    }).then(function() {
-        return botui.message.add({
-            delay: 800,
-            loading: true,
-            content: '👨‍💻 Programming:\nPython, SQL, MATLAB, G-Code, Siemens 840D'
-        });
-    }).then(function() {
-        return botui.message.add({
-            delay: 800,
-            loading: true,
-            content: '🏭 Manufacturing:\nCNC Programming, 3D Printing, CMM/PolyWorks, LEAN Manufacturing'
-        });
-    }).then(function() {
-        return botui.message.add({
-            delay: 800,
-            loading: true,
-            content: '📊 Data & Analytics:\nRedash, Databricks, Tableau, JIRA'
+            content: 'He\'s continuously learning through online courses, certifications, and hands-on projects. Check out the Resume page for full details!'
         });
     }).then(function() {
         return askFollowUpQuestion();
     });
 }
 
-// Projects
-function projects() {
+function availabilityResponse() {
     return botui.message.add({
         delay: 300,
         loading: true,
-        content: 'Check out these cool projects on GitHub! 💻'
+        content: 'Yes! Chace is currently available for new opportunities.'
     }).then(function() {
         return botui.message.add({
-            delay: 800,
+            delay: 500,
             loading: true,
-            content: '🌳 Bonsai Assistant\nAutomation system for bonsai tree care using Raspberry Pi & Python'
+            content: 'He\'s interested in:\n• Full-time positions\n• Contract work\n• Consulting projects\n• Exciting startups\n\nFeel free to reach out at chaceclaborn@gmail.com!'
+        });
+    }).then(function() {
+        return askFollowUpQuestion();
+    });
+}
+
+function genericResponse() {
+    return botui.message.add({
+        delay: 300,
+        loading: true,
+        content: 'That\'s a great question! While I might not have the specific answer, I\'d recommend:'
+    }).then(function() {
+        return botui.message.add({
+            delay: 500,
+            loading: true,
+            content: '• Checking out the Portfolio page for detailed project info\n• Visiting the Resume page for full background\n• Or reaching out directly at chaceclaborn@gmail.com'
+        });
+    }).then(function() {
+        return askFollowUpQuestion();
+    });
+}
+
+// Background Info
+function backgroundInfo() {
+    return botui.message.add({
+        delay: 300,
+        loading: true,
+        content: 'Chace has an interesting background! Let me tell you about it...'
+    }).then(function() {
+        return botui.message.add({
+            delay: 500,
+            loading: true,
+            content: 'He combines technical expertise with business acumen, having worked in both startups and established companies.'
         });
     }).then(function() {
         return botui.message.add({
-            delay: 800,
+            delay: 500,
             loading: true,
-            content: '📈 Stock App\nFinancial tracking and analysis tool'
+            content: 'His experience spans software development, project management, and strategic consulting.'
+        });
+    }).then(function() {
+        return askFollowUpQuestion();
+    });
+}
+
+// Skills Info
+function skillsInfo() {
+    return botui.message.add({
+        delay: 300,
+        loading: true,
+        content: 'Chace has a diverse skill set! Here are the highlights:'
+    }).then(function() {
+        return botui.message.add({
+            delay: 500,
+            loading: true,
+            content: '**Technical Skills:**\n• JavaScript, Python, Java\n• React, Node.js, Firebase\n• AWS, Google Cloud\n• Git, CI/CD'
         });
     }).then(function() {
         return botui.message.add({
-            delay: 800,
+            delay: 500,
             loading: true,
-            content: '🚀 Propulsion App\nEngineering calculations for propulsion systems'
+            content: '**Business Skills:**\n• Project Management\n• Strategic Planning\n• Team Leadership\n• Client Relations'
+        });
+    }).then(function() {
+        return askFollowUpQuestion();
+    });
+}
+
+// Projects Info
+function projectsInfo() {
+    return botui.message.add({
+        delay: 300,
+        loading: true,
+        content: 'Chace has worked on several exciting projects!'
+    }).then(function() {
+        return botui.message.add({
+            delay: 500,
+            loading: true,
+            content: 'Recent highlights include:\n• This portfolio website (you\'re on it!)\n• E-commerce platforms\n• Data analytics dashboards\n• Mobile applications'
         });
     }).then(function() {
         return botui.message.add({
-            delay: 800,
-            loading: true,
-            content: '💻 This Website\nBuilt from scratch to showcase my work!'
+            delay: 300,
+            content: 'Check out the Portfolio page for detailed case studies and live demos!'
         });
     }).then(function() {
         return askFollowUpQuestion();
