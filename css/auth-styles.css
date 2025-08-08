@@ -207,3 +207,197 @@
 .auth-toggle a:hover {
     text-decoration: underline;
 }
+
+/* Add to your existing auth-styles.css or create auth-workflow.css */
+/* This CSS enhances your existing modal without breaking current styles */
+
+/* Modal view system */
+.modal-view {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Welcome view specific styles */
+.auth-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.method-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+.method-btn:hover {
+    background: #f8f8f8;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.google-method {
+    border: 1px solid #4285f4;
+}
+
+.google-method:hover {
+    background: rgba(66, 133, 244, 0.05);
+}
+
+.email-method {
+    border: 1px solid #617140;
+}
+
+.email-method:hover {
+    background: rgba(97, 113, 64, 0.05);
+}
+
+/* Terms section */
+.terms-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.terms-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.terms-label input[type="checkbox"] {
+    margin-right: 8px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+#termsLinks {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+#termsLinks a {
+    color: #617140;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+#termsLinks a:hover {
+    text-decoration: underline;
+}
+
+/* Back button */
+.back-button {
+    background: none;
+    border: none;
+    color: #617140;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #536036;
+}
+
+/* Terms/Privacy content */
+.terms-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin: 15px 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.terms-content p {
+    margin-bottom: 15px;
+}
+
+.terms-content strong {
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Accept button */
+.accept-btn {
+    width: 100%;
+    padding: 12px;
+    background: #617140;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.accept-btn:hover {
+    background: #536036;
+    transform: translateY(-1px);
+}
+
+/* Error message for welcome view */
+#welcomeError {
+    background: #fee;
+    color: #c00;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Smooth transitions between views */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        padding: 1.5rem;
+        width: 95%;
+        max-width: 100%;
+    }
+
+    .method-btn {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+
+    .terms-content {
+        max-height: 200px;
+    }
+
+    .terms-label {
+        font-size: 13px;
+    }
+}

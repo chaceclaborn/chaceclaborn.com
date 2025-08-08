@@ -1,6 +1,6 @@
-// js/auth-init.js - Authentication with Smart Auto-Redirect by Tier (FIXED EVENT LISTENERS)
+// js/auth-init.js - Authentication Initialization with Terms Manager
 import { auth } from './firebase/config.js';
-import { signInWithGoogle, signOutUser } from './firebase/auth-service.js';
+import { signOutUser } from './firebase/auth-service.js';
 import { 
     initializeUserTier, 
     autoAssignTier, 
@@ -9,33 +9,31 @@ import {
     TIERS 
 } from './firebase/auth-tiers.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { initUI } from './firebase/ui.js';
+import termsManager from './firebase/terms-manager.js'; // Import terms manager
 
 // --- HELPER FUNCTIONS ---
 function isProtectedPage() {
-    // These pages require authentication
     const protectedPages = ['dashboard', 'family', 'girlfriend', 'admin'];
     const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
     return protectedPages.includes(currentPage);
 }
 
 function isPublicPage() {
-    // These pages are ALWAYS public
     const publicPages = ['index', 'portfolio', 'resume', 'about', 'contact', ''];
     const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
     return publicPages.includes(currentPage) || currentPage === '';
 }
 
-// --- SMART REDIRECT LOGIC (PRESERVED) ---
-function getRedirectPath(tier) {
-    // Only redirect from homepage
+// --- SMART REDIRECT LOGIC ---
+export function getRedirectPath(tier) {
     const currentPath = window.location.pathname;
     const isHomepage = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/');
     
     if (!isHomepage) {
-        return null; // Don't redirect if already on a specific page
+        return null;
     }
     
-    // Redirect based on tier
     switch(tier) {
         case TIERS.ADMIN:
             return '/pages/admin.html';
@@ -44,49 +42,26 @@ function getRedirectPath(tier) {
         case TIERS.FAMILY:
             return '/pages/family.html';
         case TIERS.AUTHENTICATED:
-            // Regular authenticated users stay on homepage
             return null;
         default:
             return null;
     }
 }
 
-// --- SIGN IN (PRESERVED) ---
-async function handleSignIn(e) {
+// --- OPEN AUTH MODAL ---
+function openAuthModal(e) {
     if (e) e.preventDefault();
     
-    try {
-        const user = await signInWithGoogle();
-        if (user) {
-            // Initialize user document with tier
-            await initializeUserTier(user);
-            await autoAssignTier(user);
-            console.log('✅ User signed in:', user.email);
-            
-            // Get user tier and redirect appropriately
-            const userTier = await getUserTier();
-            console.log('🔑 User tier:', userTier);
-            
-            // Auto-redirect to appropriate dashboard WITHOUT showing overlay
-            const redirectPath = getRedirectPath(userTier);
-            if (redirectPath) {
-                console.log(`🚀 Redirecting ${userTier} user to: ${redirectPath}`);
-                
-                // Direct redirect without welcome message overlay
-                window.location.href = redirectPath;
-            }
-        }
-    } catch (error) {
-        console.error('❌ Error during sign in:', error);
-        if (error.code === 'auth/popup-blocked') {
-            alert('Please allow popups for this site to sign in.');
-        } else if (error.code !== 'auth/cancelled-popup-request') {
-            alert('Error signing in. Please try again.');
-        }
+    console.log('🔐 Opening authentication modal...');
+    
+    if (window.openAuthModal) {
+        window.openAuthModal();
+    } else {
+        console.error('❌ Modal system not initialized');
     }
 }
 
-// --- SIGN OUT (PRESERVED) ---
+// --- SIGN OUT ---
 async function handleSignOut(e) {
     if (e) e.preventDefault();
     
@@ -94,7 +69,6 @@ async function handleSignOut(e) {
         await signOutUser();
         console.log('✅ User signed out');
 
-        // Only redirect if on a protected page
         const protectedPages = ['dashboard', 'family', 'girlfriend', 'admin'];
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
         
@@ -109,107 +83,95 @@ async function handleSignOut(e) {
     }
 }
 
-// --- UI UPDATES (PRESERVED) ---
+// --- UPDATE UI ---
 async function updateUI(user) {
-    // Get elements fresh each time (in case DOM changed)
+    // Handle all possible button IDs
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    const userInfo = document.getElementById('user-info');
-    const userName = document.getElementById('user-name');
-    const userEmail = document.getElementById('user-email');
-    const userPhoto = document.getElementById('user-photo');
+    const signInBtn = document.getElementById('signInBtn');
+    const signOutLink = document.getElementById('signOutLink');
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
     
     if (user) {
-        // Show user info
+        // User is logged in
         if (loginBtn) loginBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
-        if (userInfo) userInfo.style.display = 'block';
-
-        if (userName) userName.textContent = user.displayName || 'User';
-        if (userEmail) userEmail.textContent = user.email;
-
-        if (userPhoto) {
-            userPhoto.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=617140&color=fff`;
-            userPhoto.alt = user.displayName || 'User photo';
-            userPhoto.style.display = 'inline-block';
-        }
-
-        // Apply tier visibility (but not on public pages)
-        const tier = await getUserTier();
-        console.log(`🔑 User tier: ${tier}`);
+        if (signInBtn) signInBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (signOutLink) signOutLink.style.display = 'inline';
         
-        // Don't override body class - let navigation.js handle it
-        // await applyTierVisibility();
-        
-        // Add tier-specific features
-        if (tier === TIERS.ADMIN) {
-            addAdminFeatures();
+        if (userInfo) {
+            userInfo.style.display = 'flex';
+            if (userName) userName.textContent = user.displayName || user.email;
+            if (userEmail) userEmail.textContent = user.email;
         }
+        
+        // Initialize and apply tier
+        await initializeUserTier(user);
+        const userTier = await getUserTier();
+        applyTierVisibility(userTier);
+        
+        console.log(`👤 Logged in as: ${user.email} (${userTier})`);
+        
+        // Terms manager will automatically check and show terms if needed
+        // This happens through the termsManager.init() which watches auth state
         
     } else {
-        // Reset UI for signed-out state
-        if (loginBtn) loginBtn.style.display = 'block';
+        // User is logged out
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (signInBtn) signInBtn.style.display = 'inline-block';
         if (logoutBtn) logoutBtn.style.display = 'none';
+        if (signOutLink) signOutLink.style.display = 'none';
+        
         if (userInfo) userInfo.style.display = 'none';
-        if (userPhoto) {
-            userPhoto.style.display = 'none';
-            userPhoto.src = '';
+        
+        // Hide all tier-based content
+        applyTierVisibility(TIERS.PUBLIC);
+        
+        // If on protected page, redirect to home
+        if (isProtectedPage()) {
+            console.log('🚫 Protected page requires authentication');
+            const redirectPath = window.location.pathname.includes('/pages/') 
+                ? '../index.html?action=signin' 
+                : 'index.html?action=signin';
+            window.location.href = redirectPath;
         }
-        
-        // Don't apply tier visibility - let navigation.js handle it
-        // if (!isPublicPage()) {
-        //     await applyTierVisibility();
-        // }
-        
-        // Don't set body class - let navigation.js handle it
-        // document.body.className = document.body.className.replace(/tier-\w+/g, '');
-        // document.body.classList.add('tier-public');
-        
-        // Remove any tier-specific features
-        removeAdminFeatures();
     }
 }
 
-// --- NAVIGATION BASED ON TIER ---
-// NOTE: These functions are preserved but won't be called since navigation.js handles this
-// Keeping them in case you need them for other purposes
-function showTierNavigation(tier) {
-    // Navigation component handles this now, but keeping function for compatibility
-    console.log('Tier navigation is now handled by navigation.js component');
-}
-
-function hideTierNavigation() {
-    // Navigation component handles this now, but keeping function for compatibility
-    console.log('Tier navigation is now handled by navigation.js component');
-}
-
-// --- ADMIN-ONLY FEATURES (PRESERVED) ---
-function addAdminFeatures() {
-    // Admin features are now handled through navigation menu
-    // Add any additional admin-specific features here if needed
-}
-
-function removeAdminFeatures() {
-    // Admin features cleanup if needed
-}
-
-// --- SETUP EVENT LISTENERS (FIXED) ---
+// --- SETUP EVENT LISTENERS ---
 function setupEventListeners() {
-    // Use event delegation on document body to catch clicks on login/logout buttons
-    // This ensures it works even if buttons are added/removed dynamically
-    
+    // Use event delegation to catch clicks on ALL sign-in/out buttons
     document.addEventListener('click', async (e) => {
-        // Check if clicked element is login button
-        if (e.target && (e.target.id === 'login-btn' || e.target.closest('#login-btn'))) {
+        const target = e.target;
+        
+        // Check for sign-in buttons
+        const isSignInButton = 
+            target.id === 'login-btn' ||
+            target.id === 'signInBtn' ||
+            target.classList.contains('sign-in-btn') ||
+            target.closest('#login-btn') ||
+            target.closest('#signInBtn') ||
+            target.closest('.sign-in-btn');
+            
+        if (isSignInButton) {
             e.preventDefault();
-            console.log('🔐 Login button clicked');
-            await handleSignIn(e);
+            console.log('🔐 Sign-in button clicked');
+            openAuthModal(e);
         }
         
-        // Check if clicked element is logout button
-        if (e.target && (e.target.id === 'logout-btn' || e.target.closest('#logout-btn'))) {
+        // Check for sign-out buttons
+        const isSignOutButton = 
+            target.id === 'logout-btn' ||
+            target.id === 'signOutLink' ||
+            target.classList.contains('sign-out-link') ||
+            target.closest('#logout-btn') ||
+            target.closest('#signOutLink');
+            
+        if (isSignOutButton) {
             e.preventDefault();
-            console.log('👋 Logout button clicked');
+            console.log('👋 Sign-out button clicked');
             await handleSignOut(e);
         }
     });
@@ -217,7 +179,7 @@ function setupEventListeners() {
     console.log('✅ Event listeners attached with delegation');
 }
 
-// --- MOBILE MENU FUNCTIONALITY (PRESERVED) ---
+// --- MOBILE MENU FUNCTIONALITY ---
 function setupMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navMenu = document.querySelector('.main-nav');
@@ -238,7 +200,7 @@ function setupMobileMenu() {
     }
 }
 
-// --- INIT AUTH STATE (PRESERVED) ---
+// --- INIT AUTH STATE ---
 function initializeAuth() {
     onAuthStateChanged(auth, async (user) => {
         await updateUI(user);
@@ -258,8 +220,10 @@ function initializeAuth() {
                 if (redirectPath) {
                     console.log(`🚀 Auto-redirecting ${userTier} user to: ${redirectPath}`);
                     
-                    // Direct redirect without overlay message
-                    window.location.href = redirectPath;
+                    // Small delay to ensure terms check happens first
+                    setTimeout(() => {
+                        window.location.href = redirectPath;
+                    }, 100);
                 }
             }
         } else {
@@ -271,8 +235,9 @@ function initializeAuth() {
     // Check for sign-in action in URL
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('action') === 'signin') {
+        // Wait a bit for modal system to initialize
         setTimeout(() => {
-            handleSignIn();
+            openAuthModal();
         }, 500);
     }
 }
@@ -281,7 +246,13 @@ function initializeAuth() {
 function initialize() {
     console.log('🚀 Auth-init starting...');
     
-    // Setup event listeners (MUST be first!)
+    // Initialize UI modal system FIRST
+    initUI();
+    
+    // Terms manager initializes itself when imported
+    console.log('📋 Terms manager initialized');
+    
+    // Setup event listeners
     setupEventListeners();
     
     // Setup mobile menu
@@ -302,11 +273,11 @@ if (document.readyState === 'loading') {
 }
 
 // Export functions if needed by other modules
-export { handleSignIn, handleSignOut, getRedirectPath, initializeAuth };
+export { openAuthModal as handleSignIn, handleSignOut, initializeAuth };
 
 // Make functions available globally for debugging
 window.authFunctions = {
-    handleSignIn,
+    openModal: openAuthModal,
     handleSignOut,
     getUserTier,
     getRedirectPath

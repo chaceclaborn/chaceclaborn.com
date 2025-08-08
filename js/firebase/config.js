@@ -1,30 +1,27 @@
-// js/firebase/config.js
+// js/firebase/config.js - Refactored Firebase configuration
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { firebaseConfig } from '../config/environment.js';
+import { createLogger } from '../utils/logger.js';
 
-// ✅ Your Firebase project configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCZLt0X2jGoUctHaiCX8-y0Yspz4aU7u_E",
-  authDomain: "chaceclabornwebsite.firebaseapp.com",
-  projectId: "chaceclabornwebsite",
-  storageBucket: "chaceclabornwebsite.firebasestorage.app",
-  messagingSenderId: "357343717980",
-  appId: "1:357343717980:web:c451370115b7a970689499",
-  measurementId: "G-V9CLBVZ0D5"
-};
+const logger = createLogger('Firebase');
 
-// ✅ Initialize Firebase App (shared across your app)
+// Initialize Firebase App
+logger.info('Initializing Firebase...');
 const app = initializeApp(firebaseConfig);
 
-// ✅ Auth instance (for sign-in/out and tracking user state)
+// Auth instance
 const auth = getAuth(app);
 
-// ✅ Firestore instance (browser SDK only supports default DB)
+// Firestore instance
 const db = getFirestore(app);
 
-console.log("✅ Firebase initialized. Firestore DB:", db._databaseId.database); 
-// Logs: "(default)"
+// Log success
+logger.success('Firebase initialized', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain
+});
 
-// ✅ Export shared instances for the rest of your app
+// Export shared instances
 export { app, auth, db };
