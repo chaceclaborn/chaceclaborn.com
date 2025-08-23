@@ -6,14 +6,17 @@
     <title>Chace Claborn - Mechanical Engineer</title>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/auth-styles.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/auth-styles.css" />
+    <link rel="stylesheet" href="/css/tier-styles.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
   </head>
-  <body>
+  <body data-page="home">
     <!-- Header -->
     <header class="site-header">
       <div class="header-container">
@@ -44,7 +47,7 @@
         <div class="info-panel">
           <div class="profile-section">
             <img
-              src="images/Professional Photo.jpg"
+              src="/images/Professional Photo.jpg"
               alt="Chace Claborn"
               class="profile-image"
             />
@@ -92,10 +95,10 @@
 
             <!-- CTA Buttons -->
             <div class="cta-buttons">
-              <a href="pages/portfolio.html" class="btn-modern"
+              <a href="/pages/portfolio.html" class="btn-modern"
                 >View Portfolio</a
               >
-              <a href="pages/resume.html" class="btn-modern">Resume</a>
+              <a href="/pages/resume.html" class="btn-modern">Resume</a>
             </div>
           </div>
         </div>
@@ -104,13 +107,13 @@
         <div class="image-panel">
           <div class="image-slider">
             <div class="slide active">
-              <img src="images/manufacturing.png" alt="Manufacturing" />
+              <img src="/images/manufacturing.png" alt="Manufacturing" />
             </div>
             <div class="slide">
-              <img src="images/hotfire_modified.jpg" alt="Hot Fire Test" />
+              <img src="/images/hotfire_modified.jpg" alt="Hot Fire Test" />
             </div>
             <div class="slide">
-              <img src="images/graduation.jpeg" alt="Graduation" />
+              <img src="/images/graduation.jpeg" alt="Graduation" />
             </div>
           </div>
 
@@ -175,44 +178,7 @@
       </div>
     </footer>
 
-    <!-- Core JavaScript (non-module scripts) -->
-    <script src="js/carousel.js"></script>
-    <script src="js/quotes.js"></script>
-    <script src="js/chatbot-botui.js"></script>
-    <script src="js/ai-assistant.js"></script>
-    <script src="js/mobile-menu.js"></script>
-    <script type="module" src="js/firebase/terms-manager.js"></script>
-    <script type="module" src="js/components/auth-button-mount.js"></script>
-
-    <!-- Firebase Configuration and Setup -->
-    <script type="module">
-      // Import Firebase modules with CORRECT paths for root directory
-      import { app, auth, db } from "./js/firebase/config.js";
-
-      // Expose Firebase globally for widgets and legacy code
-      window.firebaseApp = app;
-      window.auth = auth;
-      window.db = db;
-
-      // Confirm Firebase is ready
-      console.log("🔥 Firebase initialized and exposed globally");
-      console.log("✅ Auth available:", !!window.auth);
-      console.log("✅ Firestore available:", !!window.db);
-
-      // Import authentication services
-      import("./js/firebase/auth-service.js");
-      import("./js/firebase/auth-tiers.js");
-      import("./js/auth-init.js");
-      import("/js/components/navigation.js");
-
-      // Initialize feedback widget after Firebase is ready
-      import("./js/feedback-widget.js")
-        .then(() => {
-          console.log("📊 Feedback widget module loaded");
-        })
-        .catch((error) => {
-          console.error("Error loading feedback widget:", error);
-        });
-    </script>
+    <!-- 🎯 SINGLE VITE ENTRY POINT -->
+    <script type="module" src="/js/main.js"></script>
   </body>
 </html>

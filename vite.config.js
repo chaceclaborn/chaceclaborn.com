@@ -1,4 +1,4 @@
-// vite.config.js (at root level)
+// vite.config.js - Fixed aliases
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -32,13 +32,13 @@ export default defineConfig({
     }
   },
   
-  // Path resolution
+  // FIXED: Path resolution - aliases relative to 'frontend' root
   resolve: {
     alias: {
-      '@': '/frontend',
-      '@js': '/frontend/js',
-      '@css': '/frontend/css',
-      '@components': '/frontend/js/components'  // Added for React components
+      '@': '',  // Points to frontend root
+      '@js': '/js',  // Points to frontend/js
+      '@css': '/css',  // Points to frontend/css
+      '@components': '/js/components'  // Points to frontend/js/components
     }
   },
   

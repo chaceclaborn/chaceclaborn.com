@@ -1,4 +1,4 @@
-// js/components/navigation.js - Fixed for Vite development server
+// js/components/navigation.js - Fixed Navigation with Active State
 import { auth } from '../firebase/config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js';
 import { getUserTier, TIERS } from '../firebase/auth-tiers.js';
@@ -11,16 +11,14 @@ class NavigationComponent {
         this.currentPage = this.getCurrentPage();
         this.isInitialized = false;
         this.authChecked = false;
-        this.isViteDevServer = this.checkIfViteDevServer();
         
-        // Define navigation structure
+        // Define navigation structure - NO DASHBOARD
         this.navItems = {
             public: [
-                { href: 'index.html', text: 'Home', id: 'home' },
+                { href: 'index.html', text: 'Home', id: 'index' },
                 { href: 'pages/portfolio.html', text: 'Portfolio', id: 'portfolio' },
                 { href: 'pages/resume.html', text: 'Resume', id: 'resume' }
             ],
-            authenticated: [],
             family: [
                 { href: 'pages/family.html', text: 'Family', id: 'family', tier: TIERS.FAMILY, class: 'tier-nav family-nav' }
             ],
@@ -35,11 +33,14 @@ class NavigationComponent {
         this.init();
     }
     
-    checkIfViteDevServer() {
-        // Check if we're running on Vite dev server
-        return window.location.port === '3000' || 
-               window.location.port === '5173' || 
-               import.meta.env?.DEV === true;
+    getCurrentPage() {
+        const path = window.location.pathname;
+        const page = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+        
+        // Handle various page name formats
+        if (page === '' || page === 'index.html') return 'index';
+        if (page.endsWith('.html')) return page.replace('.html', '');
+        return page;
     }
     
     init() {
@@ -53,12 +54,11 @@ class NavigationComponent {
     initialize() {
         console.log('📍 Current page:', this.currentPage);
         console.log('📁 Current path:', window.location.pathname);
-        console.log('🚀 Vite Dev Server:', this.isViteDevServer);
         
         // Build initial navigation (public view)
         this.buildNavigation();
         
-        // Setup authentication listener - ONLY ONE
+        // Setup authentication listener
         this.authUnsubscribe = onAuthStateChanged(auth, async (user) => {
             console.log('👤 Auth state changed:', user ? user.email : 'null');
             
@@ -85,19 +85,12 @@ class NavigationComponent {
                 document.body.classList.add('tier-public');
             }
             
-            // Rebuild navigation once
-            console.log('🔨 Rebuilding navigation for tier:', this.currentTier);
+            // Rebuild navigation
             this.buildNavigation();
         });
         
         this.isInitialized = true;
         console.log('✅ Navigation Component Ready');
-    }
-    
-    getCurrentPage() {
-        const path = window.location.pathname;
-        const page = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
-        return page.replace('.html', '');
     }
     
     buildNavigation() {
@@ -112,7 +105,7 @@ class NavigationComponent {
         // Clear existing navigation
         navContainer.innerHTML = '';
         
-        // ALWAYS add public navigation items
+        // Always add public navigation items
         this.navItems.public.forEach(item => {
             navContainer.appendChild(this.createNavLink(item));
         });
@@ -126,10 +119,7 @@ class NavigationComponent {
     }
     
     addTierNavigation(container) {
-        if (!this.currentUser) {
-            console.log('❌ No user, skipping tier navigation');
-            return;
-        }
+        if (!this.currentUser) return;
         
         console.log('🔐 Adding tier navigation for:', this.currentTier);
         
@@ -138,37 +128,26 @@ class NavigationComponent {
         
         switch (this.currentTier) {
             case TIERS.ADMIN:
-                visibleTiers = ['authenticated', 'family', 'girlfriend', 'admin'];
-                console.log('👑 Admin: showing all tiers');
+                visibleTiers = ['family', 'girlfriend', 'admin'];
                 break;
-                
             case TIERS.GIRLFRIEND:
-                visibleTiers = ['authenticated', 'family', 'girlfriend'];
-                console.log('💝 Girlfriend: showing auth, family, girlfriend');
+                visibleTiers = ['family', 'girlfriend'];
                 break;
-                
             case TIERS.FAMILY:
-                visibleTiers = ['authenticated', 'family'];
-                console.log('👨‍👩‍👧‍👦 Family: showing auth, family');
+                visibleTiers = ['family'];
                 break;
-                
             case TIERS.AUTHENTICATED:
-                visibleTiers = ['authenticated'];
-                console.log('✅ Authenticated: basic member access');
+                // Basic authenticated users see no extra tabs
+                visibleTiers = [];
                 break;
-                
-            default:
-                console.log('❓ Unknown tier:', this.currentTier);
-                return;
         }
         
-        // Add the navigation items for visible tiers
+        // Add navigation items for visible tiers
         visibleTiers.forEach(tierKey => {
             if (this.navItems[tierKey]) {
                 this.navItems[tierKey].forEach(item => {
                     const link = this.createNavLink(item);
                     container.appendChild(link);
-                    console.log('➕ Added:', item.text);
                 });
             }
         });
@@ -177,79 +156,36 @@ class NavigationComponent {
     createNavLink(item) {
         const link = document.createElement('a');
         
-        // Build the correct path
+        // Build the correct path based on current location
         let href = item.href;
+        const currentPath = window.location.pathname;
+        const isInPages = currentPath.includes('/pages/');
         
-        if (this.isViteDevServer) {
-            // For Vite dev server, use absolute paths
+        if (isInPages) {
+            // We're in pages folder
             if (href === 'index.html') {
-                href = '/';
+                href = '../index.html';
             } else if (href.startsWith('pages/')) {
-                href = '/' + href;
-            }
-        } else {
-            // For production or regular serving
-            const isOnIndexPage = window.location.pathname === '/' || 
-                                  window.location.pathname.endsWith('/index.html') ||
-                                  window.location.pathname.endsWith('/frontend/') ||
-                                  window.location.pathname.endsWith('/frontend/index.html');
-            
-            if (isOnIndexPage) {
-                // We're on index page, use relative paths
-                if (href === 'index.html') {
-                    href = './index.html';
-                }
-                // pages/ paths are already correct
-            } else {
-                // We're in a subfolder (pages/), adjust paths
-                if (href === 'index.html') {
-                    href = '../index.html';
-                } else if (href.startsWith('pages/')) {
-                    href = href.replace('pages/', './');
-                }
+                href = href.replace('pages/', '');
             }
         }
         
         link.href = href;
         link.className = 'nav-link';
+        link.textContent = item.text;
+        
+        // Add tier-specific classes
         if (item.class) {
             link.className += ' ' + item.class;
         }
         
-        // Mark active page
-        if (item.id === this.currentPage || 
-            (item.id === 'home' && (this.currentPage === 'index' || this.currentPage === ''))) {
+        // FIXED: Mark active page
+        if (item.id === this.currentPage) {
             link.classList.add('active');
-        }
-        
-        link.textContent = item.text;
-        
-        // Set display based on tier visibility
-        if (item.tier) {
-            link.style.display = this.shouldShowForTier(item.tier) ? '' : 'none';
+            console.log('✨ Active page:', item.id);
         }
         
         return link;
-    }
-    
-    shouldShowForTier(itemTier) {
-        if (!this.currentUser) return false;
-        
-        switch (this.currentTier) {
-            case TIERS.ADMIN:
-                return true; // Admin sees everything
-            case TIERS.GIRLFRIEND:
-                return itemTier === TIERS.FAMILY || 
-                       itemTier === TIERS.GIRLFRIEND || 
-                       itemTier === TIERS.AUTHENTICATED;
-            case TIERS.FAMILY:
-                return itemTier === TIERS.FAMILY || 
-                       itemTier === TIERS.AUTHENTICATED;
-            case TIERS.AUTHENTICATED:
-                return itemTier === TIERS.AUTHENTICATED;
-            default:
-                return false;
-        }
     }
     
     // Cleanup method
@@ -264,21 +200,8 @@ class NavigationComponent {
 // Initialize navigation when module loads
 const navigation = new NavigationComponent();
 
-// Export for use in other modules if needed
+// Export for use in other modules
 export default navigation;
 
 // Make available globally for debugging
 window.navigationComponent = navigation;
-
-// Add helper function for debugging
-window.debugNavigation = function() {
-    console.log('=== Navigation Debug ===');
-    console.log('Current User:', navigation.currentUser?.email);
-    console.log('Current Tier:', navigation.currentTier);
-    console.log('Current Page:', navigation.currentPage);
-    console.log('Auth Checked:', navigation.authChecked);
-    console.log('Is Vite Dev:', navigation.isViteDevServer);
-    console.log('Nav Container:', document.getElementById('mainNav'));
-    console.log('Nav Items:', document.querySelectorAll('#mainNav .nav-link'));
-    console.log('Body Classes:', document.body.className);
-};
