@@ -1,16 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raeha's Personal Tab - Chace Claborn</title>
-    
+
     <!-- CSS Files -->
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/navigation.css" />
     <link rel="stylesheet" href="../css/tier-styles.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <style>
       /* Raeha's Page Styles */
       .raeha-container {
@@ -53,7 +56,9 @@
         padding: 30px;
         border-radius: 15px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
       }
 
       .content-card:hover {
@@ -121,7 +126,9 @@
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
       }
 
       .submit-btn:hover {
@@ -174,7 +181,7 @@
       }
 
       .future-features li::before {
-        content: '✨';
+        content: "✨";
         position: absolute;
         left: 0;
       }
@@ -195,8 +202,12 @@
       }
 
       @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .special-message {
@@ -233,16 +244,8 @@
             <!-- Navigation will be injected here -->
             <nav class="main-nav" id="mainNav"></nav>
 
-            <!-- User Info -->
-            <div class="user-info" id="user-info" style="display: none">
-              <img class="user-avatar" id="user-photo" src="" alt="User Avatar" />
-              <span id="user-name" style="display: none"></span>
-              <span id="user-email" style="display: none"></span>
-              <a href="#" class="btn-modern sign-out-btn" id="logout-btn">Sign Out</a>
-            </div>
-
-            <!-- Sign In Button -->
-            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+            <!-- React Auth Button Container -->
+            <div id="auth-button-container"></div>
 
             <!-- Mobile Menu Button -->
             <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -259,7 +262,10 @@
         <!-- Welcome Section with Site Theme Colors -->
         <section class="welcome-section">
           <h1>Welcome to Your Custom Tab, Raeha!</h1>
-          <p>This is your personal space to request customizations and features for the website.</p>
+          <p>
+            This is your personal space to request customizations and features
+            for the website.
+          </p>
         </section>
 
         <!-- Content Grid -->
@@ -267,7 +273,10 @@
           <!-- Customization Request Card -->
           <div class="content-card">
             <h2><i class="fas fa-paint-brush"></i> Request Customizations</h2>
-            <p>Want something changed or added? Let me know what you'd like to see!</p>
+            <p>
+              Want something changed or added? Let me know what you'd like to
+              see!
+            </p>
             <div class="customization-form">
               <form id="customization-form">
                 <div class="form-group">
@@ -283,8 +292,13 @@
                 </div>
                 <div class="form-group">
                   <label for="request-details">Details</label>
-                  <textarea id="request-details" name="request-details" rows="4" 
-                    placeholder="Describe what you'd like..." required></textarea>
+                  <textarea
+                    id="request-details"
+                    name="request-details"
+                    rows="4"
+                    placeholder="Describe what you'd like..."
+                    required
+                  ></textarea>
                 </div>
                 <button type="submit" class="submit-btn">
                   <i class="fas fa-paper-plane"></i> Send Request
@@ -298,29 +312,54 @@
             <h2><i class="fas fa-star"></i> Your Current Features</h2>
             <ul class="feature-list">
               <li><i class="fas fa-check-circle"></i> Custom tab access</li>
-              <li><i class="fas fa-check-circle"></i> Priority feature requests</li>
-              <li><i class="fas fa-check-circle"></i> Custom content sections</li>
-              <li><i class="fas fa-check-circle"></i> Photo galleries (coming soon)</li>
-              <li><i class="fas fa-check-circle"></i> Private messaging (coming soon)</li>
+              <li>
+                <i class="fas fa-check-circle"></i> Priority feature requests
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Custom content sections
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Photo galleries (coming
+                soon)
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Private messaging (coming
+                soon)
+              </li>
             </ul>
           </div>
 
           <!-- Quick Actions Card -->
           <div class="content-card">
             <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
-            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 20px;
+              "
+            >
+              <button
+                class="submit-btn"
+                onclick="alert('Feature coming soon!')"
+              >
                 <i class="fas fa-images"></i> Upload Photos
               </button>
-              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+              <button
+                class="submit-btn"
+                onclick="alert('Feature coming soon!')"
+              >
                 <i class="fas fa-palette"></i> Change Theme
               </button>
-              <button class="submit-btn" onclick="alert('Feature coming soon!')">
+              <button
+                class="submit-btn"
+                onclick="alert('Feature coming soon!')"
+              >
                 <i class="fas fa-envelope"></i> Send Message
               </button>
             </div>
           </div>
-
         </div>
 
         <!-- Future Features -->
@@ -328,12 +367,11 @@
           <h2><i class="fas fa-sparkles"></i> Coming Soon</h2>
           <ul>
             <li>...</li>
-            
           </ul>
           <p>
-            Have an idea for something you'd like to see here? 
-            Use the request form above to let me know!
-            I'll implement them as soon as possible and they'll appear here in your personal tab.
+            Have an idea for something you'd like to see here? Use the request
+            form above to let me know! I'll implement them as soon as possible
+            and they'll appear here in your personal tab.
           </p>
         </section>
       </main>
@@ -351,10 +389,10 @@
     <script type="module" src="../js/firebase/config.js"></script>
     <script type="module" src="../js/firebase/auth-service.js"></script>
     <script type="module" src="../js/firebase/auth-tiers.js"></script>
-    
+
     <!-- Auth Init SECOND -->
     <script type="module" src="../js/auth-init.js"></script>
-    
+
     <!-- Navigation Component THIRD -->
     <script type="module" src="../js/components/navigation.js"></script>
 
@@ -365,7 +403,7 @@
       import { getUserTier, TIERS } from "../js/firebase/auth-tiers.js";
 
       // Wait for DOM to be ready
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         // Protect the page - Allow admin OR girlfriend tier
         onAuthStateChanged(auth, async (user) => {
           const loading = document.getElementById("loading");
@@ -374,8 +412,9 @@
           if (user) {
             const userTier = await getUserTier();
             // Allow access if user is girlfriend tier OR admin
-            const hasAccess = userTier === TIERS.GIRLFRIEND || userTier === TIERS.ADMIN;
-            
+            const hasAccess =
+              userTier === TIERS.GIRLFRIEND || userTier === TIERS.ADMIN;
+
             if (hasAccess) {
               loading.style.display = "none";
               content.style.display = "block";
@@ -392,11 +431,13 @@
         // REMOVED DUPLICATE FORM HANDLER - raeha-customization.js handles this
       });
     </script>
-    
+
     <!-- Raeha Customization Script (handles form submission) -->
     <script type="module" src="../js/raeha-customization.js"></script>
-    
+
     <!-- Optional: Feedback Widget -->
     <script type="module" src="../js/firebase/feedback-service.js"></script>
+    <!-- Mount React Auth Button -->
+    <script type="module" src="../js/components/auth-button-mount.js"></script>
   </body>
 </html>

@@ -85,26 +85,31 @@ async function handleSignOut(e) {
 
 // --- UPDATE UI ---
 async function updateUI(user) {
-    // Handle all possible button IDs
+    // Handle user-info element (contains photo, name, logout button)
+    const userInfo = document.getElementById('user-info');
     const loginBtn = document.getElementById('login-btn');
+    const userPhoto = document.getElementById('user-photo');
+    const userName = document.getElementById('user-name');
+    const userEmail = document.getElementById('user-email');
     const logoutBtn = document.getElementById('logout-btn');
-    const signInBtn = document.getElementById('signInBtn');
-    const signOutLink = document.getElementById('signOutLink');
-    const userInfo = document.getElementById('userInfo');
-    const userName = document.getElementById('userName');
-    const userEmail = document.getElementById('userEmail');
     
     if (user) {
-        // User is logged in
+        // User is logged in - Hide login button, show user info
         if (loginBtn) loginBtn.style.display = 'none';
-        if (signInBtn) signInBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'inline-block';
-        if (signOutLink) signOutLink.style.display = 'inline';
+        if (userInfo) userInfo.style.display = 'flex';
         
-        if (userInfo) {
-            userInfo.style.display = 'flex';
-            if (userName) userName.textContent = user.displayName || user.email;
-            if (userEmail) userEmail.textContent = user.email;
+        // Update user details
+        if (userPhoto && user.photoURL) {
+            userPhoto.src = user.photoURL;
+            userPhoto.style.display = 'block';
+        }
+        if (userName) {
+            userName.textContent = user.displayName || user.email.split('@')[0];
+            userName.style.display = 'block';
+        }
+        if (userEmail) {
+            userEmail.textContent = user.email;
+            userEmail.style.display = 'block';
         }
         
         // Initialize and apply tier
@@ -118,12 +123,8 @@ async function updateUI(user) {
         // This happens through the termsManager.init() which watches auth state
         
     } else {
-        // User is logged out
+        // User is logged out - Show login button, hide user info
         if (loginBtn) loginBtn.style.display = 'inline-block';
-        if (signInBtn) signInBtn.style.display = 'inline-block';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        if (signOutLink) signOutLink.style.display = 'none';
-        
         if (userInfo) userInfo.style.display = 'none';
         
         // Hide all tier-based content
@@ -166,8 +167,10 @@ function setupEventListeners() {
             target.id === 'logout-btn' ||
             target.id === 'signOutLink' ||
             target.classList.contains('sign-out-link') ||
+            target.classList.contains('sign-out-btn') ||
             target.closest('#logout-btn') ||
-            target.closest('#signOutLink');
+            target.closest('#signOutLink') ||
+            target.closest('.sign-out-btn');
             
         if (isSignOutButton) {
             e.preventDefault();

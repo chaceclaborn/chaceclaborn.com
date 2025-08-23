@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -45,22 +45,8 @@
               >
               <a href="admin.html" class="nav-link tier-nav admin-nav">Admin</a>
             </nav>
-
-            <!-- Sign In Button -->
-            <a href="#" class="btn-modern" id="login-btn">Sign In</a>
-
-            <!-- User Info (Hidden by default) -->
-            <div class="user-info" id="user-info" style="display: none">
-              <img
-                class="user-avatar"
-                id="user-photo"
-                src=""
-                alt="User Avatar"
-              />
-              <span id="user-name" style="display: none"></span>
-              <span id="user-email" style="display: none"></span>
-              <a href="#" class="btn-modern" id="logout-btn">Sign Out</a>
-            </div>
+            <!-- React Auth Button Container -->
+            <div id="auth-button-container"></div>
           </div>
         </div>
       </header>
@@ -562,5 +548,7 @@
     <script type="module" src="../js/firebase/auth-service.js"></script>
     <script type="module" src="../js/firebase/auth-tiers.js"></script>
     <script type="module" src="../js/auth-init.js"></script>
+    <!-- Mount React Auth Button -->
+    <script type="module" src="../js/components/auth-button-mount.js"></script>
   </body>
 </html>

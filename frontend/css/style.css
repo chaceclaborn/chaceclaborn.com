@@ -178,7 +178,7 @@ a {
 
 /* User Info (When Signed In) */
 .user-info {
-    display: inline-flex !important;
+    /* React will control display */
     align-items: center;
     gap: 10px;
 }

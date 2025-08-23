@@ -1,8 +1,12 @@
 // vite.config.js (at root level)
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   root: 'frontend',
+  
+  // Add React plugin
+  plugins: [react()],
   
   // Development server
   server: {
@@ -33,7 +37,8 @@ export default defineConfig({
     alias: {
       '@': '/frontend',
       '@js': '/frontend/js',
-      '@css': '/frontend/css'
+      '@css': '/frontend/css',
+      '@components': '/frontend/js/components'  // Added for React components
     }
   },
   

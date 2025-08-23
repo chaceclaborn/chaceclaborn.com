@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,8 +12,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    
-
   </head>
   <body>
     <!-- Header -->
@@ -24,20 +22,10 @@
         </div>
 
         <div class="nav-wrapper">
-         <nav class="main-nav" id="mainNav"></nav>
+          <nav class="main-nav" id="mainNav"></nav>
 
-          <!-- User Info (Hidden by default) -->
-          <div class="user-info" id="user-info" style="display: none">
-            <img class="user-avatar" id="user-photo" src="" alt="User Avatar" />
-            <span id="user-name" style="display: none"></span>
-            <span id="user-email" style="display: none"></span>
-            <a href="#" class="btn-modern sign-out-btn" id="logout-btn"
-              >Sign Out</a
-            >
-          </div>
-
-          <!-- Sign In Button -->
-          <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+          <!-- React Auth Button Container -->
+          <div id="auth-button-container"></div>
 
           <!-- Mobile Menu Button -->
           <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -194,36 +182,37 @@
     <script src="js/ai-assistant.js"></script>
     <script src="js/mobile-menu.js"></script>
     <script type="module" src="js/firebase/terms-manager.js"></script>
-    
+    <script type="module" src="js/components/auth-button-mount.js"></script>
 
     <!-- Firebase Configuration and Setup -->
     <script type="module">
       // Import Firebase modules with CORRECT paths for root directory
-      import { app, auth, db } from './js/firebase/config.js';
-      
+      import { app, auth, db } from "./js/firebase/config.js";
+
       // Expose Firebase globally for widgets and legacy code
       window.firebaseApp = app;
       window.auth = auth;
       window.db = db;
-      
+
       // Confirm Firebase is ready
-      console.log('🔥 Firebase initialized and exposed globally');
-      console.log('✅ Auth available:', !!window.auth);
-      console.log('✅ Firestore available:', !!window.db);
-      
+      console.log("🔥 Firebase initialized and exposed globally");
+      console.log("✅ Auth available:", !!window.auth);
+      console.log("✅ Firestore available:", !!window.db);
+
       // Import authentication services
-      import('./js/firebase/auth-service.js');
-      import('./js/firebase/auth-tiers.js');
-      import('./js/auth-init.js');
-      import('/js/components/navigation.js');
-      
-      
+      import("./js/firebase/auth-service.js");
+      import("./js/firebase/auth-tiers.js");
+      import("./js/auth-init.js");
+      import("/js/components/navigation.js");
+
       // Initialize feedback widget after Firebase is ready
-      import('./js/feedback-widget.js').then(() => {
-        console.log('📊 Feedback widget module loaded');
-      }).catch(error => {
-        console.error('Error loading feedback widget:', error);
-      });
+      import("./js/feedback-widget.js")
+        .then(() => {
+          console.log("📊 Feedback widget module loaded");
+        })
+        .catch((error) => {
+          console.error("Error loading feedback widget:", error);
+        });
     </script>
   </body>
 </html>

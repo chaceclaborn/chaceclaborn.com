@@ -1,4 +1,4 @@
-// js/components/navigation.js - Centralized Navigation Component with Consistent Display
+// js/components/navigation.js - Fixed for Vite development server
 import { auth } from '../firebase/config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js';
 import { getUserTier, TIERS } from '../firebase/auth-tiers.js';
@@ -10,18 +10,17 @@ class NavigationComponent {
         this.currentTier = TIERS.PUBLIC;
         this.currentPage = this.getCurrentPage();
         this.isInitialized = false;
-        this.authChecked = false; // Track if auth has been checked
+        this.authChecked = false;
+        this.isViteDevServer = this.checkIfViteDevServer();
         
-        // Define navigation structure - Single source of truth!
+        // Define navigation structure
         this.navItems = {
             public: [
                 { href: 'index.html', text: 'Home', id: 'home' },
                 { href: 'pages/portfolio.html', text: 'Portfolio', id: 'portfolio' },
                 { href: 'pages/resume.html', text: 'Resume', id: 'resume' }
             ],
-            authenticated: [
-                
-            ],
+            authenticated: [],
             family: [
                 { href: 'pages/family.html', text: 'Family', id: 'family', tier: TIERS.FAMILY, class: 'tier-nav family-nav' }
             ],
@@ -36,8 +35,14 @@ class NavigationComponent {
         this.init();
     }
     
+    checkIfViteDevServer() {
+        // Check if we're running on Vite dev server
+        return window.location.port === '3000' || 
+               window.location.port === '5173' || 
+               import.meta.env?.DEV === true;
+    }
+    
     init() {
-        // Initialize immediately if DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initialize());
         } else {
@@ -48,52 +53,41 @@ class NavigationComponent {
     initialize() {
         console.log('📍 Current page:', this.currentPage);
         console.log('📁 Current path:', window.location.pathname);
+        console.log('🚀 Vite Dev Server:', this.isViteDevServer);
         
-        // Build initial navigation (public view only)
+        // Build initial navigation (public view)
         this.buildNavigation();
         
-        // Setup authentication listener
-        onAuthStateChanged(auth, async (user) => {
-            console.log('👤 Auth state changed:', user ? user.email : 'Not signed in');
+        // Setup authentication listener - ONLY ONE
+        this.authUnsubscribe = onAuthStateChanged(auth, async (user) => {
+            console.log('👤 Auth state changed:', user ? user.email : 'null');
+            
+            // Prevent multiple rebuilds
+            if (this.currentUser?.uid === user?.uid && this.authChecked) {
+                console.log('⏭️ Same auth state, skipping rebuild');
+                return;
+            }
+            
             this.currentUser = user;
             this.authChecked = true;
             
             if (user) {
-                // Get user's tier
-                this.currentTier = await getUserTier();
-                console.log('🎯 User tier:', this.currentTier);
+                const tier = await getUserTier();
+                console.log('🎯 User tier determined:', tier);
+                this.currentTier = tier;
                 
-                // Special check for admin
-                if (user.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
-                    this.currentTier = TIERS.ADMIN; // Force admin tier
-                    console.log('👑 Admin detected - forcing admin tier');
-                }
-                
-                // Check for girlfriend
-                if (user.email?.toLowerCase() === 'raehaberbert@gmail.com') {
-                    this.currentTier = TIERS.GIRLFRIEND;
-                    console.log('💝 Raeha detected - setting girlfriend tier');
-                }
-                
-                // SET BODY CLASS - THIS IS CRITICAL!
+                // Set body class
                 document.body.className = document.body.className.replace(/tier-\w+/g, '');
                 document.body.classList.add(`tier-${this.currentTier}`);
-                console.log('📝 Body class set to:', `tier-${this.currentTier}`);
-                
             } else {
                 this.currentTier = TIERS.PUBLIC;
-                
-                // Set body class for public
                 document.body.className = document.body.className.replace(/tier-\w+/g, '');
                 document.body.classList.add('tier-public');
             }
             
-            // ALWAYS rebuild navigation after auth is determined
+            // Rebuild navigation once
             console.log('🔨 Rebuilding navigation for tier:', this.currentTier);
             this.buildNavigation();
-            
-            // Force visibility update for tier navigation
-            this.forceNavigationVisibility();
         });
         
         this.isInitialized = true;
@@ -144,27 +138,23 @@ class NavigationComponent {
         
         switch (this.currentTier) {
             case TIERS.ADMIN:
-                // Admin sees everything
                 visibleTiers = ['authenticated', 'family', 'girlfriend', 'admin'];
                 console.log('👑 Admin: showing all tiers');
                 break;
                 
             case TIERS.GIRLFRIEND:
-                // Girlfriend sees authenticated, family, and girlfriend tabs
                 visibleTiers = ['authenticated', 'family', 'girlfriend'];
                 console.log('💝 Girlfriend: showing auth, family, girlfriend');
                 break;
                 
             case TIERS.FAMILY:
-                // Family sees authenticated and family tabs
                 visibleTiers = ['authenticated', 'family'];
                 console.log('👨‍👩‍👧‍👦 Family: showing auth, family');
                 break;
                 
             case TIERS.AUTHENTICATED:
-                // Authenticated users only see home, portfolio, and resume
                 visibleTiers = ['authenticated'];
-                console.log('✅ Authenticated: showing resume only');
+                console.log('✅ Authenticated: basic member access');
                 break;
                 
             default:
@@ -187,95 +177,86 @@ class NavigationComponent {
     createNavLink(item) {
         const link = document.createElement('a');
         
-        // Determine the correct path based on current location
+        // Build the correct path
         let href = item.href;
-        const isInPagesDir = window.location.pathname.includes('/pages/');
-        const isInRoot = !isInPagesDir;
         
-        // Adjust paths based on current directory
-        if (isInPagesDir) {
-            // We're in /pages/ directory
-            if (item.href === 'index.html') {
-                href = '../index.html';
-            } else if (item.href.startsWith('pages/')) {
-                // Remove 'pages/' prefix since we're already in pages directory
-                href = item.href.replace('pages/', '');
+        if (this.isViteDevServer) {
+            // For Vite dev server, use absolute paths
+            if (href === 'index.html') {
+                href = '/';
+            } else if (href.startsWith('pages/')) {
+                href = '/' + href;
             }
         } else {
-            // We're in root directory - paths stay as defined
-            href = item.href;
+            // For production or regular serving
+            const isOnIndexPage = window.location.pathname === '/' || 
+                                  window.location.pathname.endsWith('/index.html') ||
+                                  window.location.pathname.endsWith('/frontend/') ||
+                                  window.location.pathname.endsWith('/frontend/index.html');
+            
+            if (isOnIndexPage) {
+                // We're on index page, use relative paths
+                if (href === 'index.html') {
+                    href = './index.html';
+                }
+                // pages/ paths are already correct
+            } else {
+                // We're in a subfolder (pages/), adjust paths
+                if (href === 'index.html') {
+                    href = '../index.html';
+                } else if (href.startsWith('pages/')) {
+                    href = href.replace('pages/', './');
+                }
+            }
         }
         
         link.href = href;
-        link.textContent = item.text;
         link.className = 'nav-link';
-        
-        // Add tier-specific classes
         if (item.class) {
             link.className += ' ' + item.class;
         }
         
-        // Mark current page as active
-        if (this.isCurrentPage(item.id)) {
-            link.className += ' active';
+        // Mark active page
+        if (item.id === this.currentPage || 
+            (item.id === 'home' && (this.currentPage === 'index' || this.currentPage === ''))) {
+            link.classList.add('active');
+        }
+        
+        link.textContent = item.text;
+        
+        // Set display based on tier visibility
+        if (item.tier) {
+            link.style.display = this.shouldShowForTier(item.tier) ? '' : 'none';
         }
         
         return link;
     }
     
-    isCurrentPage(itemId) {
-        // Check if this nav item matches the current page
-        const currentPage = this.currentPage;
+    shouldShowForTier(itemTier) {
+        if (!this.currentUser) return false;
         
-        // Handle special cases
-        if (currentPage === '' || currentPage === 'index') {
-            return itemId === 'home';
+        switch (this.currentTier) {
+            case TIERS.ADMIN:
+                return true; // Admin sees everything
+            case TIERS.GIRLFRIEND:
+                return itemTier === TIERS.FAMILY || 
+                       itemTier === TIERS.GIRLFRIEND || 
+                       itemTier === TIERS.AUTHENTICATED;
+            case TIERS.FAMILY:
+                return itemTier === TIERS.FAMILY || 
+                       itemTier === TIERS.AUTHENTICATED;
+            case TIERS.AUTHENTICATED:
+                return itemTier === TIERS.AUTHENTICATED;
+            default:
+                return false;
         }
-        
-        return currentPage === itemId;
     }
     
-    forceNavigationVisibility() {
-        // Force all tier navigation to be visible based on current tier
-        console.log('🔧 Forcing navigation visibility for tier:', this.currentTier);
-        
-        if (this.currentTier === TIERS.ADMIN) {
-            // Admin sees everything
-            document.querySelectorAll('.tier-nav').forEach(el => {
-                el.style.display = 'inline-block';
-                el.style.visibility = 'visible';
-                el.style.opacity = '1';
-            });
-        } else if (this.currentTier === TIERS.GIRLFRIEND) {
-            // Girlfriend sees auth, family, girlfriend
-            document.querySelectorAll('.auth-nav, .family-nav, .girlfriend-nav').forEach(el => {
-                el.style.display = 'inline-block';
-                el.style.visibility = 'visible';
-                el.style.opacity = '1';
-            });
-            document.querySelectorAll('.admin-nav').forEach(el => {
-                el.style.display = 'none';
-            });
-        } else if (this.currentTier === TIERS.FAMILY) {
-            // Family sees auth, family
-            document.querySelectorAll('.auth-nav, .family-nav').forEach(el => {
-                el.style.display = 'inline-block';
-                el.style.visibility = 'visible';
-                el.style.opacity = '1';
-            });
-            document.querySelectorAll('.girlfriend-nav, .admin-nav').forEach(el => {
-                el.style.display = 'none';
-            });
-        } else if (this.currentTier === TIERS.AUTHENTICATED) {
-            // Authenticated sees only home, portfolio, and resume
-            document.querySelectorAll('.auth-nav').forEach(el => {
-                el.style.display = 'inline-block';
-                el.style.visibility = 'visible';
-                el.style.opacity = '1';
-            });
-            document.querySelectorAll('.family-nav, .girlfriend-nav, .admin-nav').forEach(el => {
-                el.style.display = 'none';
-            });
+    // Cleanup method
+    destroy() {
+        if (this.authUnsubscribe) {
+            this.authUnsubscribe();
+            console.log('🧹 Navigation auth listener cleaned up');
         }
     }
 }
@@ -296,6 +277,8 @@ window.debugNavigation = function() {
     console.log('Current Tier:', navigation.currentTier);
     console.log('Current Page:', navigation.currentPage);
     console.log('Auth Checked:', navigation.authChecked);
+    console.log('Is Vite Dev:', navigation.isViteDevServer);
     console.log('Nav Container:', document.getElementById('mainNav'));
     console.log('Nav Items:', document.querySelectorAll('#mainNav .nav-link'));
+    console.log('Body Classes:', document.body.className);
 };

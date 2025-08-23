@@ -1,42 +1,44 @@
-// js/raeha-customization.js - Handles both form submission and admin panel
+// js/raeha-customization.js - Fixed with single auth listener
 import { auth, db } from './firebase/config.js';
-import { 
-    collection, 
-    addDoc, 
-    getDocs, 
-    query, 
-    orderBy, 
-    updateDoc,
-    doc,
-    arrayUnion,
-    serverTimestamp,
-    onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { 
+    collection, addDoc, serverTimestamp, query, 
+    where, orderBy, onSnapshot, doc, updateDoc 
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 // ========================================
-// FORM HANDLER FOR RAEHA'S PAGE
+// CUSTOMIZATION REQUEST FORM HANDLER
 // ========================================
-class CustomizationFormHandler {
+class CustomizationRequestHandler {
     constructor() {
-        this.form = null;
         this.currentUser = null;
+        this.form = null;
+        this.adminPanel = null;
+        this.unsubscribe = null;
+        this.authUnsubscribe = null;
         this.init();
     }
 
     init() {
-        // Only initialize on girlfriend.html page
-        if (!window.location.pathname.includes('girlfriend.html')) {
-            return;
-        }
-
-        console.log('💝 Initializing Raeha\'s form handler...');
-        
-        // Wait for auth and DOM
-        onAuthStateChanged(auth, (user) => {
+        // Single auth listener for the entire class
+        this.authUnsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log('💝 Raeha customization: Auth state changed', user?.email || 'null');
             this.currentUser = user;
+            
             if (user) {
-                this.setupForm();
+                // Setup form if on girlfriend page
+                if (window.location.pathname.includes('girlfriend.html')) {
+                    this.setupForm();
+                }
+                
+                // Setup admin panel if on admin page and user is admin
+                if (window.location.pathname.includes('admin.html') && 
+                    user.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
+                    // Use timeout to ensure DOM is ready
+                    setTimeout(() => {
+                        this.adminPanel = new AdminCustomizationPanel();
+                    }, 100);
+                }
             }
         });
     }
@@ -44,66 +46,98 @@ class CustomizationFormHandler {
     setupForm() {
         // Wait for DOM if needed
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.attachFormListener());
+            document.addEventListener('DOMContentLoaded', () => this.initializeForm());
         } else {
-            this.attachFormListener();
+            this.initializeForm();
         }
     }
 
-    attachFormListener() {
-        this.form = document.getElementById('customization-form');
-        
+    initializeForm() {
+        this.form = document.getElementById('customization-request-form');
         if (!this.form) {
-            console.log('No customization form found on this page');
+            console.log('📝 Customization form not found on this page');
             return;
         }
 
-        console.log('✅ Found customization form');
+        console.log('📝 Setting up customization request form');
         
-        this.form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.handleSubmit();
-        });
+        // Remove any existing listeners
+        const newForm = this.form.cloneNode(true);
+        this.form.parentNode.replaceChild(newForm, this.form);
+        this.form = newForm;
+        
+        // Add submit handler
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
     }
 
-    async handleSubmit() {
-        const type = document.getElementById('request-type')?.value;
-        const details = document.getElementById('request-details')?.value;
+    async handleSubmit(e) {
+        e.preventDefault();
         
-        if (!type || !details) {
-            alert('Please fill in all fields');
+        if (!this.currentUser) {
+            alert('Please sign in to submit a request');
             return;
         }
 
-        // FIXED: Changed 'const subm' to 'const submitBtn'
         const submitBtn = this.form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
+        
         try {
-            const requestData = {
-                type: type,
-                details: details,
-                email: this.currentUser?.email || 'anonymous',
-                displayName: this.currentUser?.displayName || 'Anonymous',
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            const formData = {
+                type: this.form.type.value,
+                description: this.form.description.value.trim(),
+                priority: this.form.priority.value,
+                userEmail: this.currentUser.email,
+                userName: this.currentUser.displayName || this.currentUser.email.split('@')[0],
                 status: 'pending',
                 createdAt: serverTimestamp(),
-                userId: this.currentUser?.uid || null
+                updatedAt: serverTimestamp()
             };
+
+            // Add to Firestore
+            const docRef = await addDoc(collection(db, 'customization_requests'), formData);
+            console.log('✅ Request submitted with ID:', docRef.id);
+
+            // Show success message
+            this.showSuccessMessage();
             
-            const docRef = await addDoc(collection(db, 'customization_requests'), requestData);
-            console.log('✅ Request saved with ID:', docRef.id);
-            
-            alert(`Request submitted!\n\nType: ${type}\nDetails: ${details}\n\nChace will implement this soon!`);
+            // Reset form
             this.form.reset();
             
         } catch (error) {
-            console.error('❌ Error:', error);
-            alert('Error submitting request. Please try again.');
+            console.error('❌ Error submitting request:', error);
+            alert('Failed to submit request. Please try again.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
+        }
+    }
+
+    showSuccessMessage() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'success-message';
+        messageDiv.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <p>Your request has been submitted! Chace will review it soon.</p>
+        `;
+        
+        this.form.parentElement.insertBefore(messageDiv, this.form.nextSibling);
+        
+        setTimeout(() => {
+            messageDiv.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => messageDiv.remove(), 500);
+        }, 5000);
+    }
+
+    // Cleanup method
+    destroy() {
+        if (this.authUnsubscribe) {
+            this.authUnsubscribe();
+        }
+        if (this.unsubscribe) {
+            this.unsubscribe();
         }
     }
 }
@@ -115,30 +149,14 @@ class AdminCustomizationPanel {
     constructor() {
         this.requests = [];
         this.unsubscribe = null;
-        this.init();
-    }
-
-    async init() {
-        // Only initialize on admin.html page
-        if (!window.location.pathname.includes('admin.html')) {
-            return;
-        }
-
-        // Wait for auth
-        onAuthStateChanged(auth, async (user) => {
-            if (user?.email?.toLowerCase() === 'chaceclaborn@gmail.com') {
-                console.log('👨‍💼 Admin panel initializing...');
-                this.setupAdminPanel();
-                this.subscribeToRequests();
-            }
-        });
+        this.setupAdminPanel();
+        this.subscribeToRequests();
     }
 
     setupAdminPanel() {
         // Find or create container
         let container = document.getElementById('customization-panel-container');
         if (!container) {
-            // If no specific container, add after the header
             const adminHeader = document.querySelector('.admin-header');
             if (adminHeader) {
                 container = document.createElement('div');
@@ -175,142 +193,130 @@ class AdminCustomizationPanel {
     addStyles() {
         if (document.getElementById('admin-panel-styles')) return;
         
-        const styles = `
-            <style id="admin-panel-styles">
-                .admin-customization-panel {
-                    background: white;
-                    border-radius: 15px;
-                    padding: 30px;
-                    margin: 30px auto;
-                    max-width: 1200px;
-                    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-                }
+        const styles = document.createElement('style');
+        styles.id = 'admin-panel-styles';
+        styles.innerHTML = `
+            .admin-customization-panel {
+                background: white;
+                border-radius: 15px;
+                padding: 30px;
+                margin: 30px auto;
+                max-width: 1200px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            }
 
-                .admin-panel-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 2px solid #e5e7eb;
-                }
+            .admin-panel-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #e5e7eb;
+            }
 
-                .admin-panel-header h2 {
-                    color: #1f2937;
-                    font-size: 1.8rem;
-                    margin: 0;
-                }
+            .admin-panel-header h2 {
+                color: #1f2937;
+                font-size: 1.8rem;
+                margin: 0;
+            }
 
-                .admin-stats {
-                    display: flex;
-                    gap: 15px;
-                }
+            .admin-stats {
+                display: flex;
+                gap: 15px;
+            }
 
-                .stat-badge {
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                }
+            .stat-badge {
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
 
-                .pending-count {
-                    background: #fef3c7;
-                    color: #92400e;
-                }
+            .pending-count {
+                background: #fef3c7;
+                color: #92400e;
+            }
 
-                .progress-count {
-                    background: #dbeafe;
-                    color: #1e40af;
-                }
+            .progress-count {
+                background: #dbeafe;
+                color: #1e40af;
+            }
 
-                .completed-count {
-                    background: #d1fae5;
-                    color: #065f46;
-                }
+            .completed-count {
+                background: #d1fae5;
+                color: #065f46;
+            }
 
-                .request-item {
-                    background: #f9fafb;
-                    border-radius: 12px;
-                    padding: 20px;
-                    margin-bottom: 20px;
-                    border: 1px solid #e5e7eb;
-                }
+            .admin-request-item {
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                transition: all 0.3s;
+            }
 
-                .request-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: start;
-                    margin-bottom: 15px;
-                }
+            .admin-request-item:hover {
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
 
-                .request-type-badge {
-                    display: inline-block;
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                    margin-right: 10px;
-                }
+            .request-header-admin {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 15px;
+            }
 
-                .type-design { background: #fce7f3; color: #be185d; }
-                .type-feature { background: #e0e7ff; color: #4338ca; }
-                .type-content { background: #dcfce7; color: #15803d; }
-                .type-photo { background: #f3e8ff; color: #7c3aed; }
-                .type-other { background: #f3f4f6; color: #4b5563; }
+            .request-info {
+                flex: 1;
+            }
 
-                .status-badge {
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                }
+            .request-from {
+                font-weight: 600;
+                color: #8b5cf6;
+                margin-bottom: 5px;
+            }
 
-                .status-pending { background: #fef3c7; color: #92400e; }
-                .status-in-progress { background: #dbeafe; color: #1e40af; }
-                .status-completed { background: #d1fae5; color: #065f46; }
+            .request-timestamp {
+                color: #6b7280;
+                font-size: 0.9rem;
+            }
 
-                .request-details {
-                    background: white;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin: 15px 0;
-                }
+            .request-content {
+                margin: 15px 0;
+                padding: 15px;
+                background: white;
+                border-radius: 8px;
+            }
 
-                .admin-actions {
-                    display: flex;
-                    gap: 10px;
-                    margin-top: 15px;
-                }
+            .admin-btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
 
-                .admin-btn {
-                    padding: 8px 16px;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                }
+            .btn-progress {
+                background: #3b82f6;
+                color: white;
+            }
 
-                .btn-progress {
-                    background: #3b82f6;
-                    color: white;
-                }
+            .btn-complete {
+                background: #10b981;
+                color: white;
+            }
 
-                .btn-complete {
-                    background: #10b981;
-                    color: white;
-                }
-
-                .loading-admin {
-                    text-align: center;
-                    padding: 40px;
-                    color: #6b7280;
-                }
-            </style>
+            .loading-admin {
+                text-align: center;
+                padding: 40px;
+                color: #6b7280;
+            }
         `;
 
-        document.head.insertAdjacentHTML('beforeend', styles);
+        document.head.appendChild(styles);
     }
 
     subscribeToRequests() {
@@ -348,46 +354,61 @@ class AdminCustomizationPanel {
 
         container.innerHTML = this.requests.map(request => {
             const date = request.createdAt?.toDate ? 
-                request.createdAt.toDate() : 
-                new Date(request.timestamp || Date.now());
-                
+                request.createdAt.toDate().toLocaleDateString() : 'Pending';
+            
             return `
-                <div class="request-item">
-                    <div class="request-header">
-                        <div>
-                            <span class="request-type-badge type-${request.type}">${request.type}</span>
-                            <span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span>
+                <div class="admin-request-item">
+                    <div class="request-header-admin">
+                        <div class="request-info">
+                            <div class="request-from">From: ${request.userName || request.userEmail}</div>
+                            <div class="request-timestamp">${date}</div>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="color: #6b7280; font-size: 0.9rem;">${request.email}</div>
-                            <div style="color: #9ca3af; font-size: 0.8rem;">${this.formatDate(date)}</div>
-                        </div>
+                        <span class="request-status-badge status-${request.status}">
+                            ${request.status}
+                        </span>
                     </div>
-                    
-                    <div class="request-details">
-                        <strong>Request:</strong><br>
-                        ${this.escapeHtml(request.details)}
+                    <div class="request-content">
+                        <strong>Type:</strong> ${request.type}<br>
+                        <strong>Priority:</strong> ${request.priority}<br>
+                        <strong>Description:</strong> ${request.description}
                     </div>
-                    
                     <div class="admin-actions">
-                        ${request.status !== 'in-progress' && request.status !== 'completed' ? `
-                            <button class="admin-btn btn-progress" onclick="adminPanel.updateStatus('${request.id}', 'in-progress')">
-                                <i class="fas fa-clock"></i> Mark In Progress
+                        ${request.status === 'pending' ? `
+                            <button class="admin-btn btn-progress" 
+                                    data-request-id="${request.id}">
+                                Mark In Progress
                             </button>
                         ` : ''}
-                        
                         ${request.status === 'in-progress' ? `
-                            <button class="admin-btn btn-complete" onclick="adminPanel.updateStatus('${request.id}', 'completed')">
-                                <i class="fas fa-check"></i> Mark Complete
+                            <button class="admin-btn btn-complete" 
+                                    data-request-id="${request.id}">
+                                Mark Complete
                             </button>
                         ` : ''}
                     </div>
                 </div>
             `;
         }).join('');
+
+        // Add event listeners to buttons
+        this.attachButtonListeners();
     }
 
-    async updateStatus(requestId, newStatus) {
+    attachButtonListeners() {
+        document.querySelectorAll('.btn-progress').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.updateRequestStatus(e.target.dataset.requestId, 'in-progress');
+            });
+        });
+
+        document.querySelectorAll('.btn-complete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.updateRequestStatus(e.target.dataset.requestId, 'completed');
+            });
+        });
+    }
+
+    async updateRequestStatus(requestId, newStatus) {
         try {
             await updateDoc(doc(db, 'customization_requests', requestId), {
                 status: newStatus,
@@ -395,47 +416,23 @@ class AdminCustomizationPanel {
             });
             console.log(`✅ Request ${requestId} updated to ${newStatus}`);
         } catch (error) {
-            console.error('Error updating status:', error);
-            alert('Error updating status');
+            console.error('Error updating request:', error);
+            alert('Failed to update request status');
         }
     }
 
     updateStats() {
-        const pending = this.requests.filter(r => !r.status || r.status === 'pending').length;
+        const pending = this.requests.filter(r => r.status === 'pending').length;
         const inProgress = this.requests.filter(r => r.status === 'in-progress').length;
         const completed = this.requests.filter(r => r.status === 'completed').length;
-        
-        const pendingBadge = document.querySelector('.pending-count');
-        const progressBadge = document.querySelector('.progress-count');
-        const completedBadge = document.querySelector('.completed-count');
-        
-        if (pendingBadge) pendingBadge.textContent = `${pending} Pending`;
-        if (progressBadge) progressBadge.textContent = `${inProgress} In Progress`;
-        if (completedBadge) completedBadge.textContent = `${completed} Completed`;
-    }
 
-    formatDate(date) {
-        const now = new Date();
-        const diff = now - date;
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
-        if (days === 0) {
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            if (hours === 0) {
-                const mins = Math.floor(diff / (1000 * 60));
-                return `${mins} minutes ago`;
-            }
-            return `${hours} hours ago`;
-        }
-        if (days === 1) return 'Yesterday';
-        if (days < 7) return `${days} days ago`;
-        return date.toLocaleDateString();
-    }
+        const pendingEl = document.querySelector('.pending-count');
+        const progressEl = document.querySelector('.progress-count');
+        const completedEl = document.querySelector('.completed-count');
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
+        if (pendingEl) pendingEl.textContent = `${pending} Pending`;
+        if (progressEl) progressEl.textContent = `${inProgress} In Progress`;
+        if (completedEl) completedEl.textContent = `${completed} Completed`;
     }
 
     destroy() {
@@ -445,22 +442,8 @@ class AdminCustomizationPanel {
     }
 }
 
-// ========================================
-// INITIALIZE BOTH BASED ON CURRENT PAGE
-// ========================================
-console.log('📄 Current page:', window.location.pathname);
-
-// Initialize form handler (only on girlfriend.html)
-const formHandler = new CustomizationFormHandler();
-
-// Initialize admin panel (only on admin.html)
-const adminPanel = new AdminCustomizationPanel();
-
-// Make admin panel globally available for onclick handlers
-window.adminPanel = adminPanel;
+// Initialize the handler
+const customizationHandler = new CustomizationRequestHandler();
 
 // Export for debugging
-window.raehaCustomization = {
-    formHandler,
-    adminPanel
-};
+export { customizationHandler };
