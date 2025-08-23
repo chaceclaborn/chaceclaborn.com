@@ -2,15 +2,27 @@
   "name": "chaceclaborn-portfolio",
   "version": "2.0.0",
   "description": "Professional portfolio website with Firebase integration",
-  "main": "index.html",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "deploy": "aws s3 sync . s3://chaceclaborn.com --exclude '.git/*' --exclude '.gitignore' --exclude '*.bat' --exclude 'dev/*' --exclude 'node_modules/*' --delete",
-    "serve": "python -m http.server 8000",
-    "lint": "eslint js/**/*.js",
-    "format": "prettier --write '**/*.{js,html,css,json}'"
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "deploy": "npm run deploy:frontend",
+    "deploy:frontend": "aws s3 sync frontend/ s3://chaceclaborn.com --exclude '.git/*' --exclude '.gitignore' --exclude '*.bat' --exclude 'dev/*' --exclude 'node_modules/*' --delete",
+    "deploy:production": "npm run build && aws s3 sync dist/ s3://chaceclaborn.com --delete",
+    "deploy:dryrun": "aws s3 sync frontend/ s3://chaceclaborn.com --delete --dryrun",
+    "serve": "vite preview",
+    "serve:python": "cd frontend && python -m http.server 8000",
+    "lint": "eslint frontend/js/**/*.js",
+    "lint:fix": "eslint frontend/js/**/*.js --fix",
+    "format": "prettier --write 'frontend/**/*.{js,html,css,json}'",
+    "format:check": "prettier --check 'frontend/**/*.{js,html,css,json}'",
+    "check": "npm run test:run && npm run lint && npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,7 +32,8 @@
     "portfolio",
     "firebase",
     "aws",
-    "web-development"
+    "web-development",
+    "full-stack"
   ],
   "author": "Chace Claborn",
   "license": "MIT",
@@ -29,6 +42,7 @@
     "eslint": "^8.56.0",
     "jsdom": "^23.2.0",
     "prettier": "^3.2.4",
+    "vite": "^5.4.19",
     "vitest": "^1.2.0"
   },
   "dependencies": {
