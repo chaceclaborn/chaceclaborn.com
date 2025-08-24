@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raeha's Personal Tab - Chace Claborn</title>
 
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/navigation.css" />
-    <link rel="stylesheet" href="../css/tier-styles.css" />
+    <!-- Only External Dependencies -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -56,34 +53,31 @@
         padding: 30px;
         border-radius: 15px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        transition:
-          transform 0.3s,
-          box-shadow 0.3s;
+        transition: all 0.3s ease;
       }
 
       .content-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
       }
 
       .content-card h2 {
-        color: #617140;
-        margin-bottom: 15px;
         font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: #617140;
         display: flex;
         align-items: center;
         gap: 10px;
       }
 
-      .content-card i {
-        font-size: 1.5rem;
-        color: #7a8a5a;
+      .content-card p {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 20px;
       }
 
+      /* Form Styles */
       .customization-form {
-        background: #f9fafb;
-        padding: 20px;
-        border-radius: 10px;
         margin-top: 20px;
       }
 
@@ -95,24 +89,23 @@
         display: block;
         margin-bottom: 8px;
         font-weight: 600;
-        color: #374151;
+        color: #333;
       }
 
       .form-group input,
-      .form-group textarea,
-      .form-group select {
+      .form-group select,
+      .form-group textarea {
         width: 100%;
-        padding: 10px;
-        border: 2px solid #e5e7eb;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
         border-radius: 8px;
         font-size: 1rem;
         transition: border-color 0.3s;
-        box-sizing: border-box;
       }
 
       .form-group input:focus,
-      .form-group textarea:focus,
-      .form-group select:focus {
+      .form-group select:focus,
+      .form-group textarea:focus {
         outline: none;
         border-color: #617140;
       }
@@ -126,27 +119,32 @@
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-        transition:
-          transform 0.3s,
-          box-shadow 0.3s;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
       }
 
       .submit-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(97, 113, 64, 0.3);
+        box-shadow: 0 5px 15px rgba(97, 113, 64, 0.3);
       }
 
+      /* Feature List */
       .feature-list {
         list-style: none;
         padding: 0;
       }
 
       .feature-list li {
-        padding: 10px 0;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
         display: flex;
         align-items: center;
         gap: 10px;
-        border-bottom: 1px solid #e5e7eb;
+        color: #555;
       }
 
       .feature-list li:last-child {
@@ -154,62 +152,29 @@
       }
 
       .feature-list i {
-        color: #10b981;
-      }
-
-      .future-features {
-        background: #f9fafb;
-        padding: 40px;
-        border-radius: 15px;
-        margin-bottom: 40px;
-      }
-
-      .future-features h2 {
         color: #617140;
-        margin-bottom: 20px;
       }
 
-      .future-features ul {
-        list-style: none;
-        padding: 0;
+      /* Photo Gallery */
+      .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
       }
 
-      .future-features li {
-        padding: 10px 0;
-        position: relative;
-        padding-left: 25px;
-      }
-
-      .future-features li::before {
-        content: "✨";
-        position: absolute;
-        left: 0;
-      }
-
-      .loading {
+      .photo-placeholder {
+        aspect-ratio: 1;
+        background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        border-radius: 10px;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
-        color: white;
+        color: #999;
+        font-size: 0.9rem;
       }
 
-      .spinner {
-        font-size: 3rem;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
+      /* Special Message */
       .special-message {
         background: #fef3c7;
         padding: 20px;
@@ -344,34 +309,41 @@
                 class="submit-btn"
                 onclick="alert('Feature coming soon!')"
               >
-                <i class="fas fa-images"></i> Upload Photos
+                <i class="fas fa-camera"></i> Upload Photos
               </button>
               <button
                 class="submit-btn"
                 onclick="alert('Feature coming soon!')"
               >
-                <i class="fas fa-palette"></i> Change Theme
+                <i class="fas fa-message"></i> Send Private Message
               </button>
-              <button
-                class="submit-btn"
-                onclick="alert('Feature coming soon!')"
-              >
-                <i class="fas fa-envelope"></i> Send Message
-              </button>
+            </div>
+          </div>
+
+          <!-- Photo Gallery Card -->
+          <div class="content-card">
+            <h2><i class="fas fa-images"></i> Our Photos</h2>
+            <div class="photo-gallery">
+              <div class="photo-placeholder">Photo 1</div>
+              <div class="photo-placeholder">Photo 2</div>
+              <div class="photo-placeholder">Photo 3</div>
+              <div class="photo-placeholder">Photo 4</div>
+            </div>
+            <div class="special-message">
+              <p>Photo gallery feature coming soon!</p>
             </div>
           </div>
         </div>
 
-        <!-- Future Features -->
-        <section class="future-features">
-          <h2><i class="fas fa-sparkles"></i> Coming Soon</h2>
-          <ul>
-            <li>...</li>
-          </ul>
+        <!-- Future Updates Section -->
+        <section class="welcome-section" style="margin-top: 40px">
+          <h2 style="color: white; margin-bottom: 15px">
+            <i class="fas fa-rocket"></i> Coming Soon
+          </h2>
           <p>
-            Have an idea for something you'd like to see here? Use the request
-            form above to let me know! I'll implement them as soon as possible
-            and they'll appear here in your personal tab.
+            More personalized features are on the way! If you have ideas, please
+            use the request form above to let me know! I'll implement them as
+            soon as possible and they'll appear here in your personal tab.
           </p>
         </section>
       </main>
@@ -384,23 +356,14 @@
       </footer>
     </div>
 
-    <!-- Scripts in Correct Order -->
-    <!-- Firebase Core FIRST -->
-    <script type="module" src="../js/firebase/config.js"></script>
-    <script type="module" src="../js/firebase/auth-service.js"></script>
-    <script type="module" src="../js/firebase/auth-tiers.js"></script>
+    <!-- 🎯 SINGLE VITE ENTRY POINT - Updated path! -->
+    <script type="module" src="/src/js/main.js"></script>
 
-    <!-- Auth Init SECOND -->
-    <script type="module" src="../js/auth-init.js"></script>
-
-    <!-- Navigation Component THIRD -->
-    <script type="module" src="../js/components/navigation.js"></script>
-
-    <!-- Page-Specific Protection (WITHOUT duplicate form handler) -->
+    <!-- Page-Specific Protection -->
     <script type="module">
-      import { auth, db } from "../js/firebase/config.js";
+      import { auth, db } from "/src/js/firebase/config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-      import { getUserTier, TIERS } from "../js/firebase/auth-tiers.js";
+      import { getUserTier, TIERS } from "/src/js/firebase/auth-tiers.js";
 
       // Wait for DOM to be ready
       document.addEventListener("DOMContentLoaded", () => {
@@ -427,17 +390,7 @@
             window.location.href = "../index.html?action=signin";
           }
         });
-
-        // REMOVED DUPLICATE FORM HANDLER - raeha-customization.js handles this
       });
     </script>
-
-    <!-- Raeha Customization Script (handles form submission) -->
-    <script type="module" src="../js/raeha-customization.js"></script>
-
-    <!-- Optional: Feedback Widget -->
-    <script type="module" src="../js/firebase/feedback-service.js"></script>
-    <!-- Mount React Auth Button -->
-    <script type="module" src="../js/components/auth-button-mount.js"></script>
   </body>
 </html>
