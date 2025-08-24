@@ -1,30 +1,59 @@
-// js/components/ImageCarousel.jsx
-import React, { useState, useEffect } from 'react';
+// frontend/js/components/ImageCarousel.jsx - Complete with all functionality
+import React, { useState, useEffect, useRef } from 'react'
 
 const ImageCarousel = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [currentSlide, setCurrentSlide] = useState(0)
+    const [isTransitioning, setIsTransitioning] = useState(false)
+    const intervalRef = useRef(null)
     
     const slides = [
         { src: '/images/manufacturing.png', alt: 'Manufacturing' },
         { src: '/images/hotfire_modified.jpg', alt: 'Hot Fire Test' },
         { src: '/images/graduation.jpeg', alt: 'Graduation' }
-    ];
+    ]
 
     // Auto-advance slides every 5 seconds
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 5000);
+        startAutoAdvance()
+        
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+            }
+        }
+    }, [])
 
-        return () => clearInterval(interval);
-    }, [slides.length]);
+    const startAutoAdvance = () => {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        
+        intervalRef.current = setInterval(() => {
+            goToNextSlide()
+        }, 5000)
+    }
+
+    const goToNextSlide = () => {
+        setCurrentSlide(prev => (prev + 1) % slides.length)
+    }
 
     const goToSlide = (index) => {
-        setCurrentSlide(index);
-    };
+        if (isTransitioning || index === currentSlide) return
+        
+        setIsTransitioning(true)
+        
+        // Clear and restart auto-advance
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        
+        setCurrentSlide(index)
+        
+        // Reset transitioning state
+        setTimeout(() => {
+            setIsTransitioning(false)
+            startAutoAdvance() // Restart auto-advance after manual selection
+        }, 1000)
+    }
 
     return (
-        <div className="image-panel">
+        <>
             <div className="image-slider">
                 {slides.map((slide, index) => (
                     <div 
@@ -47,8 +76,8 @@ const ImageCarousel = () => {
                     />
                 ))}
             </div>
-        </div>
-    );
-};
+        </>
+    )
+}
 
-export default ImageCarousel;
+export default ImageCarousel
