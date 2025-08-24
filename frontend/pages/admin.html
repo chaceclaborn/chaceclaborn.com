@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - Chace Claborn</title>
 
-    <!-- Your Site Stylesheets -->
-    <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/auth-styles.css" />
+    <!-- External Dependencies -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
 
-    <!-- Admin Specific Styles -->
+    <!-- Admin Dashboard Styles -->
     <style>
-      /* Admin Dashboard Styles - Matching Your Theme */
+      /* ============================================
+         ADMIN DASHBOARD CORE STYLES
+         ============================================ */
       .admin-container {
         max-width: 1400px;
         margin: 0 auto;
@@ -43,7 +43,9 @@
         opacity: 0.9;
       }
 
-      /* Stats Grid */
+      /* ============================================
+         STATISTICS GRID
+         ============================================ */
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -97,7 +99,9 @@
         font-weight: 600;
       }
 
-      /* Feedback Sections */
+      /* ============================================
+         FEEDBACK SECTIONS
+         ============================================ */
       .feedback-section {
         background: white;
         border-radius: 16px;
@@ -122,7 +126,9 @@
         font-weight: 600;
       }
 
-      /* Buttons matching your theme */
+      /* ============================================
+         BUTTONS
+         ============================================ */
       .btn-modern {
         background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
         color: white;
@@ -160,13 +166,63 @@
         margin-top: 10px;
       }
 
-      /* Action buttons container */
       .action-buttons {
         display: flex;
         gap: 10px;
       }
 
-      /* Ratings Grid */
+      /* ============================================
+         DISTRIBUTION CHART
+         ============================================ */
+      .distribution-chart {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+      }
+
+      .dist-bar {
+        flex: 1;
+        text-align: center;
+      }
+
+      .dist-label {
+        font-size: 14px;
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .dist-visual {
+        height: 120px;
+        background: #e5e7eb;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .dist-fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, #617140, #7a8b50);
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px 8px 0 0;
+      }
+
+      .dist-count {
+        margin-top: 8px;
+        font-weight: bold;
+        color: #2d3748;
+        font-size: 18px;
+      }
+
+      /* ============================================
+         RATINGS GRID
+         ============================================ */
       .ratings-grid {
         display: grid;
         gap: 15px;
@@ -213,7 +269,9 @@
         font-size: 20px;
       }
 
-      /* Comments Grid */
+      /* ============================================
+         COMMENTS GRID
+         ============================================ */
       .comments-grid {
         display: grid;
         gap: 20px;
@@ -275,54 +333,9 @@
         color: #92400e;
       }
 
-      /* Distribution Chart */
-      .distribution-chart {
-        display: flex;
-        gap: 15px;
-        margin-top: 25px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 12px;
-      }
-
-      .dist-bar {
-        flex: 1;
-        text-align: center;
-      }
-
-      .dist-label {
-        font-size: 14px;
-        color: #4a5568;
-        margin-bottom: 8px;
-        font-weight: 600;
-      }
-
-      .dist-visual {
-        height: 120px;
-        background: #e5e7eb;
-        border-radius: 8px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .dist-fill {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, #617140, #7a8b50);
-        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: 8px 8px 0 0;
-      }
-
-      .dist-count {
-        margin-top: 8px;
-        font-weight: bold;
-        color: #2d3748;
-        font-size: 18px;
-      }
-
-      /* Loading and Empty States */
+      /* ============================================
+         LOADING & EMPTY STATES
+         ============================================ */
       .loading {
         text-align: center;
         padding: 60px;
@@ -354,32 +367,9 @@
         color: #617140;
       }
 
-      /* Custom Scrollbar */
-      .ratings-grid::-webkit-scrollbar,
-      .comments-grid::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .ratings-grid::-webkit-scrollbar-track,
-      .comments-grid::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-      }
-
-      .ratings-grid::-webkit-scrollbar-thumb,
-      .comments-grid::-webkit-scrollbar-thumb {
-        background: #617140;
-        border-radius: 4px;
-      }
-
-      .ratings-grid::-webkit-scrollbar-thumb:hover,
-      .comments-grid::-webkit-scrollbar-thumb:hover {
-        background: #4a5a30;
-      }
-
-      /* ============================================ */
-      /* RAEHA'S CUSTOMIZATION PANEL STYLES - ADDED */
-      /* ============================================ */
+      /* ============================================
+         CUSTOMIZATION PANEL (RAEHA'S REQUESTS)
+         ============================================ */
       .admin-customization-panel {
         background: white;
         border-radius: 16px;
@@ -428,6 +418,11 @@
       .progress-count {
         background: #dbeafe;
         color: #1e40af;
+      }
+
+      .completed-count {
+        background: #d1fae5;
+        color: #065f46;
       }
 
       .admin-request-item {
@@ -577,27 +572,37 @@
         background: #10b981;
         color: white;
       }
-
       .btn-accept:hover {
         background: #059669;
       }
-
       .btn-complete {
         background: #3b82f6;
         color: white;
       }
-
       .btn-complete:hover {
         background: #2563eb;
       }
-
       .btn-reject {
         background: #ef4444;
         color: white;
       }
-
       .btn-reject:hover {
         background: #dc2626;
+      }
+
+      .btn-progress {
+        background: #f59e0b;
+        color: white;
+      }
+      .btn-progress:hover {
+        background: #d97706;
+      }
+      .btn-add-response {
+        background: #8b5cf6;
+        color: white;
+      }
+      .btn-add-response:hover {
+        background: #7c3aed;
       }
 
       .response-form {
@@ -666,7 +671,34 @@
         color: #6b7280;
       }
 
-      /* Responsive Design */
+      /* ============================================
+         CUSTOM SCROLLBARS
+         ============================================ */
+      .ratings-grid::-webkit-scrollbar,
+      .comments-grid::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-track,
+      .comments-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-thumb,
+      .comments-grid::-webkit-scrollbar-thumb {
+        background: #617140;
+        border-radius: 4px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-thumb:hover,
+      .comments-grid::-webkit-scrollbar-thumb:hover {
+        background: #4a5a30;
+      }
+
+      /* ============================================
+         RESPONSIVE DESIGN
+         ============================================ */
       @media (max-width: 768px) {
         .admin-container {
           padding: 80px 15px 30px;
@@ -692,8 +724,8 @@
       }
     </style>
   </head>
-  <body>
-    <!-- Header (Same as your other pages) -->
+  <body data-page="admin">
+    <!-- Header -->
     <header class="site-header">
       <div class="header-container">
         <div class="logo">
@@ -702,45 +734,11 @@
 
         <div class="nav-wrapper">
           <nav class="main-nav" id="mainNav">
-            <a href="../index.html" class="nav-link">Home</a>
-            <a href="portfolio.html" class="nav-link">Portfolio</a>
-            <a href="resume.html" class="nav-link">Resume</a>
-
-            <!-- Member Navigation -->
-            <div class="member-nav" id="memberNav" style="display: none">
-              <a href="private-projects.html" class="nav-link"
-                >Private Projects</a
-              >
-              <a href="games.html" class="nav-link">Games</a>
-            </div>
-
-            <!-- Tier Navigation -->
-            <a href="dashboard.html" class="nav-link tier-nav auth-nav"
-              >Dashboard</a
-            >
-            <a href="family.html" class="nav-link tier-nav family-nav"
-              >Family</a
-            >
-            <a href="girlfriend.html" class="nav-link tier-nav girlfriend-nav"
-              >Raeha's Tab</a
-            >
-            <a href="admin.html" class="nav-link tier-nav admin-nav active"
-              >Admin</a
-            >
+            <!-- Navigation will be injected by navigation.js -->
           </nav>
 
-          <!-- User Info -->
-          <div class="user-info" id="user-info" style="display: none">
-            <img class="user-avatar" id="user-photo" src="" alt="User Avatar" />
-            <span id="user-name" style="display: none"></span>
-            <span id="user-email" style="display: none"></span>
-            <a href="#" class="btn-modern sign-out-btn" id="logout-btn"
-              >Sign Out</a
-            >
-          </div>
-
-          <!-- Sign In Button -->
-          <a href="#" class="btn-modern" id="login-btn">Sign In</a>
+          <!-- React Auth Button Container -->
+          <div id="auth-button-container"></div>
 
           <!-- Mobile Menu Button -->
           <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -760,8 +758,7 @@
         <p class="admin-subtitle">Feedback Management System</p>
       </div>
 
-      <!-- RAEHA'S CUSTOMIZATION REQUESTS PANEL (ADDED) -->
-      <!-- This div will be populated by admin-customization-response.js -->
+      <!-- RAEHA'S CUSTOMIZATION REQUESTS PANEL -->
       <div id="customization-panel-container"></div>
 
       <!-- Statistics Cards -->
@@ -799,7 +796,7 @@
         </div>
       </div>
 
-      <!-- Rating Distribution -->
+      <!-- Rating Distribution Chart -->
       <div class="feedback-section">
         <div class="section-header">
           <h2 class="section-title">📈 Rating Distribution</h2>
@@ -896,10 +893,13 @@
     <!-- Mobile Menu Script -->
     <script src="../js/mobile-menu.js"></script>
 
-    <!-- Firebase Admin Script (YOUR EXISTING SCRIPT) -->
+    <!-- 🎯 SINGLE VITE ENTRY POINT -->
+    <script type="module" src="/src/js/main.js"></script>
+
+    <!-- Firebase Admin Script (COMPLETE FUNCTIONALITY) -->
     <script type="module">
       // Import Firebase and authentication
-      import { app, auth, db } from "../js/firebase/config.js";
+      import { app, auth, db } from "/src/js/firebase/config.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
       import {
         collection,
@@ -909,11 +909,6 @@
         deleteDoc,
         onSnapshot,
       } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-      // Import auth services for UI updates
-      import "../js/firebase/auth-service.js";
-      import "../js/firebase/auth-tiers.js";
-      import "../js/auth-init.js";
 
       // Check admin access
       onAuthStateChanged(auth, (user) => {
@@ -931,8 +926,6 @@
         await loadStats();
         await loadRatings();
         await loadComments();
-
-        // Set up real-time listeners
         setupRealtimeListeners();
       }
 
@@ -970,8 +963,8 @@
               const date = data.lastUpdated.toDate
                 ? data.lastUpdated.toDate()
                 : new Date(data.lastUpdated);
-              const timeAgo = getTimeAgo(date);
-              document.getElementById("last-update").textContent = timeAgo;
+              document.getElementById("last-update").textContent =
+                getTimeAgo(date);
             }
           } else {
             console.log("No stats document found");
@@ -981,7 +974,7 @@
         }
       }
 
-      // Load ratings
+      // Load individual ratings
       async function loadRatings() {
         try {
           const ratingsSnapshot = await getDocs(
@@ -991,11 +984,11 @@
 
           if (ratingsSnapshot.empty) {
             ratingsList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-star"></i>
-                            <p>No ratings yet</p>
-                        </div>
-                    `;
+              <div class="empty-state">
+                <i class="fas fa-star"></i>
+                <p>No ratings yet</p>
+              </div>
+            `;
             return;
           }
 
@@ -1025,21 +1018,22 @@
                 : new Date();
 
               return `
-                        <div class="rating-item">
-                            <div class="rating-user">
-                                <span class="user-email">${rating.email || "Anonymous"}</span>
-                                <span class="rating-time">${getTimeAgo(time)}</span>
-                            </div>
-                            <div class="rating-stars">
-                                ${[...Array(5)]
-                                  .map(
-                                    (_, i) =>
-                                      `<i class="fas fa-star" style="color: ${i < rating.rating ? "#fbbf24" : "#e5e7eb"}"></i>`
-                                  )
-                                  .join("")}
-                            </div>
-                        </div>
-                    `;
+                <div class="rating-item">
+                  <div class="rating-user">
+                    <span class="user-email">${rating.email || rating.id || "Anonymous"}</span>
+                    <span class="rating-time">${getTimeAgo(time)}</span>
+                  </div>
+                  <div class="rating-stars">
+                    ${[...Array(5)]
+                      .map(
+                        (_, i) =>
+                          `<i class="fa${i < rating.rating ? "s" : "r"} fa-star" 
+                            style="color: ${i < rating.rating ? "#fbbf24" : "#e5e7eb"}"></i>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `;
             })
             .join("");
 
@@ -1047,11 +1041,11 @@
         } catch (error) {
           console.error("Error loading ratings:", error);
           document.getElementById("ratings-list").innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Error loading ratings: ${error.message}</p>
-                    </div>
-                `;
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Error loading ratings: ${error.message}</p>
+            </div>
+          `;
         }
       }
 
@@ -1068,11 +1062,11 @@
 
           if (commentsSnapshot.empty) {
             commentsList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-comments"></i>
-                            <p>No feedback comments yet</p>
-                        </div>
-                    `;
+              <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <p>No feedback comments yet</p>
+              </div>
+            `;
             return;
           }
 
@@ -1102,27 +1096,27 @@
                 : new Date();
 
               return `
-                        <div class="comment-item">
-                            <div class="comment-header">
-                                <span class="comment-user">${comment.email || "Anonymous"}</span>
-                                <span class="comment-time">${getTimeAgo(time)}</span>
-                            </div>
-                            <div class="comment-text">${escapeHtml(comment.text)}</div>
-                            ${
-                              comment.rating
-                                ? `
-                                <div class="comment-rating">
-                                    <i class="fas fa-star"></i>
-                                    ${comment.rating} / 5
-                                </div>
-                            `
-                                : ""
-                            }
-                            <button class="btn-modern btn-delete" onclick="deleteComment('${comment.id}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    `;
+                <div class="comment-item">
+                  <div class="comment-header">
+                    <span class="comment-user">${comment.email || "Anonymous"}</span>
+                    <span class="comment-time">${getTimeAgo(time)}</span>
+                  </div>
+                  <div class="comment-text">${escapeHtml(comment.text || comment.feedback || "")}</div>
+                  ${
+                    comment.rating
+                      ? `
+                    <div class="comment-rating">
+                      <i class="fas fa-star"></i>
+                      ${comment.rating} / 5
+                    </div>
+                  `
+                      : ""
+                  }
+                  <button class="btn-modern btn-delete" onclick="deleteComment('${comment.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              `;
             })
             .join("");
 
@@ -1130,11 +1124,11 @@
         } catch (error) {
           console.error("Error loading comments:", error);
           document.getElementById("comments-list").innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Error loading comments: ${error.message}</p>
-                    </div>
-                `;
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Error loading comments: ${error.message}</p>
+            </div>
+          `;
         }
       }
 
@@ -1188,7 +1182,7 @@
             const time = data.timestamp?.toDate
               ? data.timestamp.toDate().toISOString()
               : "N/A";
-            csv += `"${data.email || "Anonymous"}",${data.rating},"${time}"\n`;
+            csv += `"${data.email || doc.id || "Anonymous"}",${data.rating},"${time}"\n`;
           });
 
           downloadCSV(csv, "ratings_export.csv");
@@ -1208,7 +1202,8 @@
             const time = data.timestamp?.toDate
               ? data.timestamp.toDate().toISOString()
               : "N/A";
-            csv += `"${data.email || "Anonymous"}",${data.rating || "N/A"},"${data.text.replace(/"/g, '""')}","${time}"\n`;
+            const text = (data.text || data.feedback || "").replace(/"/g, '""');
+            csv += `"${data.email || "Anonymous"}",${data.rating || "N/A"},"${text}","${time}"\n`;
           });
 
           downloadCSV(csv, "feedback_export.csv");
@@ -1242,18 +1237,17 @@
         URL.revokeObjectURL(url);
       }
 
-      // Expose functions globally
+      // Expose functions globally for onclick handlers
       window.loadRatings = loadRatings;
       window.loadComments = loadComments;
+      window.getTimeAgo = getTimeAgo;
+      window.escapeHtml = escapeHtml;
     </script>
 
-    <!-- RAEHA'S CUSTOMIZATION RESPONSE COMPONENT (ADDED) -->
-    <script type="module" src="../js/admin-customization-response.js"></script>
-
-    <!-- Navigation Component THIRD -->
-    <script type="module" src="../js/components/navigation.js"></script>
-
-    <!-- Mount React Auth Button -->
-    <script type="module" src="../js/components/auth-button-mount.js"></script>
+    <!-- RAEHA'S CUSTOMIZATION RESPONSE COMPONENT -->
+    <script
+      type="module"
+      src="/src/js/admin-customization-response.js"
+    ></script>
   </body>
 </html>

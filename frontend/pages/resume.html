@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resume - Chace Claborn</title>
 
-    <!-- Only External Dependencies -->
+    <!-- External Dependencies -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -21,7 +21,9 @@
           </div>
 
           <div class="nav-wrapper">
-            <nav class="main-nav" id="mainNav"></nav>
+            <nav class="main-nav" id="mainNav">
+              <!-- Navigation will be injected by navigation.js -->
+            </nav>
 
             <!-- React Auth Button Container -->
             <div id="auth-button-container"></div>
@@ -48,12 +50,16 @@
                 style="margin: 0 auto 1rem"
               />
               <h1
-                style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem"
+                style="
+                  color: var(--dark-green);
+                  font-size: 2.5rem;
+                  margin-bottom: 0.5rem;
+                "
               >
                 Chace Taylor Claborn
               </h1>
               <p class="current-position">
-                Manufacturing Process Engineer II – Machine Shop at Blue Origin
+                Manufacturing Engineer II – BE-3U Turbomachinery
               </p>
             </div>
 
@@ -62,13 +68,14 @@
               <div class="contact-info">
                 <h3><i class="fas fa-contact-card"></i> Contact</h3>
                 <p><i class="fas fa-envelope"></i> chaceclaborn@gmail.com</p>
-                <p><i class="fas fa-phone"></i> (256) 874-9532</p>
-                <p><i class="fas fa-map-marker-alt"></i> Seattle, WA</p>
+                <p><i class="fas fa-phone"></i> 205-983-2755</p>
+                <p><i class="fas fa-map-marker-alt"></i> Madison, AL 35757</p>
                 <p>
                   <i class="fab fa-linkedin"></i>
                   <a
                     href="https://linkedin.com/in/chace-claborn-3b4b1017b"
                     target="_blank"
+                    style="color: var(--primary-green)"
                     >LinkedIn Profile</a
                   >
                 </p>
@@ -78,9 +85,9 @@
               <div class="education-info">
                 <h3><i class="fas fa-graduation-cap"></i> Education</h3>
                 <p><strong>Auburn University</strong></p>
-                <p>Bachelor of Science</p>
-                <p>Mechanical Engineering</p>
-                <p>Graduated: May 2022</p>
+                <p>Bachelor of Science in Mechanical Engineering</p>
+                <p>Graduated: 2022</p>
+                <p><strong>GPA: 3.79</strong></p>
               </div>
             </div>
           </div>
@@ -88,7 +95,7 @@
           <!-- Download Button -->
           <div class="download-section">
             <a
-              href="/files/Resume - Chace Claborn.pdf"
+              href="/files/Chace Claborn Resume.pdf"
               download
               class="btn-modern"
             >
@@ -100,102 +107,168 @@
           <div class="resume-section">
             <h2><i class="fas fa-briefcase"></i> Professional Experience</h2>
 
+            <!-- Blue Origin - Current Position -->
             <div class="resume-item">
               <h3>Manufacturing Process Engineer II – Machine Shop</h3>
               <p>
-                <strong>Blue Origin</strong> •
-                <span class="date">June 2024 – Present</span>
+                <strong>Blue Origin</strong> • Huntsville, AL •
+                <span class="date">July 2022 – Present</span>
+                <em>(45-50 hours per week)</em>
               </p>
               <ul>
                 <li>
-                  Lead process engineering initiatives for machining operations
-                  supporting rocket engine production
+                  Lead GD&T application and design-for-manufacturability
+                  feedback for turbomachinery, valves, and other engine
+                  components - reducing cycle time, minimizing non-conformances,
+                  and improving part Cpk values
                 </li>
                 <li>
-                  Develop and optimize CNC programs for complex aerospace
-                  components
+                  Leverage CAD/CAM software to design custom fixtures and
+                  tooling, analyze CNC programs, redline engineering drawings,
+                  generate exploded assembly views—supporting efficient
+                  machining and enhanced part manufacturability
                 </li>
                 <li>
-                  Implement lean manufacturing principles to improve efficiency
-                  and reduce waste
+                  Drive machining process development and standardization for
+                  CNC operations in support of rocket engine hardware
                 </li>
                 <li>
-                  Collaborate with design engineering teams to ensure
-                  manufacturability of new products
+                  Designed and implemented CNC probing routines and macros to
+                  streamline setup processes, reduce manual intervention, and
+                  eliminate variation in critical dimensions
+                </li>
+                <li>
+                  Led iterative NPI process refinement, utilizing root cause
+                  analysis and continuous feedback loops to optimize machining
+                  techniques and drive successful production outcomes
+                </li>
+                <li>
+                  Collaborate with external vendors to implement cutting tool
+                  trials and enhance software (e.g., Vericut for CNC simulation,
+                  PLC programming for Hydroforming press) to improve machining
+                  precision and process efficiency
+                </li>
+                <li>
+                  Organize best practices, conduct RCCAs, and facilitate
+                  knowledge transfer among machinists and programmers
                 </li>
               </ul>
             </div>
 
+            <!-- Blue Origin - Previous Role -->
             <div class="resume-item">
-              <h3>Manufacturing Engineer I</h3>
+              <h3>Component Manufacturing Engineer I-II</h3>
               <p>
-                <strong>Blue Origin</strong> •
-                <span class="date">May 2023 – June 2024</span>
+                <strong>Blue Origin</strong> • Huntsville, AL •
+                <span class="date">July 2022 – June 2024</span>
               </p>
               <ul>
                 <li>
-                  Supported New Shepard and New Glenn vehicle production through
-                  process optimization
+                  Develop and update manufacturing work instructions and support
+                  the shop floor for BE-4 and BE-3U rocket engine components
+                  such as turbomachinery, valves, and various other components
                 </li>
                 <li>
-                  Created work instructions and process documentation for
-                  critical manufacturing operations
+                  Perform comprehensive engineering analysis and dispositions of
+                  non-conformances, applying advanced problem-solving techniques
+                  to ensure compliance with design specifications and production
+                  standards
                 </li>
                 <li>
-                  Conducted root cause analysis and implemented corrective
-                  actions for production issues
+                  Defines, develops, implements, and optimizes Hydroformed parts
+                  and equipment consisting of exotic materials, dies, and other
+                  supporting tooling; operates, troubleshoots, and programs
+                  recipes for new hardware
                 </li>
                 <li>
-                  Managed tooling and fixture design projects from concept to
-                  implementation
+                  Utilize Python and SQL for data analysis, creating queries and
+                  scripts to identify trends, track non-conformances, and
+                  support manufacturing improvements (e.g., building dashboards
+                  and visualizations on Redash and Databricks)
+                </li>
+                <li>
+                  Apply Lean manufacturing principles to streamline workflows
+                  and drive continuous improvement, utilizing ITS JIRA to track
+                  team progress, manage tasks, and align objectives with
+                  operational goals
+                </li>
+                <li>
+                  Track project milestones and collaborate with cross-functional
+                  teams to ensure on-time delivery of insourced components,
+                  driving vertical integration and enhancing production workflow
                 </li>
               </ul>
             </div>
 
+            <!-- Aerojet Rocketdyne -->
             <div class="resume-item">
-              <h3>Manufacturing Engineering Co-op</h3>
+              <h3>Systems/Test Engineer Intern</h3>
               <p>
-                <strong>Blue Origin</strong> •
-                <span class="date">May 2022 – May 2023</span>
+                <strong>Aerojet Rocketdyne</strong> • Huntsville/Decatur, AL •
+                <span class="date">May 2021 – August 2021</span>
+                <em>(40 hrs/week)</em>
               </p>
               <ul>
                 <li>
-                  Developed and maintained manufacturing processes for rocket
-                  engine components
+                  Reviewed and updated Field Service Manuals that specified
+                  rocket engine test procedures for Atlas/Delta RL10
                 </li>
                 <li>
-                  Utilized CAD software to design tooling and fixtures for
-                  production operations
+                  Monitored rocket engine testing & assembly to ensure
+                  procedures were followed and safety precautions were observed
                 </li>
                 <li>
-                  Participated in continuous improvement initiatives resulting
-                  in 20% cycle time reduction
+                  Performed inspection of engine components, interfaces, and
+                  test configuration to ensure acceptability per procedures
                 </li>
                 <li>
-                  Assisted in the qualification of new manufacturing equipment
-                  and processes
+                  Developed an operational procedure that specified the handling
+                  and usage of rocket motor/engine shock recorders
                 </li>
               </ul>
             </div>
 
+            <!-- Precision Grinding Inc -->
             <div class="resume-item">
-              <h3>Previous Engineering Experience</h3>
+              <h3>Process Engineer/Quality Inspector Intern</h3>
               <p>
-                <strong>Various Positions</strong> •
-                <span class="date">2019 – 2022</span>
+                <strong>Precision Grinding Inc.</strong> • Birmingham, AL •
+                <span class="date">May 2020 – January 2021</span>
+                <em>(36 hrs/week)</em>
               </p>
               <ul>
                 <li>
-                  <strong>ACME Engineering:</strong> Product Development Intern
-                  - Designed and tested mechanical systems
+                  Responsible for reading detailed drawings and close-tolerance
+                  part inspection of machined and fabricated steel parts
                 </li>
                 <li>
-                  <strong>Dynetics:</strong> Engineering Intern - Supported
-                  aerospace and defense projects
+                  Wrote scripts for Hexagon Romer Arm on PolyWorks to inspect
+                  and reverse-engineer parts using CMM and utilized manual
+                  gauges for precision measurements
                 </li>
                 <li>
-                  <strong>Auburn University:</strong> Research Assistant -
-                  Conducted materials testing and analysis
+                  Documented inspection results and generated quality reports,
+                  applying GD&T controls for compliance
+                </li>
+                <li>
+                  Accomplished writing a Standard Operating Procedure for CMM to
+                  help future company employees
+                </li>
+              </ul>
+            </div>
+
+            <!-- WhiteFab Inc -->
+            <div class="resume-item">
+              <h3>Machine Shop Department Intern (Part-Time)</h3>
+              <p>
+                <strong>WhiteFab Inc.</strong> • Birmingham, AL •
+                <span class="date">May 2017 – August 2020</span>
+                <em>(2 hrs/week)</em>
+              </p>
+              <ul>
+                <li>
+                  Gained experience with CNC Vertical Machines, CAD, lathes,
+                  forklifts, overhead cranes, and fabrication of steel parts
                 </li>
               </ul>
             </div>
@@ -206,69 +279,132 @@
             <h2><i class="fas fa-tools"></i> Technical Skills</h2>
 
             <div class="skills-section">
+              <!-- CAD/CAM Software -->
               <div class="skills-category">
-                <h3>Engineering Software</h3>
+                <h3>CAD/CAM Software</h3>
                 <div class="skills-list">
+                  <span class="skill-tag">Creo Parametric</span>
+                  <span class="skill-tag">Siemens NX</span>
                   <span class="skill-tag">SolidWorks</span>
-                  <span class="skill-tag">CATIA</span>
-                  <span class="skill-tag">NX</span>
-                  <span class="skill-tag">ANSYS</span>
-                  <span class="skill-tag">MATLAB</span>
-                  <span class="skill-tag">Mastercam</span>
                 </div>
               </div>
 
+              <!-- Programming & Tools -->
               <div class="skills-category">
-                <h3>Manufacturing</h3>
+                <h3>Programming & Software</h3>
                 <div class="skills-list">
-                  <span class="skill-tag">CNC Programming</span>
+                  <span class="skill-tag">SQL</span>
+                  <span class="skill-tag">Python</span>
+                  <span class="skill-tag">MATLAB</span>
+                  <span class="skill-tag">G-Code</span>
+                  <span class="skill-tag">Siemens 840D</span>
+                  <span class="skill-tag">ITS Jira</span>
+                  <span class="skill-tag">Windchill PLM</span>
+                  <span class="skill-tag">Internal MES</span>
+                </div>
+              </div>
+
+              <!-- Manufacturing -->
+              <div class="skills-category">
+                <h3>Manufacturing & Engineering</h3>
+                <div class="skills-list">
+                  <span class="skill-tag">Manufacturing Ideology</span>
                   <span class="skill-tag">GD&T</span>
+                  <span class="skill-tag">3D Printing</span>
+                  <span class="skill-tag">Instrumentation</span>
+                  <span class="skill-tag">Testing</span>
+                  <span class="skill-tag">R&D</span>
+                  <span class="skill-tag">Production</span>
+                  <span class="skill-tag">CNC Programming</span>
+                  <span class="skill-tag">Hydroforming</span>
                   <span class="skill-tag">Lean Manufacturing</span>
-                  <span class="skill-tag">Six Sigma</span>
                   <span class="skill-tag">Process Optimization</span>
                   <span class="skill-tag">Quality Control</span>
                 </div>
               </div>
 
+              <!-- Data Analysis & Visualization -->
               <div class="skills-category">
-                <h3>Programming & Tools</h3>
+                <h3>Data Analysis & Visualization</h3>
                 <div class="skills-list">
-                  <span class="skill-tag">Python</span>
-                  <span class="skill-tag">JavaScript</span>
-                  <span class="skill-tag">HTML/CSS</span>
-                  <span class="skill-tag">Git</span>
-                  <span class="skill-tag">SQL</span>
-                  <span class="skill-tag">Arduino</span>
+                  <span class="skill-tag">Redash</span>
+                  <span class="skill-tag">Databricks</span>
+                  <span class="skill-tag">Tableau</span>
+                  <span class="skill-tag">Microsoft Office</span>
+                </div>
+              </div>
+
+              <!-- Advanced Tools -->
+              <div class="skills-category">
+                <h3>Advanced Engineering Tools</h3>
+                <div class="skills-list">
+                  <span class="skill-tag">Vericut</span>
+                  <span class="skill-tag">PLC Programming</span>
+                  <span class="skill-tag">PolyWorks</span>
+                  <span class="skill-tag">CMM Programming</span>
+                  <span class="skill-tag">Hexagon Romer Arm</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Projects & Achievements -->
+          <!-- Key Achievements & Highlights -->
           <div class="resume-section">
-            <h2><i class="fas fa-trophy"></i> Key Achievements</h2>
+            <h2><i class="fas fa-trophy"></i> Key Achievements & Highlights</h2>
             <div class="resume-item">
               <ul>
                 <li>
-                  Reduced machining cycle time by 30% through process
-                  optimization and tooling improvements
+                  <strong>GPA 3.79</strong> - Bachelor of Science in Mechanical
+                  Engineering from Auburn University
                 </li>
                 <li>
-                  Led cross-functional team in implementing new quality control
-                  system, reducing defects by 25%
+                  Led GD&T application initiatives that reduced cycle time and
+                  improved part Cpk values for rocket engine components
                 </li>
                 <li>
-                  Developed automated data collection system for production
-                  metrics tracking
+                  Implemented CNC probing routines and macros that streamlined
+                  setup processes and eliminated variation in critical
+                  dimensions
                 </li>
                 <li>
-                  Recipient of Blue Origin's "Innovation Award" for
-                  manufacturing process improvements
+                  Successfully drove NPI (New Product Introduction) process
+                  refinement through root cause analysis and continuous feedback
+                  loops
                 </li>
                 <li>
-                  Published research paper on advanced materials in aerospace
-                  applications
+                  Developed automated data analysis systems using Python and SQL
+                  for manufacturing trend identification and non-conformance
+                  tracking
                 </li>
+                <li>
+                  Applied Lean manufacturing principles to enhance production
+                  workflows and drive continuous improvement initiatives
+                </li>
+                <li>
+                  Contributed to vertical integration efforts ensuring on-time
+                  delivery of insourced components for BE-4 and BE-3U rocket
+                  engines
+                </li>
+                <li>
+                  Created Standard Operating Procedures (SOPs) for CMM
+                  operations, improving knowledge transfer and training
+                  efficiency
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Certifications & Professional Development -->
+          <div class="resume-section">
+            <h2><i class="fas fa-certificate"></i> Professional Development</h2>
+            <div class="resume-item">
+              <ul>
+                <li>Advanced GD&T Application and Analysis</li>
+                <li>CNC Programming and Optimization</li>
+                <li>Lean Manufacturing and Six Sigma Principles</li>
+                <li>Root Cause Corrective Action (RCCA) Methodology</li>
+                <li>Aerospace Quality Management Systems</li>
+                <li>Advanced Materials and Exotic Alloys Processing</li>
               </ul>
             </div>
           </div>
@@ -302,7 +438,7 @@
       </footer>
     </div>
 
-    <!-- 🎯 SINGLE VITE ENTRY POINT - Updated path! -->
+    <!-- 🎯 SINGLE VITE ENTRY POINT -->
     <script type="module" src="/src/js/main.js"></script>
   </body>
 </html>
