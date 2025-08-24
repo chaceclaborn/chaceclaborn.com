@@ -70,6 +70,7 @@ personal/
 private/
 files/
 images/
+frontend/public/images/*
 
 # Node modules
 node_modules/
