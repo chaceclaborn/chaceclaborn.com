@@ -9,6 +9,7 @@ import '../styles/auth-styles.css'
 import '../styles/tier-styles.css'
 import '../styles/chatbot.css'
 import '../styles/feedback-widget.css'
+import '../styles/family.css'
 
 // ============================================
 // IMPORT FIREBASE & CORE MODULES
