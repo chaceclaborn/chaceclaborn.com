@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Chace Claborn</title>
+    <link rel="stylesheet" href="/styles/main.css" />
+
+    <!-- External Dependencies -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <!-- Admin Dashboard Styles -->
+    <style>
+      /* ============================================
+         ADMIN DASHBOARD CORE STYLES
+         ============================================ */
+      .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 100px 20px 40px;
+      }
+
+      .admin-header {
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        color: white;
+        text-align: center;
+      }
+
+      .admin-header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .admin-subtitle {
+        font-size: 18px;
+        opacity: 0.9;
+      }
+
+      /* ============================================
+         STATISTICS GRID
+         ============================================ */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+        border: 1px solid #e5e7eb;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
+        color: white;
+      }
+
+      .stat-value {
+        font-size: 42px;
+        font-weight: bold;
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .stat-label {
+        color: #718096;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      /* ============================================
+         FEEDBACK SECTIONS
+         ============================================ */
+      .feedback-section {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .section-title {
+        font-size: 24px;
+        color: #2d3748;
+        font-weight: 600;
+      }
+
+      /* ============================================
+         BUTTONS
+         ============================================ */
+      .btn-modern {
+        background: linear-gradient(135deg, #617140 0%, #4a5a30 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(97, 113, 64, 0.3);
+      }
+
+      .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(97, 113, 64, 0.4);
+      }
+
+      .btn-export {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      }
+
+      .btn-export:hover {
+        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+      }
+
+      .btn-delete {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        padding: 8px 16px;
+        font-size: 12px;
+        margin-top: 10px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      /* ============================================
+         DISTRIBUTION CHART
+         ============================================ */
+      .distribution-chart {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+      }
+
+      .dist-bar {
+        flex: 1;
+        text-align: center;
+      }
+
+      .dist-label {
+        font-size: 14px;
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .dist-visual {
+        height: 120px;
+        background: #e5e7eb;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .dist-fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, #617140, #7a8b50);
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px 8px 0 0;
+      }
+
+      .dist-count {
+        margin-top: 8px;
+        font-weight: bold;
+        color: #2d3748;
+        font-size: 18px;
+      }
+
+      /* ============================================
+         RATINGS GRID
+         ============================================ */
+      .ratings-grid {
+        display: grid;
+        gap: 15px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .rating-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #617140;
+        transition: background 0.2s;
+      }
+
+      .rating-item:hover {
+        background: #f0f1f3;
+      }
+
+      .rating-user {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .user-email {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 16px;
+      }
+
+      .rating-time {
+        font-size: 13px;
+        color: #718096;
+      }
+
+      .rating-stars {
+        display: flex;
+        gap: 3px;
+        font-size: 20px;
+      }
+
+      /* ============================================
+         COMMENTS GRID
+         ============================================ */
+      .comments-grid {
+        display: grid;
+        gap: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .comment-item {
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #9333ea;
+        transition: all 0.2s;
+      }
+
+      .comment-item:hover {
+        background: #f0f1f3;
+        transform: translateX(5px);
+      }
+
+      .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .comment-user {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 16px;
+      }
+
+      .comment-time {
+        font-size: 13px;
+        color: #718096;
+      }
+
+      .comment-text {
+        color: #4a5568;
+        line-height: 1.7;
+        margin-top: 12px;
+        font-size: 15px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .comment-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #92400e;
+      }
+
+      /* ============================================
+         LOADING & EMPTY STATES
+         ============================================ */
+      .loading {
+        text-align: center;
+        padding: 60px;
+        color: #718096;
+      }
+
+      .loading i {
+        font-size: 36px;
+        animation: spin 1s linear infinite;
+        color: #617140;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: #a0aec0;
+      }
+
+      .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+        color: #617140;
+      }
+
+      /* ============================================
+         CUSTOMIZATION PANEL (RAEHA'S REQUESTS)
+         ============================================ */
+      .admin-customization-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin: 0 0 30px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+      }
+
+      .admin-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .admin-panel-header h2 {
+        color: #2d3748;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .admin-stats {
+        display: flex;
+        gap: 10px;
+      }
+
+      .stat-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .pending-count {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .progress-count {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .completed-count {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .admin-request-item {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+      }
+
+      .admin-request-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .request-header-admin {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+      }
+
+      .request-info {
+        flex: 1;
+      }
+
+      .request-from {
+        font-weight: 600;
+        color: #8b5cf6;
+        margin-bottom: 5px;
+      }
+
+      .request-timestamp {
+        color: #6b7280;
+        font-size: 0.9rem;
+      }
+
+      .request-content {
+        margin: 15px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+      }
+
+      .request-type-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .type-design {
+        background: #fce7f3;
+        color: #be185d;
+      }
+      .type-feature {
+        background: #e0e7ff;
+        color: #4338ca;
+      }
+      .type-content {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .type-photo {
+        background: #f3e8ff;
+        color: #7c3aed;
+      }
+      .type-other {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+
+      .priority-indicator {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .priority-urgent {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+      .priority-high {
+        background: #fed7aa;
+        color: #c2410c;
+      }
+      .priority-normal {
+        background: #dbeafe;
+        color: #2563eb;
+      }
+      .priority-low {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .request-status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .status-in-progress {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .admin-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .admin-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-accept {
+        background: #10b981;
+        color: white;
+      }
+      .btn-accept:hover {
+        background: #059669;
+      }
+      .btn-complete {
+        background: #3b82f6;
+        color: white;
+      }
+      .btn-complete:hover {
+        background: #2563eb;
+      }
+      .btn-reject {
+        background: #ef4444;
+        color: white;
+      }
+      .btn-reject:hover {
+        background: #dc2626;
+      }
+
+      .btn-progress {
+        background: #f59e0b;
+        color: white;
+      }
+      .btn-progress:hover {
+        background: #d97706;
+      }
+      .btn-add-response {
+        background: #8b5cf6;
+        color: white;
+      }
+      .btn-add-response:hover {
+        background: #7c3aed;
+      }
+
+      .response-form {
+        margin-top: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        display: none;
+      }
+
+      .response-form.active {
+        display: block;
+      }
+
+      .response-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        resize: vertical;
+      }
+
+      .response-textarea:focus {
+        outline: none;
+        border-color: #8b5cf6;
+      }
+
+      .response-submit {
+        background: #8b5cf6;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .response-submit:hover {
+        background: #7c3aed;
+      }
+
+      .existing-response {
+        margin-top: 15px;
+        padding: 12px;
+        background: #f0fdf4;
+        border-left: 3px solid #10b981;
+        border-radius: 6px;
+      }
+
+      .response-label {
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+      }
+
+      .response-text {
+        color: #374151;
+      }
+
+      .loading-admin {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+      }
+
+      /* ============================================
+         CUSTOM SCROLLBARS
+         ============================================ */
+      .ratings-grid::-webkit-scrollbar,
+      .comments-grid::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-track,
+      .comments-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-thumb,
+      .comments-grid::-webkit-scrollbar-thumb {
+        background: #617140;
+        border-radius: 4px;
+      }
+
+      .ratings-grid::-webkit-scrollbar-thumb:hover,
+      .comments-grid::-webkit-scrollbar-thumb:hover {
+        background: #4a5a30;
+      }
+
+      /* ============================================
+         RESPONSIVE DESIGN
+         ============================================ */
+      @media (max-width: 768px) {
+        .admin-container {
+          padding: 80px 15px 30px;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .btn-modern {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .distribution-chart {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="admin">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="logo">
+          <span class="logo-text">chaceclaborn.com</span>
+        </div>
+
+        <div class="nav-wrapper">
+          <nav class="main-nav" id="mainNav">
+            <!-- Navigation will be injected by navigation.js -->
+          </nav>
+
+          <!-- React Auth Button Container -->
+          <div id="auth-button-container"></div>
+
+          <!-- Mobile Menu Button -->
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Dashboard Content -->
+    <div class="admin-container">
+      <!-- Dashboard Header -->
+      <div class="admin-header">
+        <h1>📊 Admin Dashboard</h1>
+        <p class="admin-subtitle">Feedback Management System</p>
+      </div>
+
+      <!-- RAEHA'S CUSTOMIZATION REQUESTS PANEL -->
+      <div id="customization-panel-container"></div>
+
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-value" id="avg-rating">0.0</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-value" id="total-ratings">0</div>
+          <div class="stat-label">Total Ratings</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="stat-value" id="total-comments">0</div>
+          <div class="stat-label">Feedback Comments</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-value" id="last-update">--</div>
+          <div class="stat-label">Last Activity</div>
+        </div>
+      </div>
+
+      <!-- Rating Distribution Chart -->
+      <div class="feedback-section">
+        <div class="section-header">
+          <h2 class="section-title">📈 Rating Distribution</h2>
+        </div>
+        <div class="distribution-chart" id="distribution-chart">
+          <div class="dist-bar">
+            <div class="dist-label">⭐ 1</div>
+            <div class="dist-visual">
+              <div class="dist-fill" id="dist-1" style="height: 0%"></div>
+            </div>
+            <div class="dist-count" id="count-1">0</div>
+          </div>
+          <div class="dist-bar">
+            <div class="dist-label">⭐ 2</div>
+            <div class="dist-visual">
+              <div class="dist-fill" id="dist-2" style="height: 0%"></div>
+            </div>
+            <div class="dist-count" id="count-2">0</div>
+          </div>
+          <div class="dist-bar">
+            <div class="dist-label">⭐ 3</div>
+            <div class="dist-visual">
+              <div class="dist-fill" id="dist-3" style="height: 0%"></div>
+            </div>
+            <div class="dist-count" id="count-3">0</div>
+          </div>
+          <div class="dist-bar">
+            <div class="dist-label">⭐ 4</div>
+            <div class="dist-visual">
+              <div class="dist-fill" id="dist-4" style="height: 0%"></div>
+            </div>
+            <div class="dist-count" id="count-4">0</div>
+          </div>
+          <div class="dist-bar">
+            <div class="dist-label">⭐ 5</div>
+            <div class="dist-visual">
+              <div class="dist-fill" id="dist-5" style="height: 0%"></div>
+            </div>
+            <div class="dist-count" id="count-5">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Ratings -->
+      <div class="feedback-section">
+        <div class="section-header">
+          <h2 class="section-title">⭐ Recent Ratings</h2>
+          <div class="action-buttons">
+            <button class="btn-modern btn-export" onclick="exportRatings()">
+              <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button class="btn-modern" onclick="loadRatings()">
+              <i class="fas fa-sync"></i> Refresh
+            </button>
+          </div>
+        </div>
+        <div id="ratings-list" class="ratings-grid">
+          <div class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading ratings...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Comments -->
+      <div class="feedback-section">
+        <div class="section-header">
+          <h2 class="section-title">💬 Feedback Comments</h2>
+          <div class="action-buttons">
+            <button class="btn-modern btn-export" onclick="exportComments()">
+              <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button class="btn-modern" onclick="loadComments()">
+              <i class="fas fa-sync"></i> Refresh
+            </button>
+          </div>
+        </div>
+        <div id="comments-list" class="comments-grid">
+          <div class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading feedback...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <p class="copyright">&copy; 2025 Chace Claborn. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Mobile Menu Script -->
+    <script src="../js/mobile-menu.js"></script>
+
+    <!-- 🎯 SINGLE VITE ENTRY POINT -->
+    <script type="module" src="/main.js"></script>
+
+    <!-- Firebase Admin Script (COMPLETE FUNCTIONALITY) -->
+    <script type="module">
+      // Import Firebase and authentication
+      import { app, auth, db } from "/services/firebase/config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      import {
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        deleteDoc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+      // Check admin access
+      onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== "chaceclaborn@gmail.com") {
+          alert("Admin access only! Redirecting to home...");
+          window.location.href = "../index.html";
+        } else {
+          console.log("✅ Admin authenticated:", user.email);
+          loadAllData();
+        }
+      });
+
+      // Load all data
+      async function loadAllData() {
+        await loadStats();
+        await loadRatings();
+        await loadComments();
+        setupRealtimeListeners();
+      }
+
+      // Load statistics
+      async function loadStats() {
+        try {
+          const statsDoc = await getDoc(doc(db, "feedback_stats", "aggregate"));
+
+          if (statsDoc.exists()) {
+            const data = statsDoc.data();
+
+            // Update stats display
+            document.getElementById("avg-rating").textContent = (
+              data.averageRating || 0
+            ).toFixed(1);
+            document.getElementById("total-ratings").textContent =
+              data.totalRatings || 0;
+
+            // Update distribution chart
+            if (data.distribution) {
+              const maxCount = Math.max(...Object.values(data.distribution), 1);
+
+              for (let i = 1; i <= 5; i++) {
+                const count = data.distribution[i] || 0;
+                const percentage = (count / maxCount) * 100;
+
+                document.getElementById(`dist-${i}`).style.height =
+                  `${percentage}%`;
+                document.getElementById(`count-${i}`).textContent = count;
+              }
+            }
+
+            // Update last activity
+            if (data.lastUpdated) {
+              const date = data.lastUpdated.toDate
+                ? data.lastUpdated.toDate()
+                : new Date(data.lastUpdated);
+              document.getElementById("last-update").textContent =
+                getTimeAgo(date);
+            }
+          } else {
+            console.log("No stats document found");
+          }
+        } catch (error) {
+          console.error("Error loading stats:", error);
+        }
+      }
+
+      // Load individual ratings
+      async function loadRatings() {
+        try {
+          const ratingsSnapshot = await getDocs(
+            collection(db, "feedback_ratings")
+          );
+          const ratingsList = document.getElementById("ratings-list");
+
+          if (ratingsSnapshot.empty) {
+            ratingsList.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-star"></i>
+                <p>No ratings yet</p>
+              </div>
+            `;
+            return;
+          }
+
+          const ratings = [];
+          ratingsSnapshot.forEach((doc) => {
+            ratings.push({ id: doc.id, ...doc.data() });
+          });
+
+          // Sort by timestamp (newest first)
+          ratings.sort((a, b) => {
+            const timeA = a.timestamp?.toDate
+              ? a.timestamp.toDate()
+              : new Date(a.timestamp || 0);
+            const timeB = b.timestamp?.toDate
+              ? b.timestamp.toDate()
+              : new Date(b.timestamp || 0);
+            return timeB - timeA;
+          });
+
+          // Display ratings
+          ratingsList.innerHTML = ratings
+            .map((rating) => {
+              const time = rating.timestamp
+                ? rating.timestamp.toDate
+                  ? rating.timestamp.toDate()
+                  : new Date(rating.timestamp)
+                : new Date();
+
+              return `
+                <div class="rating-item">
+                  <div class="rating-user">
+                    <span class="user-email">${rating.email || rating.id || "Anonymous"}</span>
+                    <span class="rating-time">${getTimeAgo(time)}</span>
+                  </div>
+                  <div class="rating-stars">
+                    ${[...Array(5)]
+                      .map(
+                        (_, i) =>
+                          `<i class="fa${i < rating.rating ? "s" : "r"} fa-star" 
+                            style="color: ${i < rating.rating ? "#fbbf24" : "#e5e7eb"}"></i>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+
+          console.log(`Loaded ${ratings.length} ratings`);
+        } catch (error) {
+          console.error("Error loading ratings:", error);
+          document.getElementById("ratings-list").innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Error loading ratings: ${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Load comments
+      async function loadComments() {
+        try {
+          const commentsSnapshot = await getDocs(
+            collection(db, "feedback_comments")
+          );
+          const commentsList = document.getElementById("comments-list");
+
+          document.getElementById("total-comments").textContent =
+            commentsSnapshot.size;
+
+          if (commentsSnapshot.empty) {
+            commentsList.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <p>No feedback comments yet</p>
+              </div>
+            `;
+            return;
+          }
+
+          const comments = [];
+          commentsSnapshot.forEach((doc) => {
+            comments.push({ id: doc.id, ...doc.data() });
+          });
+
+          // Sort by timestamp (newest first)
+          comments.sort((a, b) => {
+            const timeA = a.timestamp?.toDate
+              ? a.timestamp.toDate()
+              : new Date(a.timestamp || 0);
+            const timeB = b.timestamp?.toDate
+              ? b.timestamp.toDate()
+              : new Date(b.timestamp || 0);
+            return timeB - timeA;
+          });
+
+          // Display comments
+          commentsList.innerHTML = comments
+            .map((comment) => {
+              const time = comment.timestamp
+                ? comment.timestamp.toDate
+                  ? comment.timestamp.toDate()
+                  : new Date(comment.timestamp)
+                : new Date();
+
+              return `
+                <div class="comment-item">
+                  <div class="comment-header">
+                    <span class="comment-user">${comment.email || "Anonymous"}</span>
+                    <span class="comment-time">${getTimeAgo(time)}</span>
+                  </div>
+                  <div class="comment-text">${escapeHtml(comment.text || comment.feedback || "")}</div>
+                  ${
+                    comment.rating
+                      ? `
+                    <div class="comment-rating">
+                      <i class="fas fa-star"></i>
+                      ${comment.rating} / 5
+                    </div>
+                  `
+                      : ""
+                  }
+                  <button class="btn-modern btn-delete" onclick="deleteComment('${comment.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              `;
+            })
+            .join("");
+
+          console.log(`Loaded ${comments.length} comments`);
+        } catch (error) {
+          console.error("Error loading comments:", error);
+          document.getElementById("comments-list").innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>Error loading comments: ${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Set up real-time listeners
+      function setupRealtimeListeners() {
+        // Listen to stats changes
+        onSnapshot(doc(db, "feedback_stats", "aggregate"), (doc) => {
+          if (doc.exists()) {
+            loadStats();
+          }
+        });
+
+        // Listen to ratings changes
+        onSnapshot(collection(db, "feedback_ratings"), () => {
+          loadRatings();
+        });
+
+        // Listen to comments changes
+        onSnapshot(collection(db, "feedback_comments"), () => {
+          loadComments();
+        });
+      }
+
+      // Helper function to get time ago
+      function getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+
+        if (seconds < 60) return "just now";
+        if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+        if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
+
+        return date.toLocaleDateString();
+      }
+
+      // Helper function to escape HTML
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Export functions
+      window.exportRatings = async function () {
+        try {
+          const snapshot = await getDocs(collection(db, "feedback_ratings"));
+          let csv = "Email,Rating,Timestamp\n";
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const time = data.timestamp?.toDate
+              ? data.timestamp.toDate().toISOString()
+              : "N/A";
+            csv += `"${data.email || doc.id || "Anonymous"}",${data.rating},"${time}"\n`;
+          });
+
+          downloadCSV(csv, "ratings_export.csv");
+        } catch (error) {
+          console.error("Export error:", error);
+          alert("Error exporting ratings");
+        }
+      };
+
+      window.exportComments = async function () {
+        try {
+          const snapshot = await getDocs(collection(db, "feedback_comments"));
+          let csv = "Email,Rating,Comment,Timestamp\n";
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const time = data.timestamp?.toDate
+              ? data.timestamp.toDate().toISOString()
+              : "N/A";
+            const text = (data.text || data.feedback || "").replace(/"/g, '""');
+            csv += `"${data.email || "Anonymous"}",${data.rating || "N/A"},"${text}","${time}"\n`;
+          });
+
+          downloadCSV(csv, "feedback_export.csv");
+        } catch (error) {
+          console.error("Export error:", error);
+          alert("Error exporting feedback");
+        }
+      };
+
+      window.deleteComment = async function (commentId) {
+        if (confirm("Are you sure you want to delete this comment?")) {
+          try {
+            await deleteDoc(doc(db, "feedback_comments", commentId));
+            console.log("Comment deleted");
+            loadComments();
+          } catch (error) {
+            console.error("Delete error:", error);
+            alert("Error deleting comment");
+          }
+        }
+      };
+
+      // Helper function to download CSV
+      function downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // Expose functions globally for onclick handlers
+      window.loadRatings = loadRatings;
+      window.loadComments = loadComments;
+      window.getTimeAgo = getTimeAgo;
+      window.escapeHtml = escapeHtml;
+    </script>
+
+    <!-- RAEHA'S CUSTOMIZATION RESPONSE COMPONENT -->
+    <script
+      type="module"
+      src="/src/js/admin-customization-response.js"
+    ></script>
+  </body>
+</html>
