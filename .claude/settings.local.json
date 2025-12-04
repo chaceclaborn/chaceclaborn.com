@@ -15,7 +15,10 @@
       "Bash(timeout /t 2 /nobreak)",
       "Bash(findstr:*)",
       "Bash(powershell -Command \"Stop-Process -Id 16908 -Force\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(del \"E:\\Coding\\Website\\src\\middleware.ts\")"
     ],
     "deny": [],
     "ask": []

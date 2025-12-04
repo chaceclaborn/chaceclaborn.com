@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useMemo, useState, useCallback } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Html } from '@react-three/drei';
+import { OrbitControls, Stars, Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { leoSatellites, meoSatellites, geoSatellites, type SatelliteData } from '@/data/satellites';
 
@@ -102,7 +102,7 @@ function OrbitPath({ altitude, inclination, color }: { altitude: number; inclina
   const scaledAltitude = scaleAltitude(altitude);
 
   const points = useMemo(() => {
-    const pts = [];
+    const pts: [number, number, number][] = [];
     const radius = 1 + scaledAltitude;
     const incRad = (inclination * Math.PI) / 180;
 
@@ -111,19 +111,19 @@ function OrbitPath({ altitude, inclination, color }: { altitude: number; inclina
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * Math.sin(incRad) * radius;
       const z = Math.sin(angle) * Math.cos(incRad) * radius;
-      pts.push(new THREE.Vector3(x, y, z));
+      pts.push([x, y, z]);
     }
     return pts;
   }, [scaledAltitude, inclination]);
 
-  const geometry = useMemo(() => {
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [points]);
-
   return (
-    <line geometry={geometry}>
-      <lineBasicMaterial color={color} transparent opacity={0.15} />
-    </line>
+    <Line
+      points={points}
+      color={color}
+      transparent
+      opacity={0.15}
+      lineWidth={1}
+    />
   );
 }
 

@@ -112,7 +112,7 @@ export function Hero() {
               <Button asChild variant="outline" size="lg" className="group">
                 <Link href="/resume">
                   View Resume
-                  <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
             </div>
