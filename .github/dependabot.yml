@@ -1,47 +1,22 @@
 version: 2
 updates:
-  # JavaScript/Node.js dependencies
+  # JavaScript/Node.js dependencies - monthly, grouped
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "America/Chicago"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "chaceclaborn"
-    labels:
-      - "dependencies"
-      - "security"
-    commit-message:
-      prefix: "deps"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
-      # Group minor and patch updates together
-      minor-and-patch:
+      all-dependencies:
         patterns:
           - "*"
-        update-types:
-          - "minor"
-          - "patch"
-      # Keep major updates separate for review
-    ignore:
-      # Ignore major version updates for React (review manually)
-      - dependency-name: "react"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "react-dom"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "next"
-        update-types: ["version-update:semver-major"]
 
-  # GitHub Actions
+  # GitHub Actions - monthly, grouped
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "ci"
+      interval: "monthly"
+    groups:
+      all-actions:
+        patterns:
+          - "*"
