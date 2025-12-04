@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Windows reserved names
 nul
+
+# Large files (upload with: yarn upload:large)
+/public/large-files/

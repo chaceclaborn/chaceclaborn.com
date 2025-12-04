@@ -146,9 +146,11 @@ export default function ResumePage() {
           </div>
 
           {/* Download Button */}
-          <Button size="lg" className="group">
-            <Download className="mr-2 h-4 w-4" />
-            Download Resume PDF
+          <Button asChild size="lg" className="group">
+            <a href="/files/Chace Claborn Resume.pdf" download>
+              <Download className="mr-2 h-4 w-4" />
+              Download Resume PDF
+            </a>
           </Button>
         </motion.div>
 

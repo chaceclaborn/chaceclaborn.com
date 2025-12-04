@@ -3,17 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Rocket, Cog, Wrench, Building2 } from 'lucide-react';
 import { Github, Linkedin, Mail, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-// Dev placeholder slides with gradient backgrounds and icons
+// Carousel slides with images
 const carouselSlides = [
-  { color: 'from-primary/40 to-sage-500/20', label: 'Rocket Propulsion', Icon: Rocket },
-  { color: 'from-sage-600/40 to-primary/20', label: 'Manufacturing', Icon: Cog },
-  { color: 'from-sage-700/40 to-sage-400/20', label: 'Engineering', Icon: Wrench },
-  { color: 'from-primary/30 to-sage-600/30', label: 'Blue Origin', Icon: Building2 },
+  { src: '/images/carousel/rocket_engine.jpg', label: 'Rocket Propulsion' },
 ];
 
 export function Hero() {
@@ -126,51 +123,63 @@ export function Hero() {
             className="relative"
           >
             <div className="aspect-[4/3] rounded-xl overflow-hidden bg-muted relative group shadow-lg">
-              {/* Placeholder slides with gradients and icons */}
+              {/* Image slides */}
               {carouselSlides.map((slide, index) => (
                 <div
                   key={index}
-                  className={`absolute inset-0 transition-opacity duration-700 bg-gradient-to-br ${slide.color} flex flex-col items-center justify-center ${
+                  className={`absolute inset-0 transition-opacity duration-700 ${
                     index === currentImage ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
-                  <slide.Icon className="h-20 w-20 md:h-28 md:w-28 text-primary/60 mb-4" />
-                  <span className="text-xl md:text-2xl font-semibold text-foreground/70">{slide.label}</span>
-                  <span className="text-sm text-muted-foreground mt-2">Coming Soon</span>
+                  <Image
+                    src={slide.src}
+                    alt={slide.label}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                  {/* Label overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <span className="text-white text-lg font-semibold">{slide.label}</span>
+                  </div>
                 </div>
               ))}
 
-              {/* Navigation */}
-              <button
-                onClick={prevImage}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
-                aria-label="Next image"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-
-              {/* Indicators */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {carouselSlides.map((_, index) => (
+              {/* Navigation - only show if more than 1 slide */}
+              {carouselSlides.length > 1 && (
+                <>
                   <button
-                    key={index}
-                    onClick={() => setCurrentImage(index)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      index === currentImage
-                        ? 'w-6 bg-primary'
-                        : 'w-1.5 bg-background/60 hover:bg-background/80'
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
-                  />
-                ))}
-              </div>
+                    onClick={prevImage}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+
+                  {/* Indicators */}
+                  <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {carouselSlides.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImage(index)}
+                        className={`h-1.5 rounded-full transition-all ${
+                          index === currentImage
+                            ? 'w-6 bg-white'
+                            : 'w-1.5 bg-white/60 hover:bg-white/80'
+                        }`}
+                        aria-label={`Go to image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         </div>
