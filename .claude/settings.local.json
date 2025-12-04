@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn dev:*)",
+      "Bash(yarn add:*)",
+      "Bash(taskkill:*)",
+      "Bash(dir:*)",
+      "Bash(public/images/README.txt)",
+      "Bash(for file in portfolio.html resume.html admin.html girlfriend.html family.html)",
+      "Bash(do sed -i '/<\\/title>/a\\    <link rel=\"\"stylesheet\"\" href=\"\"/styles/main.css\"\" />' \"$file\")",
+      "Bash(cat:*)",
+      "Bash(src/styles/main.css)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 16908 -Force\")",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(del \"E:\\Coding\\Website\\src\\middleware.ts\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Area - Chace Claborn</title>
+    <link rel="stylesheet" href="/styles/main.css" />
+
+    <!-- External Dependencies -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body data-page="family">
+    <!-- Loading State -->
+    <div id="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Checking family access...</p>
+    </div>
+
+    <!-- Main Family Content (Hidden Initially) -->
+    <div id="family-container" style="display: none">
+      <!-- Header -->
+      <header class="site-header">
+        <div class="header-container">
+          <div class="logo">
+            <span class="logo-text">chaceclaborn.com</span>
+          </div>
+
+          <div class="nav-wrapper">
+            <nav class="main-nav" id="mainNav">
+              <!-- Navigation will be injected by navigation.js -->
+            </nav>
+
+            <!-- React Auth Button Container -->
+            <div id="auth-button-container"></div>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Family Main Content -->
+      <main class="main-content">
+        <div class="content-wrapper">
+          <!-- Hero Section -->
+          <section class="family-hero fade-in">
+            <div class="hero-content">
+              <h1 class="hero-title">
+                <i class="fas fa-home"></i> Family Area
+              </h1>
+              <p class="hero-subtitle">
+                Welcome to our private family space! Only family members can see
+                this content.
+              </p>
+            </div>
+          </section>
+
+          <!-- Static HTML Content (No React for now) -->
+          <div class="family-content-grid">
+            <!-- Family Photos Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-images"></i> Family Photos</h2>
+              </div>
+              <div class="card-content">
+                <p>Our latest family photos and memories.</p>
+                <div class="photo-grid">
+                  <div class="photo-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>Photo 1</span>
+                  </div>
+                  <div class="photo-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>Photo 2</span>
+                  </div>
+                  <div class="photo-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>Photo 3</span>
+                  </div>
+                  <div class="photo-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>Photo 4</span>
+                  </div>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Photo upload coming soon!')"
+                >
+                  <i class="fas fa-upload"></i> Upload Photos
+                </button>
+              </div>
+            </section>
+
+            <!-- Family Updates Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-newspaper"></i> Family Updates</h2>
+              </div>
+              <div class="card-content">
+                <p>Latest news and updates from the family.</p>
+                <div class="updates-list">
+                  <div class="update-item">
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Add your family updates here</span>
+                  </div>
+                  <div class="update-item">
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Share important dates and events</span>
+                  </div>
+                  <div class="update-item">
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Keep everyone in the loop</span>
+                  </div>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Update posting coming soon!')"
+                >
+                  <i class="fas fa-plus"></i> Post Update
+                </button>
+              </div>
+            </section>
+
+            <!-- Private Documents Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-file-alt"></i> Private Documents</h2>
+              </div>
+              <div class="card-content">
+                <p>Important family documents and information.</p>
+                <div class="document-list">
+                  <div class="document-item">
+                    <i class="fas fa-address-book"></i>
+                    <span>Family contact information</span>
+                  </div>
+                  <div class="document-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>Emergency contacts</span>
+                  </div>
+                  <div class="document-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Important dates to remember</span>
+                  </div>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Document management coming soon!')"
+                >
+                  <i class="fas fa-folder-open"></i> View Documents
+                </button>
+              </div>
+            </section>
+
+            <!-- Family Calendar Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-calendar-alt"></i> Family Calendar</h2>
+              </div>
+              <div class="card-content">
+                <p>Upcoming family events and birthdays.</p>
+                <div class="calendar-preview">
+                  <div class="event-item">
+                    <i class="fas fa-birthday-cake"></i>
+                    <span>Birthday reminders</span>
+                  </div>
+                  <div class="event-item">
+                    <i class="fas fa-users"></i>
+                    <span>Family gatherings</span>
+                  </div>
+                  <div class="event-item">
+                    <i class="fas fa-star"></i>
+                    <span>Special occasions</span>
+                  </div>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Calendar feature coming soon!')"
+                >
+                  <i class="fas fa-calendar-plus"></i> Add Event
+                </button>
+              </div>
+            </section>
+
+            <!-- Family Chat Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-comments"></i> Family Chat</h2>
+              </div>
+              <div class="card-content">
+                <p>Stay connected with family members.</p>
+                <div class="chat-preview">
+                  <div class="chat-message">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Private family messaging coming soon!</span>
+                  </div>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Chat feature coming soon!')"
+                >
+                  <i class="fas fa-message"></i> Open Chat
+                </button>
+              </div>
+            </section>
+
+            <!-- Family Tree Card -->
+            <section class="content-card">
+              <div class="card-header">
+                <h2><i class="fas fa-tree"></i> Family Tree</h2>
+              </div>
+              <div class="card-content">
+                <p>Explore our family genealogy.</p>
+                <div class="tree-preview">
+                  <i class="fas fa-sitemap fa-3x"></i>
+                </div>
+                <button
+                  class="btn-modern"
+                  onclick="alert('Family tree feature coming soon!')"
+                >
+                  <i class="fas fa-search"></i> View Family Tree
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <!-- Coming Soon Section -->
+          <section class="info-section">
+            <h2><i class="fas fa-rocket"></i> More Features Coming Soon</h2>
+            <p>
+              We're working on adding more features to make this space even
+              better for our family. If you have ideas or suggestions, please
+              let me know!
+            </p>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-content">
+          <p>&copy; 2025 Chace Claborn. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- 🎯 SINGLE VITE ENTRY POINT -->
+    <script type="module" src="/main.js"></script>
+
+    <!-- Page-Specific Family Protection -->
+    <script type="module">
+      import { auth, db } from "/services/firebase/config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+      import { getUserTier, TIERS } from "/services/firebase/auth-tiers.js";
+
+      // Check family access
+      onAuthStateChanged(auth, async (user) => {
+        const loading = document.getElementById("loading");
+        const content = document.getElementById("family-container");
+
+        if (user) {
+          const userTier = await getUserTier();
+
+          // Allow access if user is family tier OR admin
+          const hasAccess =
+            userTier === TIERS.FAMILY || userTier === TIERS.ADMIN;
+
+          if (hasAccess) {
+            console.log("✅ Family access granted:", user.email);
+            loading.style.display = "none";
+            content.style.display = "block";
+          } else {
+            // Redirect if no access
+            console.log("❌ Access denied for:", user.email);
+            alert("This page is for family members only.");
+            window.location.href = "../index.html?error=access-denied";
+          }
+        } else {
+          // Redirect to home if not logged in
+          console.log("❌ No user signed in");
+          window.location.href = "../index.html?action=signin";
+        }
+      });
+    </script>
+  </body>
+</html>
