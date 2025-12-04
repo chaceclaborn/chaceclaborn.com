@@ -25,6 +25,14 @@ const orbitTypes = [
   { name: 'Starlink', description: 'SpaceX Starlink', altitude: '~550 km', color: '#00bfff', count: starlinkSatellites.length },
 ];
 
+// Speed presets for visualization
+const speedPresets = [
+  { label: '1x', value: 1, description: 'Real-time' },
+  { label: '60x', value: 60, description: '1 min = 1 hour' },
+  { label: '360x', value: 360, description: '10 sec = 1 hour' },
+  { label: '1440x', value: 1440, description: '1 min = 1 day' },
+];
+
 export default function EarthPage() {
   const [showOrbits, setShowOrbits] = useState(true);
   const [selectedOrbit, setSelectedOrbit] = useState<string | null>(null);
@@ -85,51 +93,43 @@ export default function EarthPage() {
         </div>
       </motion.div>
 
-      {/* Title */}
+      {/* Title - positioned to not cover Earth on mobile */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="absolute top-16 left-1/2 -translate-x-1/2 text-center z-10"
+        className="absolute top-16 md:top-20 right-4 md:right-auto md:left-1/2 md:-translate-x-1/2 text-right md:text-center z-10"
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 flex items-center gap-2 justify-center">
-          <Globe className="h-6 w-6" />
+        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-1 flex items-center gap-2 justify-end md:justify-center">
+          <Globe className="h-5 w-5 md:h-6 md:w-6" />
           Earth & Satellites
         </h1>
-        <p className="text-white/50 text-sm">Click satellites to view details • {currentSatellites.length} satellites shown</p>
+        <p className="text-white/50 text-xs md:text-sm hidden md:block">Click satellites to view details • {currentSatellites.length} satellites</p>
       </motion.div>
 
-      {/* Speed Control */}
+      {/* Speed Control - hidden on small mobile, shown on larger screens */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3 }}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
+        className="absolute right-4 top-32 md:left-4 md:right-auto md:top-1/2 md:-translate-y-1/2 z-10"
       >
-        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-          <div className="text-white/40 text-xs mb-2 text-center">Speed</div>
-          <div className="flex flex-col items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSpeed(Math.min(3, speed + 0.5))}
-              className="h-7 w-7 text-white hover:bg-white/20"
-            >
-              <span className="text-lg">+</span>
-            </Button>
-            <div className="py-2 text-center">
-              <span className="text-white font-medium text-sm">{speed.toFixed(1)}x</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSpeed(Math.max(0, speed - 0.5))}
-              className="h-7 w-7 text-white hover:bg-white/20"
-            >
-              <span className="text-lg">−</span>
-            </Button>
+        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-white/10">
+          <div className="text-white/40 text-[10px] md:text-xs mb-1.5 md:mb-2 text-center">Speed</div>
+          <div className="flex flex-row md:flex-col items-center gap-1">
+            {speedPresets.map((preset) => (
+              <Button
+                key={preset.value}
+                variant="ghost"
+                size="sm"
+                onClick={() => setSpeed(preset.value)}
+                className={`text-[10px] md:text-xs h-6 md:h-7 px-2 md:px-3 md:w-full ${speed === preset.value ? 'bg-white/20 text-white' : 'text-white/60 hover:bg-white/10'}`}
+              >
+                {preset.label}
+              </Button>
+            ))}
           </div>
-          <div className="mt-2 pt-2 border-t border-white/10">
+          <div className="hidden md:block mt-2 pt-2 border-t border-white/10">
             <Button
               variant="ghost"
               size="icon"
@@ -139,22 +139,25 @@ export default function EarthPage() {
               {speed === 0 ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </Button>
           </div>
+          <div className="hidden md:block mt-2 text-[10px] text-white/30 text-center">
+            {speed === 1 ? 'Real-time' : `${speed}x faster`}
+          </div>
         </div>
       </motion.div>
 
-      {/* Orbit Filter Buttons */}
+      {/* Orbit Filter Buttons - scrollable on mobile */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-20 md:bottom-16 left-0 right-0 px-4 z-10"
       >
-        <div className="flex gap-2 flex-wrap justify-center">
+        <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-hide">
           <Button
             variant="secondary"
             size="sm"
             onClick={() => { setSelectedOrbit(null); setSelectedSatellite(null); }}
-            className={`backdrop-blur-sm border-white/10 text-white hover:bg-white/20 ${!selectedOrbit ? 'bg-white/25 ring-1 ring-white/40' : 'bg-black/60'}`}
+            className={`backdrop-blur-sm border-white/10 text-white hover:bg-white/20 text-xs whitespace-nowrap flex-shrink-0 ${!selectedOrbit ? 'bg-white/25 ring-1 ring-white/40' : 'bg-black/60'}`}
           >
             All ({leoSatellites.length + meoSatellites.length + geoSatellites.length})
           </Button>
@@ -164,34 +167,34 @@ export default function EarthPage() {
               variant="secondary"
               size="sm"
               onClick={() => { setSelectedOrbit(selectedOrbit === orbit.name ? null : orbit.name); setSelectedSatellite(null); }}
-              className="backdrop-blur-sm border-white/10 text-white hover:bg-white/20 bg-black/60"
+              className="backdrop-blur-sm border-white/10 text-white hover:bg-white/20 bg-black/60 text-xs whitespace-nowrap flex-shrink-0"
               style={{
                 backgroundColor: selectedOrbit === orbit.name ? `${orbit.color}30` : undefined,
                 borderColor: selectedOrbit === orbit.name ? orbit.color : undefined,
               }}
             >
-              <span className="w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: orbit.color }} />
+              <span className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0" style={{ backgroundColor: orbit.color }} />
               {orbit.name} ({orbit.count})
             </Button>
           ))}
         </div>
       </motion.div>
 
-      {/* Satellite Details Panel */}
+      {/* Satellite Details Panel - bottom sheet on mobile, side panel on desktop */}
       <AnimatePresence>
         {selectedSatellite && (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-72 z-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute left-4 right-4 bottom-32 md:left-auto md:right-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-auto md:w-72 z-20"
           >
-            <Card className="bg-black/80 backdrop-blur-sm border-white/20">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
+            <Card className="bg-black/90 backdrop-blur-sm border-white/20">
+              <CardContent className="p-3 md:p-4">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
                   <div>
-                    <h3 className="text-white font-semibold text-lg">{selectedSatellite.name}</h3>
-                    <p className="text-white/50 text-xs">{selectedSatellite.category}</p>
+                    <h3 className="text-white font-semibold text-base md:text-lg">{selectedSatellite.name}</h3>
+                    <p className="text-white/50 text-[10px] md:text-xs">{selectedSatellite.category}</p>
                   </div>
                   <button
                     onClick={() => setSelectedSatellite(null)}
@@ -252,12 +255,12 @@ export default function EarthPage() {
         )}
       </AnimatePresence>
 
-      {/* Satellite List Panel (when no satellite selected) */}
+      {/* Satellite List Panel (when no satellite selected) - hidden on mobile */}
       {showInfo && !selectedSatellite && (
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-64 z-10"
+          className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 w-64 z-10"
         >
           <Card className="bg-black/60 backdrop-blur-sm border-white/10">
             <CardContent className="p-3">

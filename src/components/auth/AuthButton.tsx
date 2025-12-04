@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, LogOut, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/auth-context';
 
 export function AuthButton() {
   const { user, tier, loading, signInWithGoogle, signOut } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleSignIn = async () => {
     setIsSigningIn(true);
@@ -39,6 +39,8 @@ export function AuthButton() {
   }
 
   if (user) {
+    const showPhoto = user.photoURL && !imageError;
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -49,12 +51,21 @@ export function AuthButton() {
           <span className="text-sm font-medium">{user.displayName?.split(' ')[0]}</span>
           <span className="text-xs text-muted-foreground capitalize">{tier.name}</span>
         </div>
-        <Avatar className="h-8 w-8 border border-primary/20">
-          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-            {user.displayName?.charAt(0) || 'U'}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative h-8 w-8 rounded-full overflow-hidden border border-primary/20 bg-primary">
+          {showPhoto ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName || 'User'}
+              className="h-full w-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-primary-foreground text-xs font-medium">
+              {user.displayName?.charAt(0) || 'U'}
+            </div>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"

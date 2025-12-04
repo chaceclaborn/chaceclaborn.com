@@ -22,19 +22,12 @@ export const metadata: Metadata = {
     default: "Chace Claborn | Propulsion Design Engineer",
     template: "%s | Chace Claborn",
   },
-  description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer at Blue Origin, Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
-  keywords: ["Propulsion Engineer", "Design Engineer", "Blue Origin", "Auburn University", "Aerospace", "Rocket Engines", "Manufacturing"],
+  description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer and Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
+  keywords: ["Propulsion Engineer", "Design Engineer", "Auburn University", "Aerospace", "Rocket Engines", "Manufacturing"],
   authors: [{ name: "Chace Claborn" }],
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/apple-touch-icon.png',
-  },
   openGraph: {
     title: "Chace Claborn | Propulsion Design Engineer",
-    description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer at Blue Origin",
+    description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer and Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
     url: "https://chaceclaborn.com",
     siteName: "Chace Claborn Portfolio",
     type: "website",

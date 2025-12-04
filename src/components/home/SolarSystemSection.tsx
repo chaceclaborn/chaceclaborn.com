@@ -30,12 +30,9 @@ export function SolarSystemSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            Solar System Simulation
+          <h2 className="text-2xl md:text-3xl font-bold">
+            Solar System
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Interactive 3D visualization of our solar system. Click explore to view in fullscreen.
-          </p>
         </motion.div>
 
         <motion.div

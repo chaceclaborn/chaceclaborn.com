@@ -66,16 +66,12 @@ export function Hero() {
               <p className="text-xl md:text-2xl text-primary font-semibold">
                 Propulsion Design Engineer
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Blue Origin
-              </p>
             </div>
 
             {/* Bio */}
             <p className="text-muted-foreground text-center lg:text-left max-w-lg leading-relaxed">
-              Auburn University graduate and Propulsion Design Engineer at Blue Origin.
-              Passionate about aerospace engineering, rocket propulsion systems, and building
-              innovative solutions for space exploration.
+              Auburn University graduate and aerospace engineer passionate about rocket propulsion
+              systems, manufacturing innovation, and building solutions for space exploration.
             </p>
 
             {/* Social Links */}
@@ -122,7 +118,7 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="relative"
           >
-            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-muted relative group shadow-lg">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-card relative group shadow-xl border border-border/50">
               {/* Image slides */}
               {carouselSlides.map((slide, index) => (
                 <div
