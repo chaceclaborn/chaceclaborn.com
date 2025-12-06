@@ -18,7 +18,8 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(mkdir:*)",
-      "Bash(del \"E:\\Coding\\Website\\src\\middleware.ts\")"
+      "Bash(del \"E:\\Coding\\Website\\src\\middleware.ts\")",
+      "Bash(yarn build:*)"
     ],
     "deny": [],
     "ask": []

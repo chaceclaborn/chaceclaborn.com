@@ -31,7 +31,7 @@ export function SolarSystemSection() {
           className="text-center mb-8"
         >
           <h2 className="text-2xl md:text-3xl font-bold">
-            Solar System
+            Solar System Simulation
           </h2>
         </motion.div>
 

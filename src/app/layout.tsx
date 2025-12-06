@@ -19,15 +19,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Chace Claborn | Propulsion Design Engineer",
+    default: "Chace Claborn | Mechanical Engineer",
     template: "%s | Chace Claborn",
   },
-  description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer and Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
-  keywords: ["Propulsion Engineer", "Design Engineer", "Auburn University", "Aerospace", "Rocket Engines", "Manufacturing"],
+  description: "Professional portfolio of Chace Claborn - Mechanical Engineer and propulsion design engineer for turbomachinery. Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
+  keywords: ["Mechanical Engineer", "Propulsion Engineer", "Turbomachinery", "Auburn University", "Aerospace", "Rocket Engines", "Manufacturing"],
   authors: [{ name: "Chace Claborn" }],
   openGraph: {
-    title: "Chace Claborn | Propulsion Design Engineer",
-    description: "Professional portfolio of Chace Claborn - Propulsion Design Engineer and Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
+    title: "Chace Claborn | Mechanical Engineer",
+    description: "Professional portfolio of Chace Claborn - Mechanical Engineer and propulsion design engineer for turbomachinery. Auburn University graduate specializing in aerospace engineering and rocket propulsion systems.",
     url: "https://chaceclaborn.com",
     siteName: "Chace Claborn Portfolio",
     type: "website",

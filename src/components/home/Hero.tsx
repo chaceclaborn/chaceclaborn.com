@@ -30,9 +30,9 @@ export function Hero() {
   }, [nextImage]);
 
   return (
-    <section className="py-16 md:py-20">
+    <section className="pt-8 pb-12 md:py-20">
       <div className="container max-w-7xl mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Column - Profile Info */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -47,12 +47,15 @@ export function Hero() {
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 className="relative group"
               >
-                <Avatar className="h-40 w-40 md:h-48 md:w-48 border-4 border-primary/40 shadow-lg transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
-                  <AvatarImage src="/images/profile.jpg" alt="Chace Claborn" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
-                    CC
-                  </AvatarFallback>
-                </Avatar>
+                {/* Outer ring with padding to prevent clipping */}
+                <div className="h-40 w-40 md:h-48 md:w-48 rounded-full border-4 border-primary/40 p-1 shadow-lg transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 bg-background">
+                  <Avatar className="h-full w-full">
+                    <AvatarImage src="/images/profile.jpg" alt="Chace Claborn" className="!h-[110%] !w-[110%] object-cover object-top -translate-y-[4%]" />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
+                      CC
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
               </motion.div>
@@ -64,13 +67,13 @@ export function Hero() {
                 Chace Claborn
               </h1>
               <p className="text-xl md:text-2xl text-primary font-semibold">
-                Propulsion Design Engineer
+                Mechanical Engineer
               </p>
             </div>
 
             {/* Bio */}
             <p className="text-muted-foreground text-center lg:text-left max-w-lg leading-relaxed">
-              Auburn University graduate and aerospace engineer passionate about rocket propulsion
+              Auburn University graduate and propulsion design engineer for turbomachinery, passionate about rocket propulsion
               systems, manufacturing innovation, and building solutions for space exploration.
             </p>
 
@@ -134,10 +137,6 @@ export function Hero() {
                     className="object-cover"
                     priority={index === 0}
                   />
-                  {/* Label overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                    <span className="text-white text-lg font-semibold">{slide.label}</span>
-                  </div>
                 </div>
               ))}
 
