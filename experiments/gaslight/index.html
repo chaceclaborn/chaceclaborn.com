@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Back</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Georgia', serif;
+      transition: all 0.5s ease;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      font-weight: 300;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+
+    .visit-counter {
+      font-size: 0.9rem;
+      opacity: 0.5;
+      margin-top: 20px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 1rem;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+
+    nav a:hover {
+      opacity: 1;
+    }
+
+    .content {
+      line-height: 1.9;
+      font-size: 1.1rem;
+    }
+
+    .content p {
+      margin-bottom: 25px;
+    }
+
+    .image-container {
+      margin: 40px 0;
+      text-align: center;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .quote {
+      font-style: italic;
+      padding: 30px;
+      margin: 40px 0;
+      border-left: 3px solid;
+      opacity: 0.9;
+    }
+
+    footer {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.5;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 15px 40px;
+      border: 2px solid;
+      text-decoration: none;
+      margin-top: 30px;
+      transition: all 0.3s;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    /* The "nothing is wrong" message - appears after many visits */
+    .reassurance {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 2s;
+    }
+
+    .reassurance.visible {
+      opacity: 0.3;
+    }
+
+    /* Glitch effect for extreme cases */
+    .glitch {
+      animation: glitch 0.1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="title">Welcome</h1>
+      <p class="subtitle" id="subtitle">A perfectly normal website</p>
+      <p class="visit-counter" id="visitCounter"></p>
+    </header>
+
+    <nav id="nav">
+      <a href="#" id="navHome">Home</a>
+      <a href="#" id="navAbout">About</a>
+      <a href="#" id="navWork">Work</a>
+      <a href="#" id="navContact">Contact</a>
+    </nav>
+
+    <main class="content">
+      <p id="intro">
+        Thank you for visiting. This is a simple website with simple content.
+        Nothing here is unusual. Everything is exactly as you remember it.
+      </p>
+
+      <div class="quote" id="quote">
+        <p id="quoteText">"The only thing we have to fear is fear itself."</p>
+        <small id="quoteAuthor">- Franklin D. Roosevelt</small>
+      </div>
+
+      <p id="middle">
+        We hope you find what you're looking for. The navigation above will help
+        you explore our <span id="adjective">wonderful</span> collection of content.
+        Feel free to return anytime.
+      </p>
+
+      <p id="closing">
+        If anything seems different from your last visit, you're probably just
+        misremembering. Memory is a funny thing, isn't it?
+      </p>
+
+      <a href="#" class="button" id="ctaButton">Explore More</a>
+    </main>
+
+    <footer id="footer">
+      <p id="footerText">&copy; 2024 A Normal Website. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <div class="reassurance" id="reassurance">Nothing is wrong.</div>
+
+  <script>
+    // Gaslighting Engine
+    const gaslight = {
+      // Track visits
+      visits: parseInt(localStorage.getItem('gl_visits') || '0'),
+      changes: JSON.parse(localStorage.getItem('gl_changes') || '{}'),
+
+      // Possible variations for each element
+      variations: {
+        title: [
+          'Welcome',
+          'Welcome Back',
+          'Hello Again',
+          'Welcome Home',
+          'You Returned',
+          'Welcome?',
+          'Welcom',
+          'W e l c o m e'
+        ],
+        subtitle: [
+          'A perfectly normal website',
+          'A completely normal website',
+          'An ordinary website',
+          'A regular website',
+          'A website',
+          'A normal website',
+          'Everything is fine',
+          'Nothing has changed'
+        ],
+        navItems: {
+          home: ['Home', 'Home', 'Homne', 'Start', 'Begin', 'Return'],
+          about: ['About', 'About', 'About Us', 'Who?', 'About', 'Info'],
+          work: ['Work', 'Work', 'Projects', 'Portfolio', 'Works', 'Creations'],
+          contact: ['Contact', 'Contact', 'Reach Out', 'Connect', 'Find Us', 'Talk']
+        },
+        quotes: [
+          { text: '"The only thing we have to fear is fear itself."', author: '- Franklin D. Roosevelt' },
+          { text: '"The only thing we have to fear is fear itself."', author: '- Franklin Roosevelt' },
+          { text: '"The only thing to fear is fear itself."', author: '- FDR' },
+          { text: '"We have nothing to fear but fear itself."', author: '- Roosevelt' },
+          { text: '"Fear is the only thing we should fear."', author: '- Someone' },
+          { text: '"What is there to fear?"', author: '- Unknown' },
+          { text: '"Did this quote always say this?"', author: '- You' },
+        ],
+        adjectives: [
+          'wonderful',
+          'amazing',
+          'lovely',
+          'nice',
+          'pleasant',
+          'fine',
+          'adequate',
+          'existing'
+        ],
+        ctaButton: [
+          'Explore More',
+          'Learn More',
+          'Discover',
+          'Continue',
+          'Go Deeper',
+          'Enter',
+          'Proceed',
+          'Submit'
+        ],
+        colors: {
+          bg: ['#ffffff', '#fffef9', '#f9f9f9', '#fefefe', '#fffdf5', '#f5f5f5', '#fafafa', '#f0f0f0'],
+          text: ['#1a1a1a', '#2a2a2a', '#1c1c1c', '#222222', '#181818', '#333333', '#0a0a0a', '#000000'],
+          accent: ['#333333', '#444444', '#2a2a2a', '#1a1a1a', '#555555', '#3a3a3a', '#4a4a4a', '#222222']
+        }
+      },
+
+      init() {
+        this.visits++;
+        localStorage.setItem('gl_visits', this.visits);
+
+        // Show visit count (but make it unreliable)
+        this.showVisitCount();
+
+        // Apply changes based on visit count
+        this.applyGaslighting();
+
+        // Random chance of change on each visit
+        if (Math.random() < 0.4 || this.visits <= 3) {
+          this.makeRandomChange();
+        }
+
+        // Show reassurance message after many visits
+        if (this.visits > 5) {
+          setTimeout(() => {
+            document.getElementById('reassurance').classList.add('visible');
+          }, 3000);
+        }
+
+        // Extreme effects for dedicated visitors
+        if (this.visits > 10) {
+          this.addSubtleWeirdness();
+        }
+
+        // Save changes
+        localStorage.setItem('gl_changes', JSON.stringify(this.changes));
+      },
+
+      showVisitCount() {
+        const counter = document.getElementById('visitCounter');
+        // Sometimes lie about the visit count
+        let displayCount = this.visits;
+        if (this.visits > 3 && Math.random() < 0.3) {
+          displayCount = this.visits + (Math.random() < 0.5 ? -1 : 1);
+        }
+        if (this.visits > 7 && Math.random() < 0.2) {
+          displayCount = this.visits - Math.floor(Math.random() * 3);
+        }
+
+        if (this.visits === 1) {
+          counter.textContent = 'First visit';
+        } else if (this.visits === 2) {
+          counter.textContent = 'Welcome back';
+        } else {
+          const messages = [
+            `Visit #${displayCount}`,
+            `You've been here ${displayCount} times`,
+            `Visit ${displayCount}`,
+            `Return #${displayCount - 1}`,
+          ];
+          counter.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }
+      },
+
+      applyGaslighting() {
+        // Apply all stored changes
+        Object.keys(this.changes).forEach(key => {
+          this.applyChange(key, this.changes[key]);
+        });
+      },
+
+      makeRandomChange() {
+        const possibleChanges = [
+          'title', 'subtitle', 'navHome', 'navAbout', 'navWork', 'navContact',
+          'quote', 'adjective', 'ctaButton', 'bgColor', 'textColor'
+        ];
+
+        // Weight towards changes that haven't been made yet
+        const change = possibleChanges[Math.floor(Math.random() * possibleChanges.length)];
+
+        let newValue;
+        switch(change) {
+          case 'title':
+            newValue = Math.min((this.changes.title || 0) + 1, this.variations.title.length - 1);
+            break;
+          case 'subtitle':
+            newValue = Math.min((this.changes.subtitle || 0) + 1, this.variations.subtitle.length - 1);
+            break;
+          case 'navHome':
+          case 'navAbout':
+          case 'navWork':
+          case 'navContact':
+            const navKey = change.replace('nav', '').toLowerCase();
+            newValue = Math.floor(Math.random() * this.variations.navItems[navKey].length);
+            break;
+          case 'quote':
+            newValue = Math.min((this.changes.quote || 0) + 1, this.variations.quotes.length - 1);
+            break;
+          case 'adjective':
+            newValue = Math.min((this.changes.adjective || 0) + 1, this.variations.adjectives.length - 1);
+            break;
+          case 'ctaButton':
+            newValue = Math.floor(Math.random() * this.variations.ctaButton.length);
+            break;
+          case 'bgColor':
+            newValue = Math.min((this.changes.bgColor || 0) + 1, this.variations.colors.bg.length - 1);
+            break;
+          case 'textColor':
+            newValue = Math.min((this.changes.textColor || 0) + 1, this.variations.colors.text.length - 1);
+            break;
+        }
+
+        this.changes[change] = newValue;
+        this.applyChange(change, newValue);
+      },
+
+      applyChange(change, value) {
+        switch(change) {
+          case 'title':
+            document.getElementById('title').textContent = this.variations.title[value];
+            break;
+          case 'subtitle':
+            document.getElementById('subtitle').textContent = this.variations.subtitle[value];
+            break;
+          case 'navHome':
+            document.getElementById('navHome').textContent = this.variations.navItems.home[value];
+            break;
+          case 'navAbout':
+            document.getElementById('navAbout').textContent = this.variations.navItems.about[value];
+            break;
+          case 'navWork':
+            document.getElementById('navWork').textContent = this.variations.navItems.work[value];
+            break;
+          case 'navContact':
+            document.getElementById('navContact').textContent = this.variations.navItems.contact[value];
+            break;
+          case 'quote':
+            document.getElementById('quoteText').textContent = this.variations.quotes[value].text;
+            document.getElementById('quoteAuthor').textContent = this.variations.quotes[value].author;
+            break;
+          case 'adjective':
+            document.getElementById('adjective').textContent = this.variations.adjectives[value];
+            break;
+          case 'ctaButton':
+            document.getElementById('ctaButton').textContent = this.variations.ctaButton[value];
+            break;
+          case 'bgColor':
+            document.body.style.backgroundColor = this.variations.colors.bg[value];
+            break;
+          case 'textColor':
+            document.body.style.color = this.variations.colors.text[value];
+            document.querySelectorAll('a').forEach(a => a.style.color = this.variations.colors.text[value]);
+            break;
+        }
+      },
+
+      addSubtleWeirdness() {
+        // Subtle cursor drift
+        if (Math.random() < 0.3) {
+          document.body.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'2\' fill=\'%23000\'/%3E%3C/svg%3E"), auto';
+        }
+
+        // Very subtle text spacing changes
+        if (Math.random() < 0.4) {
+          document.body.style.letterSpacing = (Math.random() * 0.5 - 0.25) + 'px';
+        }
+
+        // Random paragraph might be slightly different opacity
+        if (Math.random() < 0.3) {
+          const paragraphs = document.querySelectorAll('p');
+          const randomP = paragraphs[Math.floor(Math.random() * paragraphs.length)];
+          randomP.style.opacity = 0.85 + Math.random() * 0.15;
+        }
+
+        // After 15 visits, things get weirder
+        if (this.visits > 15) {
+          // Occasional micro-glitch
+          setInterval(() => {
+            if (Math.random() < 0.05) {
+              document.body.classList.add('glitch');
+              setTimeout(() => document.body.classList.remove('glitch'), 50);
+            }
+          }, 5000);
+        }
+      }
+    };
+
+    // Reset function (hidden)
+    window.resetGaslight = () => {
+      localStorage.removeItem('gl_visits');
+      localStorage.removeItem('gl_changes');
+      location.reload();
+    };
+
+    // Console message
+    console.log('Everything is normal. There is nothing to see here.');
+    console.log('Type resetGaslight() to start over (but why would you need to?)');
+
+    // Initialize
+    gaslight.init();
+  </script>
+</body>
+</html>
