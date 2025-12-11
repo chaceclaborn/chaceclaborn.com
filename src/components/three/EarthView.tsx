@@ -91,7 +91,6 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
     lastCalcTime: 0,
     currentSimTime: initialDate.getTime(),
     currentSpeed: speedMultiplier,
-    lastTimeReport: 0,
     initialized: false,
   });
 
@@ -109,6 +108,15 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
   useEffect(() => {
     animRef.current.currentSpeed = speedMultiplier;
   }, [speedMultiplier]);
+
+  // Report time to parent via separate interval (NOT from useFrame!)
+  // This prevents React state updates from interrupting the render loop
+  useEffect(() => {
+    const interval = setInterval(() => {
+      onTimeUpdate?.(new Date(animRef.current.currentSimTime));
+    }, 200); // Update UI clock 5 times per second
+    return () => clearInterval(interval);
+  }, [onTimeUpdate]);
 
   // Clear states when satellites array changes (e.g., category filter)
   useEffect(() => {
@@ -129,105 +137,41 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
 
-  // SGP4 recalculation: every 60 seconds of SIM time (not real time)
-  // This ensures accurate orbital paths even at high speeds
-  const SIM_CALC_INTERVAL = 60000; // 60 seconds of simulation time
-
   useFrame(() => {
     if (!meshRef.current) return;
 
     const anim = animRef.current;
     const now = performance.now();
-    const realDeltaTime = Math.min(now - anim.lastFrameTime, 100); // Cap at 100ms to prevent huge jumps
+    const realDeltaTime = Math.min(now - anim.lastFrameTime, 100);
     anim.lastFrameTime = now;
 
     const simDeltaTime = realDeltaTime * anim.currentSpeed;
     anim.currentSimTime += simDeltaTime;
 
-    // Report time to parent periodically (every 100ms real time)
-    if (now - anim.lastTimeReport > 100) {
-      anim.lastTimeReport = now;
-      onTimeUpdate?.(new Date(anim.currentSimTime));
-    }
-
-    // Calculate time since last SGP4 calculation in SIMULATION time
+    // At high speeds, calculate SGP4 positions EVERY FRAME for accuracy
+    // This is the only way to get smooth orbital motion without snapping
     const currentDate = new Date(anim.currentSimTime);
-    const simTimeSinceCalc = anim.currentSimTime - anim.lastCalcTime;
-    const needsRecalc = simTimeSinceCalc >= SIM_CALC_INTERVAL || anim.lastCalcTime === 0;
 
-    // Recalculate SGP4 positions based on simulation time elapsed
-    if (needsRecalc) {
-      anim.lastCalcTime = anim.currentSimTime;
+    // Update ALL satellites every frame using direct SGP4 calculation
+    for (let index = 0; index < satellites.length; index++) {
+      const tle = satellites[index];
+      const pos = calculatePosition(tle, currentDate);
 
-      const futureDate = new Date(anim.currentSimTime + 1000);
-
-      satellites.forEach((tle, index) => {
-        const pos1 = calculatePosition(tle, currentDate);
-        const pos2 = calculatePosition(tle, futureDate);
-
-        // If calculation fails, use fallback position (won't be visible but won't break)
-        if (!pos1) {
-          if (!statesRef.current.has(index)) {
-            statesRef.current.set(index, {
-              x: 0, y: 0, z: 0,
-              vx: 0, vy: 0, vz: 0,
-              altitude: 0,
-              velocity: 0,
-              latitude: 0,
-              longitude: 0,
-              name: tle.name,
-              noradId: tle.noradId,
-              category: tle.category,
-            });
-          }
-          return;
-        }
-
-        // Calculate velocity per ms of simulation time
-        const p2 = pos2 || pos1;
-        const vx = (p2.x - pos1.x) / 1000;
-        const vy = (p2.y - pos1.y) / 1000;
-        const vz = (p2.z - pos1.z) / 1000;
-
-        const existing = statesRef.current.get(index);
-
-        if (existing) {
-          // ALWAYS snap position to SGP4 result on recalc to prevent drift
-          existing.x = pos1.x;
-          existing.y = pos1.y;
-          existing.z = pos1.z;
-          existing.vx = vx;
-          existing.vy = vy;
-          existing.vz = vz;
-          existing.altitude = pos1.altitude;
-          existing.velocity = pos1.velocity;
-          existing.latitude = pos1.latitude;
-          existing.longitude = pos1.longitude;
-        } else {
+      if (!pos) {
+        // Failed calculation - hide satellite
+        if (!statesRef.current.has(index)) {
           statesRef.current.set(index, {
-            x: pos1.x,
-            y: pos1.y,
-            z: pos1.z,
-            vx, vy, vz,
-            altitude: pos1.altitude,
-            velocity: pos1.velocity,
-            latitude: pos1.latitude,
-            longitude: pos1.longitude,
-            name: pos1.name,
-            noradId: pos1.noradId,
-            category: pos1.category,
+            x: 0, y: 0, z: 0,
+            vx: 0, vy: 0, vz: 0,
+            altitude: 0,
+            velocity: 0,
+            latitude: 0,
+            longitude: 0,
+            name: tle.name,
+            noradId: tle.noradId,
+            category: tle.category,
           });
         }
-      });
-    }
-
-    // Update ALL satellites every frame
-    for (let index = 0; index < satellites.length; index++) {
-      const state = statesRef.current.get(index);
-      const tle = satellites[index];
-
-      if (!state || state.altitude === 0) {
-        // Satellite not initialized yet or invalid - hide it
         dummy.position.set(0, 0, 0);
         dummy.scale.setScalar(0);
         dummy.updateMatrix();
@@ -235,11 +179,29 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
         continue;
       }
 
-      // Integrate position between SGP4 recalculations (only if not just recalculated)
-      if (!needsRecalc) {
-        state.x += state.vx * simDeltaTime;
-        state.y += state.vy * simDeltaTime;
-        state.z += state.vz * simDeltaTime;
+      // Update state with current SGP4 position
+      let state = statesRef.current.get(index);
+      if (!state) {
+        state = {
+          x: pos.x, y: pos.y, z: pos.z,
+          vx: 0, vy: 0, vz: 0,
+          altitude: pos.altitude,
+          velocity: pos.velocity,
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+          name: pos.name,
+          noradId: pos.noradId,
+          category: pos.category,
+        };
+        statesRef.current.set(index, state);
+      } else {
+        state.x = pos.x;
+        state.y = pos.y;
+        state.z = pos.z;
+        state.altitude = pos.altitude;
+        state.velocity = pos.velocity;
+        state.latitude = pos.latitude;
+        state.longitude = pos.longitude;
       }
 
       // Store for tooltips
@@ -369,10 +331,16 @@ function OrbitPath({ altitude, inclination, color }: { altitude: number; inclina
 }
 
 // ============================================
-// EARTH
+// EARTH - Uses internal clock for smooth rotation
 // ============================================
 
-function EarthWithTextures({ simulatedDate }: { simulatedDate: Date }) {
+interface EarthProps {
+  initialDate: Date;
+  speedMultiplier: number;
+  useTextures: boolean;
+}
+
+function EarthWithTextures({ initialDate, speedMultiplier }: { initialDate: Date; speedMultiplier: number }) {
   const earthRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
   const textures = useLoader(THREE.TextureLoader, [
@@ -380,8 +348,26 @@ function EarthWithTextures({ simulatedDate }: { simulatedDate: Date }) {
     '/textures/earth_clouds.png',
   ]);
 
+  // Internal clock for smooth animation - matches satellite clock
+  const clockRef = useRef({
+    lastFrameTime: performance.now(),
+    currentSimTime: initialDate.getTime(),
+    currentSpeed: speedMultiplier,
+  });
+
+  // Update speed without resetting time
+  useEffect(() => {
+    clockRef.current.currentSpeed = speedMultiplier;
+  }, [speedMultiplier]);
+
   useFrame(() => {
-    const rotation = getEarthRotation(simulatedDate);
+    const clock = clockRef.current;
+    const now = performance.now();
+    const realDeltaTime = Math.min(now - clock.lastFrameTime, 100);
+    clock.lastFrameTime = now;
+    clock.currentSimTime += realDeltaTime * clock.currentSpeed;
+
+    const rotation = getEarthRotation(new Date(clock.currentSimTime));
     if (earthRef.current) earthRef.current.rotation.y = rotation;
     if (cloudsRef.current) cloudsRef.current.rotation.y = rotation * 1.01;
   });
@@ -404,12 +390,30 @@ function EarthWithTextures({ simulatedDate }: { simulatedDate: Date }) {
   );
 }
 
-function EarthWithoutTextures({ simulatedDate }: { simulatedDate: Date }) {
+function EarthWithoutTextures({ initialDate, speedMultiplier }: { initialDate: Date; speedMultiplier: number }) {
   const earthRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
 
+  // Internal clock for smooth animation - matches satellite clock
+  const clockRef = useRef({
+    lastFrameTime: performance.now(),
+    currentSimTime: initialDate.getTime(),
+    currentSpeed: speedMultiplier,
+  });
+
+  // Update speed without resetting time
+  useEffect(() => {
+    clockRef.current.currentSpeed = speedMultiplier;
+  }, [speedMultiplier]);
+
   useFrame(() => {
-    const rotation = getEarthRotation(simulatedDate);
+    const clock = clockRef.current;
+    const now = performance.now();
+    const realDeltaTime = Math.min(now - clock.lastFrameTime, 100);
+    clock.lastFrameTime = now;
+    clock.currentSimTime += realDeltaTime * clock.currentSpeed;
+
+    const rotation = getEarthRotation(new Date(clock.currentSimTime));
     if (earthRef.current) earthRef.current.rotation.y = rotation;
     if (cloudsRef.current) cloudsRef.current.rotation.y = rotation * 1.01;
   });
@@ -432,11 +436,11 @@ function EarthWithoutTextures({ simulatedDate }: { simulatedDate: Date }) {
   );
 }
 
-function Earth({ simulatedDate, useTextures }: { simulatedDate: Date; useTextures: boolean }) {
+function Earth({ initialDate, speedMultiplier, useTextures }: EarthProps) {
   if (useTextures) {
-    return <EarthWithTextures simulatedDate={simulatedDate} />;
+    return <EarthWithTextures initialDate={initialDate} speedMultiplier={speedMultiplier} />;
   }
-  return <EarthWithoutTextures simulatedDate={simulatedDate} />;
+  return <EarthWithoutTextures initialDate={initialDate} speedMultiplier={speedMultiplier} />;
 }
 
 // ============================================
@@ -454,10 +458,9 @@ interface SceneProps {
   autoRotate: boolean;
   onInteraction: () => void;
   onTimeUpdate?: (date: Date) => void;
-  simulatedDate: Date; // For Earth rotation display
 }
 
-function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, onSelectSatellite, satellites, useTextures, autoRotate, onInteraction, onTimeUpdate, simulatedDate }: SceneProps) {
+function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, onSelectSatellite, satellites, useTextures, autoRotate, onInteraction, onTimeUpdate }: SceneProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
 
@@ -475,7 +478,7 @@ function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, on
       <directionalLight position={[5, 3, 5]} intensity={1.2} />
       <Stars radius={100} depth={50} count={1500} factor={3} fade />
 
-      <Earth simulatedDate={simulatedDate} useTextures={useTextures} />
+      <Earth initialDate={initialDate} speedMultiplier={speedMultiplier} useTextures={useTextures} />
 
       {showOrbits && (
         <>
@@ -538,16 +541,15 @@ export function EarthView({
 }: EarthViewProps) {
   const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [simulatedDate, setSimulatedDate] = useState(() => new Date());
   const [autoRotate, setAutoRotate] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   // Initial date is set once on mount and never changes
   const [initialDate] = useState(() => new Date());
 
   // Handle time updates from InstancedSatellites (the authoritative clock)
+  // Simply forward to parent - Earth now has its own internal clock
   const handleTimeUpdate = useCallback((date: Date) => {
-    setSimulatedDate(date); // Update Earth rotation
-    onTimeUpdate?.(date);   // Report to parent
+    onTimeUpdate?.(date);
   }, [onTimeUpdate]);
 
   // Load satellites from Supabase API with fallback to local JSON
@@ -630,7 +632,6 @@ export function EarthView({
           <Scene
             showOrbits={showOrbits}
             initialDate={initialDate}
-            simulatedDate={simulatedDate}
             speedMultiplier={speedMultiplier}
             selectedSatellite={selectedSatellite}
             onSelectSatellite={onSelectSatellite}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,26 +28,74 @@ const categories: { key: TLESourceKey | null; label: string; color: string }[] =
   { key: 'weather', label: 'Weather', color: '#74b9ff' },
 ];
 
+const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+// Clock display component that updates via ref without causing parent re-renders
+function ClockDisplay({ timeRef, speed }: { timeRef: React.RefObject<Date | null>; speed: number }) {
+  const [displayTime, setDisplayTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timeRef.current) {
+        setDisplayTime(new Date(timeRef.current.getTime()));
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, [timeRef]);
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+      <div className={`w-1.5 h-1.5 rounded-full ${speed === 1 ? 'bg-green-500' : 'bg-amber-500'} animate-pulse`} />
+      <span className="text-white font-mono text-xs">{formatTime(displayTime)}</span>
+      <span className="text-white/40 text-[10px] hidden sm:inline">{formatDate(displayTime)}</span>
+      {speed > 1 && <span className="text-amber-400 text-[9px] font-medium">SIM</span>}
+    </div>
+  );
+}
+
+// Small time display for telemetry panel
+function TelemetryTime({ timeRef }: { timeRef: React.RefObject<Date | null> }) {
+  const [displayTime, setDisplayTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timeRef.current) {
+        setDisplayTime(new Date(timeRef.current.getTime()));
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, [timeRef]);
+
+  return <span className="text-white/30 text-[8px] font-mono">{formatTime(displayTime)}</span>;
+}
+
 export default function EarthPage() {
   const [category, setCategory] = useState<TLESourceKey | null>(null);
   const [speed, setSpeed] = useState(1);
   const [satellite, setSatellite] = useState<TLEData | null>(null);
   const [position, setPosition] = useState<{ alt: number; vel: number; lat: number; lon: number } | null>(null);
-  const [simulatedTime, setSimulatedTime] = useState(new Date());
 
+  // Use ref for simulated time to avoid re-renders
+  const simulatedTimeRef = useRef<Date | null>(new Date());
+
+  // Callback that updates ref without causing re-render
+  const handleTimeUpdate = useCallback((date: Date) => {
+    simulatedTimeRef.current = date;
+  }, []);
+
+  // Update satellite position based on ref (separate from render cycle)
   useEffect(() => {
     if (!satellite) { setPosition(null); return; }
     const update = () => {
-      const pos = calculatePosition(satellite, simulatedTime);
+      const time = simulatedTimeRef.current || new Date();
+      const pos = calculatePosition(satellite, time);
       if (pos) setPosition({ alt: pos.altitude, vel: pos.velocity, lat: pos.latitude, lon: pos.longitude });
     };
     update();
     const interval = setInterval(update, 500);
     return () => clearInterval(interval);
-  }, [satellite, simulatedTime]);
-
-  const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  }, [satellite]);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 h-full">
@@ -86,13 +134,8 @@ export default function EarthPage() {
 
           {/* Right: Time + Speed */}
           <div className="flex items-center gap-2">
-            {/* Clock - shows simulated time */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-              <div className={`w-1.5 h-1.5 rounded-full ${speed === 1 ? 'bg-green-500' : 'bg-amber-500'} animate-pulse`} />
-              <span className="text-white font-mono text-xs">{formatTime(simulatedTime)}</span>
-              <span className="text-white/40 text-[10px] hidden sm:inline">{formatDate(simulatedTime)}</span>
-              {speed > 1 && <span className="text-amber-400 text-[9px] font-medium">SIM</span>}
-            </div>
+            {/* Clock - shows simulated time (isolated component to prevent re-renders) */}
+            <ClockDisplay timeRef={simulatedTimeRef} speed={speed} />
 
             {/* Speed */}
             <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/5 border border-white/10">
@@ -128,7 +171,7 @@ export default function EarthPage() {
             speedMultiplier={speed}
             selectedSatellite={satellite}
             onSelectSatellite={setSatellite}
-            onTimeUpdate={setSimulatedTime}
+            onTimeUpdate={handleTimeUpdate}
           />
         </div>
 
@@ -178,7 +221,7 @@ export default function EarthPage() {
                       {speed === 1 ? 'Live Telemetry' : 'Simulated'}
                     </span>
                   </div>
-                  <span className="text-white/30 text-[8px] font-mono">{formatTime(simulatedTime)}</span>
+                  <TelemetryTime timeRef={simulatedTimeRef} />
                 </div>
 
                 <div className="space-y-1.5">
