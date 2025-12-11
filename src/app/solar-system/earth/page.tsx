@@ -33,9 +33,11 @@ const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: '2-d
 
 // Clock display component that updates via ref without causing parent re-renders
 function ClockDisplay({ timeRef, speed }: { timeRef: React.RefObject<Date | null>; speed: number }) {
-  const [displayTime, setDisplayTime] = useState(new Date());
+  const [displayTime, setDisplayTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // Set initial time on client mount
+    setDisplayTime(timeRef.current || new Date());
     const interval = setInterval(() => {
       if (timeRef.current) {
         setDisplayTime(new Date(timeRef.current.getTime()));
@@ -43,6 +45,16 @@ function ClockDisplay({ timeRef, speed }: { timeRef: React.RefObject<Date | null
     }, 200);
     return () => clearInterval(interval);
   }, [timeRef]);
+
+  // Don't render time until client-side
+  if (!displayTime) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+        <span className="text-white font-mono text-xs">--:--:--</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
@@ -56,9 +68,11 @@ function ClockDisplay({ timeRef, speed }: { timeRef: React.RefObject<Date | null
 
 // Small time display for telemetry panel
 function TelemetryTime({ timeRef }: { timeRef: React.RefObject<Date | null> }) {
-  const [displayTime, setDisplayTime] = useState(new Date());
+  const [displayTime, setDisplayTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // Set initial time on client mount
+    setDisplayTime(timeRef.current || new Date());
     const interval = setInterval(() => {
       if (timeRef.current) {
         setDisplayTime(new Date(timeRef.current.getTime()));
@@ -66,6 +80,10 @@ function TelemetryTime({ timeRef }: { timeRef: React.RefObject<Date | null> }) {
     }, 200);
     return () => clearInterval(interval);
   }, [timeRef]);
+
+  if (!displayTime) {
+    return <span className="text-white/30 text-[8px] font-mono">--:--:--</span>;
+  }
 
   return <span className="text-white/30 text-[8px] font-mono">{formatTime(displayTime)}</span>;
 }
