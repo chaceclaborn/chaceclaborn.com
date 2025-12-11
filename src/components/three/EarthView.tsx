@@ -58,21 +58,35 @@ interface InstancedSatellitesProps {
 
 // Position with velocity for interpolation
 interface SatelliteState {
-  pos: SatellitePosition;
-  // Velocity in normalized units per ms for smooth interpolation
+  // Current interpolated position
+  x: number;
+  y: number;
+  z: number;
+  // Velocity per millisecond
   vx: number;
   vy: number;
   vz: number;
-  lastCalcTime: number;
+  // Static properties
+  altitude: number;
+  velocity: number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  noradId?: number;
+  category?: string;
 }
 
 function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSatellite }: InstancedSatellitesProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [hovered, setHovered] = useState<number | null>(null);
-  // Store positions with velocity for smooth interpolation
+  // Store satellite states for smooth interpolation
   const statesRef = useRef<Map<number, SatelliteState>>(new Map());
   const positionsRef = useRef<Map<number, SatellitePosition>>(new Map());
-  const lastBatchUpdateRef = useRef<number>(0);
+  // Track real time for frame-independent animation
+  const lastFrameTimeRef = useRef<number>(performance.now());
+  const lastCalcTimeRef = useRef<number>(0);
+  // Track the simulation time we last calculated for
+  const lastSimTimeRef = useRef<number>(0);
   const { gl } = useThree();
 
   // Update cursor when hovering
@@ -85,64 +99,102 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
   const color = useMemo(() => new THREE.Color(), []);
 
   // How often to recalculate SGP4 positions (ms)
-  const CALC_INTERVAL = 200;
+  const CALC_INTERVAL = 500;
 
-  // Smooth animation: calculate SGP4 periodically, interpolate every frame
+  // Butter-smooth animation using velocity-based interpolation
   useFrame(() => {
     if (!meshRef.current) return;
 
     const now = performance.now();
-    const timeSinceCalc = now - lastBatchUpdateRef.current;
+    const deltaTime = now - lastFrameTimeRef.current;
+    lastFrameTimeRef.current = now;
 
-    // Periodically recalculate actual positions and velocities
-    if (timeSinceCalc >= CALC_INTERVAL || lastBatchUpdateRef.current === 0) {
-      lastBatchUpdateRef.current = now;
+    const simTime = simulatedDate.getTime();
+    const timeSinceCalc = now - lastCalcTimeRef.current;
+    const simTimeChanged = simTime !== lastSimTimeRef.current;
 
-      // Calculate positions at two time points to get velocity
+    // Recalculate positions when:
+    // 1. Enough time has passed since last calc, OR
+    // 2. The simulation time has changed (speed change, etc)
+    if (timeSinceCalc >= CALC_INTERVAL || lastCalcTimeRef.current === 0 || simTimeChanged) {
+      lastCalcTimeRef.current = now;
+      lastSimTimeRef.current = simTime;
+
+      // Calculate positions at current time and 1 second later for velocity
       const t1 = simulatedDate;
-      const t2 = new Date(simulatedDate.getTime() + 1000); // 1 second later
+      const t2 = new Date(simTime + 1000);
 
       satellites.forEach((tle, index) => {
         const pos1 = calculatePosition(tle, t1);
         const pos2 = calculatePosition(tle, t2);
         if (!pos1 || !pos2) return;
 
-        // Calculate velocity (change per millisecond)
+        // Calculate velocity (change per millisecond in real time)
+        // This accounts for speedMultiplier already baked into simulatedDate progression
         const vx = (pos2.x - pos1.x) / 1000;
         const vy = (pos2.y - pos1.y) / 1000;
         const vz = (pos2.z - pos1.z) / 1000;
 
-        statesRef.current.set(index, {
-          pos: pos1,
-          vx,
-          vy,
-          vz,
-          lastCalcTime: now
-        });
+        const existing = statesRef.current.get(index);
+
+        if (existing && !simTimeChanged) {
+          // Smooth transition: update velocity but keep current interpolated position
+          // This prevents jumps when recalculating
+          existing.vx = vx;
+          existing.vy = vy;
+          existing.vz = vz;
+          existing.altitude = pos1.altitude;
+          existing.velocity = pos1.velocity;
+        } else {
+          // First time or sim time changed: set position directly
+          statesRef.current.set(index, {
+            x: pos1.x,
+            y: pos1.y,
+            z: pos1.z,
+            vx,
+            vy,
+            vz,
+            altitude: pos1.altitude,
+            velocity: pos1.velocity,
+            latitude: pos1.latitude,
+            longitude: pos1.longitude,
+            name: pos1.name,
+            noradId: pos1.noradId,
+            category: pos1.category,
+          });
+        }
       });
     }
 
-    // Every frame: interpolate positions based on velocity
+    // Every frame: advance positions using velocity and delta time
     statesRef.current.forEach((state, index) => {
-      const elapsed = now - state.lastCalcTime;
-
-      // Interpolate position using velocity
-      const x = state.pos.x + state.vx * elapsed;
-      const y = state.pos.y + state.vy * elapsed;
-      const z = state.pos.z + state.vz * elapsed;
+      // Move satellite based on velocity and actual frame time
+      state.x += state.vx * deltaTime;
+      state.y += state.vy * deltaTime;
+      state.z += state.vz * deltaTime;
 
       // Update stored position for tooltips
-      const currentPos = { ...state.pos, x, y, z };
-      positionsRef.current.set(index, currentPos);
+      positionsRef.current.set(index, {
+        x: state.x,
+        y: state.y,
+        z: state.z,
+        altitude: state.altitude,
+        velocity: state.velocity,
+        latitude: state.latitude,
+        longitude: state.longitude,
+        name: state.name,
+        noradId: state.noradId,
+        category: state.category,
+      });
 
-      const scale = 1 + scaleAltitude(state.pos.altitude);
-      const normalizedRadius = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+      const scale = 1 + scaleAltitude(state.altitude);
+      const normalizedRadius = Math.sqrt(state.x ** 2 + state.y ** 2 + state.z ** 2);
 
       if (normalizedRadius > 0) {
         dummy.position.set(
-          (x / normalizedRadius) * scale,
-          (y / normalizedRadius) * scale,
-          (z / normalizedRadius) * scale
+          (state.x / normalizedRadius) * scale,
+          (state.y / normalizedRadius) * scale,
+          (state.z / normalizedRadius) * scale
         );
 
         const tle = satellites[index];
@@ -158,7 +210,7 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
         meshRef.current!.setMatrixAt(index, dummy.matrix);
 
         // Set color based on orbit type
-        const orbitType = getOrbitType(state.pos.altitude);
+        const orbitType = getOrbitType(state.altitude);
         const categoryColor = SATELLITE_CATEGORIES[tle?.category as keyof typeof SATELLITE_CATEGORIES]?.color;
         color.set(isSelected ? '#ffffff' : isHovered ? '#ffffff' : categoryColor || orbitColors[orbitType]);
         meshRef.current!.setColorAt(index, color);
