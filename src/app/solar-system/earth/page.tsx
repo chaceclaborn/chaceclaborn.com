@@ -1,290 +1,227 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Eye, EyeOff, Globe, Satellite, Info, Pause, Play, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { leoSatellites, meoSatellites, geoSatellites, type SatelliteData } from '@/data/satellites';
+import { ArrowLeft, X, Satellite } from 'lucide-react';
+import { calculatePosition, SATELLITE_CATEGORIES, getOrbitType, type TLEData, type TLESourceKey } from '@/lib/satellite-service';
 
-// Dynamic import to avoid SSR issues with Three.js
 const EarthView = dynamic(
   () => import('@/components/three/EarthView').then((mod) => mod.EarthView),
-  { ssr: false, loading: () => <div className="h-full w-full bg-black flex items-center justify-center text-white">Loading Earth View...</div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full bg-black flex items-center justify-center">
+        <div className="h-8 w-8 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
+      </div>
+    ),
+  }
 );
 
-// Count Starlink satellites
-const starlinkSatellites = leoSatellites.filter(s => s.name.includes('Starlink'));
-
-const orbitTypes = [
-  { name: 'LEO', description: 'Low Earth Orbit', altitude: '160-2,000 km', color: '#00ff88', count: leoSatellites.length },
-  { name: 'MEO', description: 'Medium Earth Orbit', altitude: '2,000-35,786 km', color: '#ffaa00', count: meoSatellites.length },
-  { name: 'GEO', description: 'Geostationary Orbit', altitude: '35,786 km', color: '#ff4488', count: geoSatellites.length },
-  { name: 'Starlink', description: 'SpaceX Starlink', altitude: '~550 km', color: '#00bfff', count: starlinkSatellites.length },
-];
-
-// Speed presets for visualization
-const speedPresets = [
-  { label: '1x', value: 1, description: 'Real-time' },
-  { label: '60x', value: 60, description: '1 min = 1 hour' },
-  { label: '360x', value: 360, description: '10 sec = 1 hour' },
-  { label: '1440x', value: 1440, description: '1 min = 1 day' },
+const categories: { key: TLESourceKey | null; label: string; color: string }[] = [
+  { key: null, label: 'All', color: '#888888' },
+  { key: 'stations', label: 'Stations', color: '#ff6b6b' },
+  { key: 'starlink', label: 'Starlink', color: '#00bfff' },
+  { key: 'gps-ops', label: 'GPS', color: '#f1c40f' },
+  { key: 'geo', label: 'GEO', color: '#ff4488' },
+  { key: 'weather', label: 'Weather', color: '#74b9ff' },
 ];
 
 export default function EarthPage() {
-  const [showOrbits, setShowOrbits] = useState(true);
-  const [selectedOrbit, setSelectedOrbit] = useState<string | null>(null);
-  const [showInfo, setShowInfo] = useState(true);
+  const [category, setCategory] = useState<TLESourceKey | null>(null);
   const [speed, setSpeed] = useState(1);
-  const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
+  const [satellite, setSatellite] = useState<TLEData | null>(null);
+  const [position, setPosition] = useState<{ alt: number; vel: number; lat: number; lon: number } | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Get satellites for current filter
-  const currentSatellites = selectedOrbit === 'LEO' ? leoSatellites
-    : selectedOrbit === 'MEO' ? meoSatellites
-    : selectedOrbit === 'GEO' ? geoSatellites
-    : selectedOrbit === 'Starlink' ? starlinkSatellites
-    : [...leoSatellites, ...meoSatellites, ...geoSatellites];
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!satellite) { setPosition(null); return; }
+    const update = () => {
+      const pos = calculatePosition(satellite, new Date());
+      if (pos) setPosition({ alt: pos.altitude, vel: pos.velocity, lat: pos.latitude, lon: pos.longitude });
+    };
+    update();
+    const interval = setInterval(update, 500);
+    return () => clearInterval(interval);
+  }, [satellite]);
+
+  const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden">
-      {/* 3D Earth View */}
-      <EarthView
-        className="h-full w-full"
-        showOrbits={showOrbits}
-        selectedOrbit={selectedOrbit}
-        speedMultiplier={speed}
-        selectedSatellite={selectedSatellite}
-        onSelectSatellite={setSelectedSatellite}
-      />
-
-      {/* Header Controls */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="absolute top-4 left-4 right-4 flex justify-between items-start z-10"
-      >
-        <Link href="/solar-system">
-          <Button variant="secondary" size="sm" className="gap-2 bg-black/60 backdrop-blur-sm border-white/10 text-white hover:bg-white/20">
-            <ArrowLeft className="h-4 w-4" />
-            Solar System
-          </Button>
-        </Link>
-
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowOrbits(!showOrbits)}
-            className={`gap-2 backdrop-blur-sm border-white/10 text-white hover:bg-white/20 ${showOrbits ? 'bg-white/20' : 'bg-black/60'}`}
-          >
-            <Satellite className="h-4 w-4" />
-            Orbits
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowInfo(!showInfo)}
-            className={`gap-2 backdrop-blur-sm border-white/10 text-white hover:bg-white/20 ${showInfo ? 'bg-white/20' : 'bg-black/60'}`}
-          >
-            <Info className="h-4 w-4" />
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Title - positioned to not cover Earth on mobile */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="absolute top-16 md:top-20 right-4 md:right-auto md:left-1/2 md:-translate-x-1/2 text-right md:text-center z-10"
-      >
-        <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-1 flex items-center gap-2 justify-end md:justify-center">
-          <Globe className="h-5 w-5 md:h-6 md:w-6" />
-          Earth & Satellites
-        </h1>
-        <p className="text-white/50 text-xs md:text-sm hidden md:block">Click satellites to view details • {currentSatellites.length} satellites</p>
-      </motion.div>
-
-      {/* Speed Control - hidden on small mobile, shown on larger screens */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
-        className="absolute right-4 top-32 md:left-4 md:right-auto md:top-1/2 md:-translate-y-1/2 z-10"
-      >
-        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2 md:p-3 border border-white/10">
-          <div className="text-white/40 text-[10px] md:text-xs mb-1.5 md:mb-2 text-center">Speed</div>
-          <div className="flex flex-row md:flex-col items-center gap-1">
-            {speedPresets.map((preset) => (
-              <Button
-                key={preset.value}
-                variant="ghost"
-                size="sm"
-                onClick={() => setSpeed(preset.value)}
-                className={`text-[10px] md:text-xs h-6 md:h-7 px-2 md:px-3 md:w-full ${speed === preset.value ? 'bg-white/20 text-white' : 'text-white/60 hover:bg-white/10'}`}
-              >
-                {preset.label}
-              </Button>
-            ))}
-          </div>
-          <div className="hidden md:block mt-2 pt-2 border-t border-white/10">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSpeed(speed === 0 ? 1 : 0)}
-              className="h-8 w-full text-white hover:bg-white/20"
+    <div className="flex flex-col flex-1 min-h-0 h-full">
+      {/* Filter Bar - Between header and content */}
+      <div className="shrink-0 bg-black/95 backdrop-blur border-b border-white/10 px-4 py-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          {/* Left: Back + Filters */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href="/solar-system"
+              className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
             >
-              {speed === 0 ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            </Button>
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+
+            <div className="h-6 w-px bg-white/10 hidden sm:block" />
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Satellite className="h-3.5 w-3.5 text-white/50" />
+              {categories.map((cat) => (
+                <button
+                  key={cat.key ?? 'all'}
+                  onClick={() => setCategory(cat.key)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                    category === cat.key
+                      ? 'bg-white/20 text-white ring-1 ring-white/30'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="hidden md:block mt-2 text-[10px] text-white/30 text-center">
-            {speed === 1 ? 'Real-time' : `${speed}x faster`}
+
+          {/* Right: Time + Speed */}
+          <div className="flex items-center gap-2">
+            {/* Clock */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-white font-mono text-xs">{formatTime(currentTime)}</span>
+              <span className="text-white/40 text-[10px] hidden sm:inline">{formatDate(currentTime)}</span>
+            </div>
+
+            {/* Speed */}
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/5 border border-white/10">
+              {[
+                { label: '1×', value: 1 },
+                { label: '60×', value: 60 },
+                { label: '600×', value: 600 },
+              ].map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => setSpeed(s.value)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                    speed === s.value
+                      ? 'bg-blue-600 text-white'
+                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Orbit Filter Buttons - scrollable on mobile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="absolute bottom-20 md:bottom-16 left-0 right-0 px-4 z-10"
-      >
-        <div className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-hide">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => { setSelectedOrbit(null); setSelectedSatellite(null); }}
-            className={`backdrop-blur-sm border-white/10 text-white hover:bg-white/20 text-xs whitespace-nowrap flex-shrink-0 ${!selectedOrbit ? 'bg-white/25 ring-1 ring-white/40' : 'bg-black/60'}`}
-          >
-            All ({leoSatellites.length + meoSatellites.length + geoSatellites.length})
-          </Button>
-          {orbitTypes.map((orbit) => (
-            <Button
-              key={orbit.name}
-              variant="secondary"
-              size="sm"
-              onClick={() => { setSelectedOrbit(selectedOrbit === orbit.name ? null : orbit.name); setSelectedSatellite(null); }}
-              className="backdrop-blur-sm border-white/10 text-white hover:bg-white/20 bg-black/60 text-xs whitespace-nowrap flex-shrink-0"
-              style={{
-                backgroundColor: selectedOrbit === orbit.name ? `${orbit.color}30` : undefined,
-                borderColor: selectedOrbit === orbit.name ? orbit.color : undefined,
-              }}
+      {/* 3D Earth View - Fills remaining space */}
+      <div className="flex-1 relative bg-black min-h-0">
+        <div className="absolute inset-0">
+          <EarthView
+            className="w-full h-full"
+            showOrbits={true}
+            selectedCategory={category}
+            speedMultiplier={speed}
+            selectedSatellite={satellite}
+            onSelectSatellite={setSatellite}
+          />
+        </div>
+
+        {/* Satellite Info Panel */}
+        <AnimatePresence>
+          {satellite && position && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute top-4 right-4 z-20 w-[220px] bg-black/95 backdrop-blur-md rounded-xl border border-white/20 shadow-2xl overflow-hidden"
             >
-              <span className="w-2 h-2 rounded-full mr-1.5 flex-shrink-0" style={{ backgroundColor: orbit.color }} />
-              {orbit.name} ({orbit.count})
-            </Button>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Satellite Details Panel - bottom sheet on mobile, side panel on desktop */}
-      <AnimatePresence>
-        {selectedSatellite && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute left-4 right-4 bottom-32 md:left-auto md:right-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-auto md:w-72 z-20"
-          >
-            <Card className="bg-black/90 backdrop-blur-sm border-white/20">
-              <CardContent className="p-3 md:p-4">
-                <div className="flex items-start justify-between mb-2 md:mb-3">
-                  <div>
-                    <h3 className="text-white font-semibold text-base md:text-lg">{selectedSatellite.name}</h3>
-                    <p className="text-white/50 text-[10px] md:text-xs">{selectedSatellite.category}</p>
+              {/* Header */}
+              <div className="px-3 py-2.5 border-b border-white/10 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-semibold text-sm truncate">{satellite.name}</h3>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {satellite.category && SATELLITE_CATEGORIES[satellite.category as keyof typeof SATELLITE_CATEGORIES] && (
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
+                          style={{
+                            backgroundColor: `${SATELLITE_CATEGORIES[satellite.category as keyof typeof SATELLITE_CATEGORIES].color}25`,
+                            color: SATELLITE_CATEGORIES[satellite.category as keyof typeof SATELLITE_CATEGORIES].color,
+                          }}
+                        >
+                          {SATELLITE_CATEGORIES[satellite.category as keyof typeof SATELLITE_CATEGORIES].name}
+                        </span>
+                      )}
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-white/10 text-white/70">
+                        {getOrbitType(position.alt)}
+                      </span>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setSelectedSatellite(null)}
-                    className="p-1 hover:bg-white/10 rounded"
-                  >
-                    <X className="h-4 w-4 text-white/50" />
+                  <button onClick={() => setSatellite(null)} className="p-1 rounded-md hover:bg-white/10 transition-colors">
+                    <X className="h-3.5 w-3.5 text-white/60" />
                   </button>
                 </div>
-
-                <p className="text-white/70 text-sm mb-4">{selectedSatellite.description}</p>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Operator</span>
-                    <span className="text-white">{selectedSatellite.operator}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Country</span>
-                    <span className="text-white">{selectedSatellite.country}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Altitude</span>
-                    <span className="text-white">{selectedSatellite.altitude.toLocaleString()} km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Inclination</span>
-                    <span className="text-white">{selectedSatellite.inclination}°</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Period</span>
-                    <span className="text-white">{selectedSatellite.period} min</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">Launch Date</span>
-                    <span className="text-white">{selectedSatellite.launchDate}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/50">NORAD ID</span>
-                    <span className="text-white font-mono">{selectedSatellite.noradId}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-white/10">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs"
-                    style={{ backgroundColor: `${orbitTypes.find(o => o.name === selectedSatellite.type)?.color}30` }}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: orbitTypes.find(o => o.name === selectedSatellite.type)?.color }}
-                    />
-                    <span className="text-white">{selectedSatellite.type}</span>
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Satellite List Panel (when no satellite selected) - hidden on mobile */}
-      {showInfo && !selectedSatellite && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 w-64 z-10"
-        >
-          <Card className="bg-black/60 backdrop-blur-sm border-white/10">
-            <CardContent className="p-3">
-              <h3 className="text-white font-medium mb-2 text-sm">Satellites ({currentSatellites.length})</h3>
-              <div className="space-y-1 max-h-[50vh] overflow-y-auto">
-                {currentSatellites.map((sat) => (
-                  <button
-                    key={sat.noradId}
-                    onClick={() => setSelectedSatellite(sat)}
-                    className="w-full text-left p-2 rounded text-xs transition-all bg-white/5 hover:bg-white/15 flex items-center gap-2"
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: orbitTypes.find(o => o.name === sat.type)?.color }}
-                    />
-                    <span className="text-white truncate">{sat.name}</span>
-                    <span className="text-white/40 ml-auto shrink-0">{sat.altitude.toLocaleString()} km</span>
-                  </button>
-                ))}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+
+              {/* Live Telemetry */}
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-green-400 text-[9px] font-semibold uppercase tracking-wider">Live Telemetry</span>
+                  </div>
+                  <span className="text-white/30 text-[8px] font-mono">{formatTime(currentTime)}</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center bg-white/5 rounded px-2 py-1.5">
+                    <span className="text-white/50 text-[10px]">Altitude</span>
+                    <span className="text-white font-mono text-xs">{position.alt.toFixed(1)} <span className="text-white/40">km</span></span>
+                  </div>
+                  <div className="flex justify-between items-center bg-white/5 rounded px-2 py-1.5">
+                    <span className="text-white/50 text-[10px]">Velocity</span>
+                    <span className="text-white font-mono text-xs">{position.vel.toFixed(3)} <span className="text-white/40">km/s</span></span>
+                  </div>
+                  <div className="flex justify-between items-center bg-white/5 rounded px-2 py-1.5">
+                    <span className="text-white/50 text-[10px]">Latitude</span>
+                    <span className="text-white font-mono text-xs">{position.lat >= 0 ? '+' : ''}{position.lat.toFixed(4)}°</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-white/5 rounded px-2 py-1.5">
+                    <span className="text-white/50 text-[10px]">Longitude</span>
+                    <span className="text-white font-mono text-xs">{position.lon >= 0 ? '+' : ''}{position.lon.toFixed(4)}°</span>
+                  </div>
+                </div>
+
+                {satellite.noradId && (
+                  <div className="mt-2.5 pt-2 border-t border-white/10 flex justify-between text-[10px]">
+                    <span className="text-white/40">NORAD Catalog #</span>
+                    <span className="text-white/80 font-mono">{satellite.noradId}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Attribution */}
+        <a
+          href="https://celestrak.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-3 right-3 z-10 text-[10px] text-white/30 hover:text-white/50 transition-colors"
+        >
+          CelesTrak
+        </a>
+      </div>
     </div>
   );
 }

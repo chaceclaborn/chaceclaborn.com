@@ -11,32 +11,45 @@ import { Download, Mail, MapPin, Linkedin, GraduationCap, Briefcase, Award, Book
 
 const experience = [
   {
-    title: 'Propulsion Design Engineer',
+    title: 'Propulsion Design Engineer II - BE-3U Turbomachinery',
     company: 'Blue Origin',
-    period: 'Present',
+    period: '2024-2025',
     highlights: [
-      'Design and analyze propulsion system components for rocket engines',
-      'Apply GD&T expertise to improve design-for-manufacturability',
-      'Develop CAD/CAM solutions for fixtures, tooling, and specialized equipment',
-      'Lead NPI process refinement efforts to streamline production workflows',
-      'Collaborate with cross-functional teams on propulsion system development',
+      'Coming Soon'
+    ],
+  },
+  
+  {
+    title: 'Hardware Manufacturing Engineer II - BE-3U Turbomachinery',
+    company: 'Blue Origin',
+    period: '2024-2025',
+    highlights: [
+      'Develop and update manufacturing work instructions and support the shop floor for BE-4 and BE-3U rocket engine components such as turbomachinery, valves, and various other components',
+      'Perform comprehensive engineering analysis and dispositions of non-conformances, applying advanced problemsolving techniques to ensure compliance with design specifications and production standards',
+      'Defines, develops, implements, and optimizes Hydroformed parts and equipment consisting of exotic materials, dies, and other supporting tooling; operates, troubleshoots, and programs recipes for new hardware',
+      'Utilize Python and SQL for data analysis, creating queries and scripts to identify trends, track non-conformances, and support manufacturing improvements (e.g., building dashboards and visualizations on Redash and Databricks)',
+      'Apply Lean manufacturing principles to streamline workflows and drive continuous improvement, utilizing ITS JIRA to track team progress, manage tasks, and align objectives with operational goals',
+      'Track project milestones and collaborate with cross-functional teams to ensure on-time delivery of insourced components, driving vertical integration and enhancing production workflow',
+      'Created AI Agents, AI workflows, and leveraged Artificial Intelligence for querying, data analysis, and troubleshooting',
+      'Started development on full-stack web-based applications like Turbo Build Book for subassembly processes'
     ],
   },
   {
-    title: 'Manufacturing Process Engineer II',
+    title: 'Manufacturing Process Engineer II - Turbomachinery, Valves, Combustion Devices, Thrust Chamber Assembly',
     company: 'Blue Origin',
     period: '2022 – 2024',
     highlights: [
-      'Authored detailed work instructions for BE-4 and BE-3U engine components',
-      'Performed root cause analysis on non-conformances to improve quality',
-      'Supported development of hydroformed parts manufacturing processes',
-      'Built Python/SQL tools for production data analysis and reporting',
-      'Implemented Lean manufacturing practices across production lines',
-      'Coordinated cross-functional efforts using JIRA and Windchill PLM',
+      'Lead GD&T application and design-for-manufacturability feedback for turbomachinery, valves, and other engine components - reducing cycle time, minimizing non-conformances, and improving part Cpk values',
+      'Leverage CAD/CAM software to design custom fixtures and tooling, analyze CNC programs, redline engineering drawings, generate exploded assembly views—supporting efficient machining and enhanced part manufacturability',
+      'Drive machining process development and standardization for CNC operations in support of rocket engine hardware',
+      'Designed and implemented CNC probing routines and macros to streamline and automate setup processes, reduce manual intervention, and eliminate variation in critical dimensions',
+      'Led iterative NPI process refinement, utilizing root cause analysis and continuous feedback loops to optimize machining techniques and drive successful production outcomes',
+      'Collaborate with external vendors to implement cutting tool trials and enhance software (e.g., Vericut for CNC simulation, PLC programming for Hydroforming press) to improve machining precision and process efficiency',
+      'Organize best practices, conduct RCCAs, and facilitate knowledge transfer among machinists and programmers'
     ],
   },
   {
-    title: 'Systems/Test Engineer Intern',
+    title: 'Systems/Test Engineer Intern - RL10 Rocket Engines',
     company: 'Aerojet Rocketdyne',
     period: 'May 2021 – August 2021',
     highlights: [
@@ -68,21 +81,16 @@ const skills = {
 };
 
 const achievements = [
-  'Graduated with 3.79 GPA from Auburn University',
+  'Graduated Magna Cum Laude with 3.79 GPA from Auburn University',
   'Led GD&T standardization reducing cycle time by 15%',
-  'Implemented CNC probing systems saving 20+ hours weekly',
+  'Implemented CNC probing routines',
   'Developed automated data analysis tools in Python/SQL',
-  'Contributed to vertical integration for rocket engine production',
-  'Created comprehensive SOPs for CMM operations',
+  'Contributed to vertical integration for rocket engine production'
 ];
 
 const certifications = [
-  'Advanced GD&T',
-  'CNC Programming',
-  'Lean Manufacturing / Six Sigma',
-  'RCCA (Root Cause Corrective Action)',
-  'Aerospace Quality Standards',
-  'Advanced Materials Processing',
+  'Working on Space Systems Certification from Auburn',
+  'Working on Artificial Intelligence Certification from Auburn. '
 ];
 
 const container = {
@@ -100,8 +108,22 @@ const item = {
 
 export default function ResumePage() {
   return (
-    <div className="py-12 md:py-16">
-      <div className="container max-w-4xl mx-auto px-4">
+    <div className="min-h-screen py-8 md:py-12 relative">
+      {/* Futuristic background effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `linear-gradient(var(--primary) 1px, transparent 1px),
+                             linear-gradient(90deg, var(--primary) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px',
+          }}
+        />
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-accent/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container max-w-4xl mx-auto px-4 relative z-10">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

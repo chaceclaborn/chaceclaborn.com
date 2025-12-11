@@ -8,9 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "upload:large": "node scripts/upload-large-files.mjs"
+    "upload:large": "node scripts/upload-large-files.mjs",
+    "update:satellites": "node scripts/update-satellites.mjs",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "node scripts/seed-satellites.mjs"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -23,6 +29,8 @@
     "lucide-react": "^0.555.0",
     "next": "16.0.6",
     "open": "^11.0.0",
+    "pg": "^8.16.3",
+    "prisma": "^7.1.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "satellite.js": "^6.0.1",
@@ -32,6 +40,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

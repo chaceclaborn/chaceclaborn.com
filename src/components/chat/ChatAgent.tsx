@@ -137,8 +137,13 @@ function getResponse(input: string): string {
   return "I can tell you about Chace's work at Blue Origin, his Auburn education, technical skills, or projects. What interests you?";
 }
 
-export function ChatAgent() {
-  const [isOpen, setIsOpen] = useState(false);
+interface ChatAgentProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function ChatAgent({ isOpen: externalIsOpen, onClose }: ChatAgentProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', role: 'assistant', content: "Hi! I can help you learn about Chace's experience and skills. What would you like to know?" }
@@ -147,6 +152,10 @@ export function ChatAgent() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Use external control if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = onClose ? (value: boolean) => { if (!value) onClose(); } : setInternalIsOpen;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -183,29 +192,14 @@ export function ChatAgent() {
 
   return (
     <>
-      {/* Floating Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-5 right-5 z-50 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 flex items-center justify-center transition-colors"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* Chat Window */}
+      {/* Chat Window - positioned above footer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
-            className="fixed bottom-5 right-5 z-50 w-80 max-w-[calc(100vw-2.5rem)] bg-background border border-border rounded-lg shadow-xl overflow-hidden"
+            className="fixed bottom-16 sm:bottom-20 right-4 z-[150] w-80 max-w-[calc(100vw-2rem)] bg-background border border-border rounded-lg shadow-xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">

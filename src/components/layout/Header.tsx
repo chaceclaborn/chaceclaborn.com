@@ -64,9 +64,9 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="fixed top-0 left-0 right-0 z-[100] w-full h-16">
       {/* Sleek header background */}
-      <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/20" />
+      <div className="absolute inset-0 bg-background/90 backdrop-blur-2xl border-b border-border/30" />
 
       <div className="relative container flex h-16 max-w-7xl items-center justify-between mx-auto px-4">
         {/* Logo */}

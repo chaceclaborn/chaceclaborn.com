@@ -19,7 +19,20 @@
       "Bash(find:*)",
       "Bash(mkdir:*)",
       "Bash(del \"E:\\Coding\\Website\\src\\middleware.ts\")",
-      "Bash(yarn build:*)"
+      "Bash(yarn build:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:celestrak.org)",
+      "Bash(node scripts/update-satellites.mjs:*)",
+      "Bash(npx prisma init)",
+      "Bash(yarn db:generate:*)",
+      "Bash(yarn db:push)",
+      "Bash(yarn db:seed:*)",
+      "WebFetch(domain:www.prisma.io)"
     ],
     "deny": [],
     "ask": []
