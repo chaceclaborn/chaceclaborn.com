@@ -1,6 +1,19 @@
 import { prisma } from './prisma';
 import { FALLBACK_TLE, type TLEData, type TLESourceKey } from './satellite-service';
 
+interface SatelliteRecord {
+  name: string;
+  line1: string;
+  line2: string;
+  noradId: number;
+  category: string;
+}
+
+interface CategoryCount {
+  category: string;
+  _count: { category: number };
+}
+
 /**
  * Fetch all satellites from the database
  */
@@ -16,7 +29,7 @@ export async function getAllSatellites(): Promise<TLEData[]> {
       },
     });
 
-    return satellites.map(sat => ({
+    return satellites.map((sat: SatelliteRecord) => ({
       name: sat.name,
       line1: sat.line1,
       line2: sat.line2,
@@ -45,7 +58,7 @@ export async function getSatellitesByCategory(category: TLESourceKey): Promise<T
       },
     });
 
-    return satellites.map(sat => ({
+    return satellites.map((sat: SatelliteRecord) => ({
       name: sat.name,
       line1: sat.line1,
       line2: sat.line2,
@@ -68,7 +81,7 @@ export async function getSatelliteCounts(): Promise<Record<string, number>> {
       _count: { category: true },
     });
 
-    return counts.reduce((acc, item) => {
+    return counts.reduce((acc: Record<string, number>, item: CategoryCount) => {
       acc[item.category] = item._count.category;
       return acc;
     }, {} as Record<string, number>);

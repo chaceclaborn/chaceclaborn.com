@@ -74,7 +74,7 @@ export function useTheme() {
     // Return default values if not within provider (during SSR)
     return {
       theme: 'system' as Theme,
-      setTheme: () => {},
+      setTheme: (_theme: Theme) => { /* noop during SSR */ },
       resolvedTheme: 'light' as const,
     };
   }

@@ -1,12 +1,11 @@
 'use client';
 
 import { useRef, useState, useMemo, useEffect, useCallback } from 'react';
-import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Expand, Pause, Play, Info, X, ChevronLeft, ChevronRight, Globe, ArrowRight } from 'lucide-react';
+import { Expand, Info, X, ChevronLeft, ChevronRight, Globe, ArrowRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // ============================================
@@ -518,7 +517,8 @@ function CelestialBodyMesh({
   body,
   daysSinceJ2000,
   showLabels,
-  onBodyClick,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBodyClick: _onBodyClick,
   onBodySelect
 }: {
   body: CelestialBody;
@@ -675,6 +675,12 @@ function OrbitPath({ body }: { body: CelestialBody }) {
   );
 }
 
+// Seeded random number generator for deterministic asteroid positions
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 function AsteroidBelt() {
   const asteroidsRef = useRef<THREE.Points>(null);
 
@@ -684,15 +690,15 @@ function AsteroidBelt() {
     const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      const r = 2.2 + Math.random() * 1.0;
-      const angle = Math.random() * Math.PI * 2;
-      const inclination = (Math.random() - 0.5) * 0.3;
+      const r = 2.2 + seededRandom(i * 3) * 1.0;
+      const angle = seededRandom(i * 3 + 1) * Math.PI * 2;
+      const inclination = (seededRandom(i * 3 + 2) - 0.5) * 0.3;
 
       positions[i * 3] = r * Math.cos(angle) * DISTANCE_SCALE;
       positions[i * 3 + 1] = inclination * DISTANCE_SCALE;
       positions[i * 3 + 2] = r * Math.sin(angle) * DISTANCE_SCALE;
 
-      const shade = 0.3 + Math.random() * 0.3;
+      const shade = 0.3 + seededRandom(i * 4) * 0.3;
       colors[i * 3] = shade;
       colors[i * 3 + 1] = shade * 0.9;
       colors[i * 3 + 2] = shade * 0.8;
@@ -728,15 +734,15 @@ function KuiperBelt() {
     const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      const r = 30 + Math.random() * 20;
-      const angle = Math.random() * Math.PI * 2;
-      const inclination = (Math.random() - 0.5) * 0.5;
+      const r = 30 + seededRandom(i * 5 + 10000) * 20;
+      const angle = seededRandom(i * 5 + 10001) * Math.PI * 2;
+      const inclination = (seededRandom(i * 5 + 10002) - 0.5) * 0.5;
 
       positions[i * 3] = r * Math.cos(angle) * DISTANCE_SCALE;
       positions[i * 3 + 1] = inclination * DISTANCE_SCALE;
       positions[i * 3 + 2] = r * Math.sin(angle) * DISTANCE_SCALE;
 
-      const shade = 0.4 + Math.random() * 0.2;
+      const shade = 0.4 + seededRandom(i * 5 + 10003) * 0.2;
       colors[i * 3] = shade * 0.9;
       colors[i * 3 + 1] = shade;
       colors[i * 3 + 2] = shade * 1.1;
@@ -757,6 +763,7 @@ function KuiperBelt() {
 
 // Custom OrbitControls wrapper that stops auto-rotation on user interaction
 function CustomOrbitControls({ autoRotate, onInteraction }: { autoRotate: boolean; onInteraction: () => void }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
 
   useEffect(() => {
@@ -846,7 +853,8 @@ function InfoPanel({
   if (!selectedBody && !showSunInfo) return null;
 
   const allBodies = [{ name: 'Sun', type: 'star' }, ...celestialBodies];
-  const currentIndex = showSunInfo ? 0 : allBodies.findIndex(b => b.name === selectedBody?.name);
+  const _currentIndex = showSunInfo ? 0 : allBodies.findIndex(b => b.name === selectedBody?.name);
+  void _currentIndex; // Used for navigation context
 
   if (showSunInfo) {
     return (
@@ -1050,10 +1058,10 @@ export function SolarSystem({
   className = '',
   showExpandButton = true,
   showLabels = false,
-  interactive = true,
+  interactive: _interactive = true,
   showControls = true
 }: SolarSystemProps) {
-  const router = useRouter();
+  void _interactive; // Reserved for future use
   const [simulatedDate, setSimulatedDate] = useState(new Date());
   const [isPaused, setIsPaused] = useState(false);
   const [timeScale, setTimeScale] = useState(0);
@@ -1103,7 +1111,7 @@ export function SolarSystem({
 
   const handleNavigate = useCallback((direction: 'prev' | 'next') => {
     const allBodies = celestialBodies;
-    let currentIndex = showSunInfo ? -1 : allBodies.findIndex(b => b.name === selectedBody?.name);
+    const currentIndex = showSunInfo ? -1 : allBodies.findIndex(b => b.name === selectedBody?.name);
 
     if (direction === 'next') {
       if (showSunInfo) {

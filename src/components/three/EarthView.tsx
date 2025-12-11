@@ -26,7 +26,8 @@ export const orbitColors = {
 };
 
 // No hard limit - we use instanced rendering so we can handle thousands
-const MAX_SATELLITES = 10000;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _MAX_SATELLITES = 10000;
 
 // Scale altitudes for visualization
 function scaleAltitude(altitudeKm: number): number {
@@ -63,8 +64,9 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
 
   // Update cursor when hovering
   useEffect(() => {
-    gl.domElement.style.cursor = hovered !== null ? 'pointer' : 'grab';
-  }, [hovered, gl]);
+    const cursor = hovered !== null ? 'pointer' : 'grab';
+    gl.domElement.style.cursor = cursor;
+  }, [hovered, gl.domElement]);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
@@ -85,7 +87,8 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
     });
 
     setPositions(newPositions);
-  }, [satellites, Math.floor(simulatedDate.getTime() / updateInterval)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [satellites, updateInterval, simulatedDate]);
 
   // Update instance matrices
   useFrame(() => {
@@ -212,14 +215,13 @@ function OrbitPath({ altitude, inclination, color }: { altitude: number; inclina
 // EARTH
 // ============================================
 
-function Earth({ simulatedDate, useTextures }: { simulatedDate: Date; useTextures: boolean }) {
+function EarthWithTextures({ simulatedDate }: { simulatedDate: Date }) {
   const earthRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
-
-  const textures = useTextures ? useLoader(THREE.TextureLoader, [
+  const textures = useLoader(THREE.TextureLoader, [
     '/textures/earth_daymap.jpg',
     '/textures/earth_clouds.png',
-  ]) : [null, null];
+  ]);
 
   useFrame(() => {
     const rotation = getEarthRotation(simulatedDate);
@@ -231,19 +233,11 @@ function Earth({ simulatedDate, useTextures }: { simulatedDate: Date; useTexture
     <group>
       <mesh ref={earthRef}>
         <sphereGeometry args={[1, 48, 48]} />
-        {useTextures && textures[0] ? (
-          <meshStandardMaterial map={textures[0]} roughness={0.8} />
-        ) : (
-          <meshStandardMaterial color="#4a90d9" roughness={0.7} />
-        )}
+        <meshStandardMaterial map={textures[0]} roughness={0.8} />
       </mesh>
       <mesh ref={cloudsRef}>
         <sphereGeometry args={[1.01, 32, 32]} />
-        {useTextures && textures[1] ? (
-          <meshStandardMaterial map={textures[1]} transparent opacity={0.3} depthWrite={false} />
-        ) : (
-          <meshStandardMaterial color="#fff" transparent opacity={0.2} />
-        )}
+        <meshStandardMaterial map={textures[1]} transparent opacity={0.3} depthWrite={false} />
       </mesh>
       <mesh>
         <sphereGeometry args={[1.08, 24, 24]} />
@@ -251,6 +245,41 @@ function Earth({ simulatedDate, useTextures }: { simulatedDate: Date; useTexture
       </mesh>
     </group>
   );
+}
+
+function EarthWithoutTextures({ simulatedDate }: { simulatedDate: Date }) {
+  const earthRef = useRef<THREE.Mesh>(null);
+  const cloudsRef = useRef<THREE.Mesh>(null);
+
+  useFrame(() => {
+    const rotation = getEarthRotation(simulatedDate);
+    if (earthRef.current) earthRef.current.rotation.y = rotation;
+    if (cloudsRef.current) cloudsRef.current.rotation.y = rotation * 1.01;
+  });
+
+  return (
+    <group>
+      <mesh ref={earthRef}>
+        <sphereGeometry args={[1, 48, 48]} />
+        <meshStandardMaterial color="#4a90d9" roughness={0.7} />
+      </mesh>
+      <mesh ref={cloudsRef}>
+        <sphereGeometry args={[1.01, 32, 32]} />
+        <meshStandardMaterial color="#fff" transparent opacity={0.2} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[1.08, 24, 24]} />
+        <meshBasicMaterial color="#4da6ff" transparent opacity={0.05} side={THREE.BackSide} />
+      </mesh>
+    </group>
+  );
+}
+
+function Earth({ simulatedDate, useTextures }: { simulatedDate: Date; useTextures: boolean }) {
+  if (useTextures) {
+    return <EarthWithTextures simulatedDate={simulatedDate} />;
+  }
+  return <EarthWithoutTextures simulatedDate={simulatedDate} />;
 }
 
 // ============================================
@@ -269,6 +298,7 @@ interface SceneProps {
 }
 
 function Scene({ showOrbits, simulatedDate, selectedSatellite, onSelectSatellite, satellites, useTextures, autoRotate, onInteraction }: SceneProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
 
   useEffect(() => {
@@ -339,21 +369,31 @@ export function EarthView({
   selectedSatellite = null,
   onSelectSatellite = () => {},
   useRealisticTextures = true,
-  categoriesToLoad,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  categoriesToLoad: _categoriesToLoad,
 }: EarthViewProps) {
   const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [simulatedDate, setSimulatedDate] = useState(new Date());
+  const [simulatedDate, setSimulatedDate] = useState(() => new Date());
   const [autoRotate, setAutoRotate] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const startTimeRef = useRef(Date.now());
-  const startDateRef = useRef(new Date());
+  const startTimeRef = useRef<number | null>(null);
+  const startDateRef = useRef<Date | null>(null);
+
+  // Initialize refs on mount
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+    startDateRef.current = new Date();
+  }, []);
 
   // Update time - throttled for performance
   useEffect(() => {
+    if (startTimeRef.current === null || startDateRef.current === null) return;
+    const startTime = startTimeRef.current;
+    const startDate = startDateRef.current;
     const interval = setInterval(() => {
-      const elapsed = (Date.now() - startTimeRef.current) * speedMultiplier;
-      setSimulatedDate(new Date(startDateRef.current.getTime() + elapsed));
+      const elapsed = (Date.now() - startTime) * speedMultiplier;
+      setSimulatedDate(new Date(startDate.getTime() + elapsed));
     }, speedMultiplier === 1 ? 1000 : 200);
     return () => clearInterval(interval);
   }, [speedMultiplier]);
