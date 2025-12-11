@@ -23,13 +23,13 @@ const SolarSystem = dynamic(
 
 export function SolarSystemLayer() {
   return (
-    <div className="w-full h-full flex flex-col items-center px-2 sm:px-4 md:px-6 pt-1 sm:pt-2 pb-16 sm:pb-20">
+    <div className="w-full h-full flex flex-col items-center px-4 sm:px-6 md:px-8 pt-2 sm:pt-3 pb-20 sm:pb-24">
       {/* Header with Visit Earth Button */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-3xl flex items-center justify-between mb-1 sm:mb-2 shrink-0 px-1"
+        className="w-full max-w-3xl flex items-center justify-between mb-2 sm:mb-3 shrink-0 px-1"
       >
         <div className="text-center flex-1">
           <h2 className="text-sm sm:text-lg md:text-xl font-bold mb-0.5">
@@ -60,13 +60,16 @@ export function SolarSystemLayer() {
         </Link>
       </motion.div>
 
-      {/* Solar System Container */}
+      {/* Solar System Container - Smaller on mobile for easier swiping */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="solar-system-container w-full max-w-3xl grow min-h-0 rounded-xl overflow-hidden"
-        style={{ maxHeight: 'calc(100% - 60px)' }}
+        className="solar-system-container w-full max-w-3xl rounded-xl overflow-hidden"
+        style={{
+          height: 'calc(100% - 80px)',
+          maxHeight: '500px' // Limit height on mobile
+        }}
       >
         <SolarSystem
           className="w-full h-full"
@@ -75,6 +78,16 @@ export function SolarSystemLayer() {
           showControls={true}
         />
       </motion.div>
+
+      {/* Swipe hint on mobile */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="sm:hidden text-muted-foreground/60 text-[10px] mt-3 text-center"
+      >
+        Swipe left or right to navigate
+      </motion.p>
     </div>
   );
 }
