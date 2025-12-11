@@ -59,7 +59,8 @@ interface InstancedSatellitesProps {
 function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSatellite }: InstancedSatellitesProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [hovered, setHovered] = useState<number | null>(null);
-  const [positions, setPositions] = useState<Map<number, SatellitePosition>>(new Map());
+  // Store last known positions for hover/click interactions
+  const positionsRef = useRef<Map<number, SatellitePosition>>(new Map());
   const { gl } = useThree();
 
   // Update cursor when hovering
@@ -71,31 +72,21 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
 
-  // Calculate positions - throttled based on satellite count for performance
-  // More satellites = less frequent updates to maintain smooth rendering
-  // Faster updates for smoother motion (reduced intervals)
-  const updateInterval = satellites.length > 3000 ? 500 : satellites.length > 1000 ? 250 : 100;
-
-  useEffect(() => {
-    const newPositions = new Map<number, SatellitePosition>();
-
-    // Process in batches to avoid blocking the main thread
-    satellites.forEach((tle, index) => {
-      const pos = calculatePosition(tle, simulatedDate);
-      if (pos) {
-        newPositions.set(index, pos);
-      }
-    });
-
-    setPositions(newPositions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [satellites, updateInterval, simulatedDate]);
-
-  // Update instance matrices
+  // Calculate positions in real-time every frame for smooth animation
   useFrame(() => {
     if (!meshRef.current) return;
 
-    positions.forEach((pos, index) => {
+    // Get current time for this frame
+    const now = simulatedDate;
+    const newPositions = new Map<number, SatellitePosition>();
+
+    satellites.forEach((tle, index) => {
+      // Calculate fresh position for this exact moment
+      const pos = calculatePosition(tle, now);
+      if (!pos) return;
+
+      newPositions.set(index, pos);
+
       const scale = 1 + scaleAltitude(pos.altitude);
       const normalizedRadius = Math.sqrt(pos.x ** 2 + pos.y ** 2 + pos.z ** 2);
 
@@ -106,8 +97,8 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
           (pos.z / normalizedRadius) * scale
         );
 
-        const isStation = satellites[index]?.category === 'stations';
-        const isSelected = selectedSatellite?.name === satellites[index]?.name;
+        const isStation = tle.category === 'stations';
+        const isSelected = selectedSatellite?.name === tle.name;
         const isHovered = hovered === index;
         // Scale size based on total count - smaller when showing thousands, but keep clickable
         const baseSize = satellites.length > 3000 ? 0.008 : satellites.length > 1000 ? 0.01 : 0.015;
@@ -119,11 +110,14 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
 
         // Set color based on orbit type
         const orbitType = getOrbitType(pos.altitude);
-        const categoryColor = SATELLITE_CATEGORIES[satellites[index]?.category as keyof typeof SATELLITE_CATEGORIES]?.color;
+        const categoryColor = SATELLITE_CATEGORIES[tle.category as keyof typeof SATELLITE_CATEGORIES]?.color;
         color.set(isSelected ? '#ffffff' : isHovered ? '#ffffff' : categoryColor || orbitColors[orbitType]);
         meshRef.current!.setColorAt(index, color);
       }
     });
+
+    // Store positions for interactions
+    positionsRef.current = newPositions;
 
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) {
@@ -160,12 +154,12 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
       </instancedMesh>
 
       {/* Tooltip for hovered satellite */}
-      {hovered !== null && positions.get(hovered) && satellites[hovered] && (
+      {hovered !== null && positionsRef.current.get(hovered) && satellites[hovered] && (
         <Html
           position={[
-            (positions.get(hovered)!.x / Math.sqrt(positions.get(hovered)!.x ** 2 + positions.get(hovered)!.y ** 2 + positions.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positions.get(hovered)!.altitude)),
-            (positions.get(hovered)!.y / Math.sqrt(positions.get(hovered)!.x ** 2 + positions.get(hovered)!.y ** 2 + positions.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positions.get(hovered)!.altitude)) + 0.12,
-            (positions.get(hovered)!.z / Math.sqrt(positions.get(hovered)!.x ** 2 + positions.get(hovered)!.y ** 2 + positions.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positions.get(hovered)!.altitude))
+            (positionsRef.current.get(hovered)!.x / Math.sqrt(positionsRef.current.get(hovered)!.x ** 2 + positionsRef.current.get(hovered)!.y ** 2 + positionsRef.current.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positionsRef.current.get(hovered)!.altitude)),
+            (positionsRef.current.get(hovered)!.y / Math.sqrt(positionsRef.current.get(hovered)!.x ** 2 + positionsRef.current.get(hovered)!.y ** 2 + positionsRef.current.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positionsRef.current.get(hovered)!.altitude)) + 0.12,
+            (positionsRef.current.get(hovered)!.z / Math.sqrt(positionsRef.current.get(hovered)!.x ** 2 + positionsRef.current.get(hovered)!.y ** 2 + positionsRef.current.get(hovered)!.z ** 2)) * (1 + scaleAltitude(positionsRef.current.get(hovered)!.altitude))
           ]}
           center
           style={{ pointerEvents: 'none' }}
@@ -177,9 +171,9 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
             </div>
             <div className="mt-1.5 pt-1.5 border-t border-white/10 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px]">
               <span className="text-white/40">Alt:</span>
-              <span className="text-white font-mono text-right">{positions.get(hovered)!.altitude.toFixed(0)} km</span>
+              <span className="text-white font-mono text-right">{positionsRef.current.get(hovered)!.altitude.toFixed(0)} km</span>
               <span className="text-white/40">Vel:</span>
-              <span className="text-white font-mono text-right">{positions.get(hovered)!.velocity.toFixed(2)} km/s</span>
+              <span className="text-white font-mono text-right">{positionsRef.current.get(hovered)!.velocity.toFixed(2)} km/s</span>
             </div>
             <div className="text-[8px] text-blue-400 mt-1.5 text-center">Click to select</div>
           </div>
