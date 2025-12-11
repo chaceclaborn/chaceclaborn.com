@@ -56,11 +56,23 @@ interface InstancedSatellitesProps {
   selectedSatellite: TLEData | null;
 }
 
+// Store position data for interpolation
+interface InterpolatedPosition extends SatellitePosition {
+  prevX: number;
+  prevY: number;
+  prevZ: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+}
+
 function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSatellite }: InstancedSatellitesProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [hovered, setHovered] = useState<number | null>(null);
-  // Store last known positions for hover/click interactions
-  const positionsRef = useRef<Map<number, SatellitePosition>>(new Map());
+  // Store positions with interpolation data
+  const positionsRef = useRef<Map<number, InterpolatedPosition>>(new Map());
+  const lastUpdateRef = useRef<number>(0);
+  const interpolationRef = useRef<number>(0);
   const { gl } = useThree();
 
   // Update cursor when hovering
@@ -72,35 +84,85 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
 
-  // Calculate positions in real-time every frame for smooth animation
+  // Update interval in ms - calculate new positions every 100ms, interpolate between
+  const UPDATE_INTERVAL = 100;
+
+  // Smooth animation with interpolation between position updates
   useFrame(() => {
     if (!meshRef.current) return;
 
-    // Get current time for this frame
-    const now = simulatedDate;
-    const newPositions = new Map<number, SatellitePosition>();
+    const now = performance.now();
+    const timeSinceUpdate = now - lastUpdateRef.current;
 
-    satellites.forEach((tle, index) => {
-      // Calculate fresh position for this exact moment
-      const pos = calculatePosition(tle, now);
-      if (!pos) return;
+    // Calculate new target positions periodically
+    if (timeSinceUpdate >= UPDATE_INTERVAL) {
+      lastUpdateRef.current = now;
+      interpolationRef.current = 0;
 
-      newPositions.set(index, pos);
+      satellites.forEach((tle, index) => {
+        const pos = calculatePosition(tle, simulatedDate);
+        if (!pos) return;
+
+        const existing = positionsRef.current.get(index);
+
+        if (existing) {
+          // Store current interpolated position as previous, new calc as target
+          existing.prevX = existing.x;
+          existing.prevY = existing.y;
+          existing.prevZ = existing.z;
+          existing.targetX = pos.x;
+          existing.targetY = pos.y;
+          existing.targetZ = pos.z;
+          existing.altitude = pos.altitude;
+          existing.velocity = pos.velocity;
+          existing.latitude = pos.latitude;
+          existing.longitude = pos.longitude;
+        } else {
+          // First time - no interpolation needed
+          positionsRef.current.set(index, {
+            ...pos,
+            prevX: pos.x,
+            prevY: pos.y,
+            prevZ: pos.z,
+            targetX: pos.x,
+            targetY: pos.y,
+            targetZ: pos.z,
+          });
+        }
+      });
+    }
+
+    // Interpolation factor (0 to 1) - smooth easing
+    const t = Math.min(timeSinceUpdate / UPDATE_INTERVAL, 1);
+    // Smooth step for extra smoothness
+    const smoothT = t * t * (3 - 2 * t);
+
+    positionsRef.current.forEach((pos, index) => {
+      // Interpolate position for butter-smooth movement
+      const x = pos.prevX + (pos.targetX - pos.prevX) * smoothT;
+      const y = pos.prevY + (pos.targetY - pos.prevY) * smoothT;
+      const z = pos.prevZ + (pos.targetZ - pos.prevZ) * smoothT;
+
+      // Update the stored current position for tooltips
+      pos.x = x;
+      pos.y = y;
+      pos.z = z;
 
       const scale = 1 + scaleAltitude(pos.altitude);
-      const normalizedRadius = Math.sqrt(pos.x ** 2 + pos.y ** 2 + pos.z ** 2);
+      const normalizedRadius = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
 
       if (normalizedRadius > 0) {
         dummy.position.set(
-          (pos.x / normalizedRadius) * scale,
-          (pos.y / normalizedRadius) * scale,
-          (pos.z / normalizedRadius) * scale
+          (x / normalizedRadius) * scale,
+          (y / normalizedRadius) * scale,
+          (z / normalizedRadius) * scale
         );
 
-        const isStation = tle.category === 'stations';
-        const isSelected = selectedSatellite?.name === tle.name;
+        const tle = satellites[index];
+        const isStation = tle?.category === 'stations';
+        const isSelected = selectedSatellite?.name === tle?.name;
         const isHovered = hovered === index;
-        // Scale size based on total count - smaller when showing thousands, but keep clickable
+        // Scale size based on total count
         const baseSize = satellites.length > 3000 ? 0.008 : satellites.length > 1000 ? 0.01 : 0.015;
         const size = isStation ? baseSize * 2.5 : baseSize;
 
@@ -110,14 +172,11 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
 
         // Set color based on orbit type
         const orbitType = getOrbitType(pos.altitude);
-        const categoryColor = SATELLITE_CATEGORIES[tle.category as keyof typeof SATELLITE_CATEGORIES]?.color;
+        const categoryColor = SATELLITE_CATEGORIES[tle?.category as keyof typeof SATELLITE_CATEGORIES]?.color;
         color.set(isSelected ? '#ffffff' : isHovered ? '#ffffff' : categoryColor || orbitColors[orbitType]);
         meshRef.current!.setColorAt(index, color);
       }
     });
-
-    // Store positions for interactions
-    positionsRef.current = newPositions;
 
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) {
