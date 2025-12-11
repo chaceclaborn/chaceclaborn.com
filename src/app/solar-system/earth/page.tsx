@@ -75,6 +75,8 @@ export default function EarthPage() {
   const [speed, setSpeed] = useState(1);
   const [satellite, setSatellite] = useState<TLEData | null>(null);
   const [position, setPosition] = useState<{ alt: number; vel: number; lat: number; lon: number } | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+  const [isLive, setIsLive] = useState(true);
 
   // Use ref for simulated time to avoid re-renders
   const simulatedTimeRef = useRef<Date | null>(new Date());
@@ -83,6 +85,20 @@ export default function EarthPage() {
   const handleTimeUpdate = useCallback((date: Date) => {
     simulatedTimeRef.current = date;
   }, []);
+
+  // Reset to live time
+  const handleGoLive = useCallback(() => {
+    setResetKey(k => k + 1);
+    setSpeed(1);
+    setIsLive(true);
+  }, []);
+
+  // Track when we go non-live
+  useEffect(() => {
+    if (speed !== 1) {
+      setIsLive(false);
+    }
+  }, [speed]);
 
   // Update satellite position based on ref (separate from render cycle)
   useEffect(() => {
@@ -137,6 +153,19 @@ export default function EarthPage() {
             {/* Clock - shows simulated time (isolated component to prevent re-renders) */}
             <ClockDisplay timeRef={simulatedTimeRef} speed={speed} />
 
+            {/* LIVE button */}
+            <button
+              onClick={handleGoLive}
+              className={`px-2.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                isLive
+                  ? 'bg-green-600 text-white'
+                  : 'bg-red-600/80 text-white hover:bg-red-600 animate-pulse'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-300' : 'bg-red-300'}`} />
+              LIVE
+            </button>
+
             {/* Speed */}
             <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/5 border border-white/10">
               {[
@@ -172,6 +201,7 @@ export default function EarthPage() {
             selectedSatellite={satellite}
             onSelectSatellite={setSatellite}
             onTimeUpdate={handleTimeUpdate}
+            resetToLive={resetKey}
           />
         </div>
 

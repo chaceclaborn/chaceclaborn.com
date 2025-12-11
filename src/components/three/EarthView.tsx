@@ -96,11 +96,16 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
 
   const { gl } = useThree();
 
-  // Initialize once on mount
+  // Track initialDate to detect resets
+  const prevInitialDateRef = useRef(initialDate.getTime());
+
+  // Initialize on mount and reset when initialDate changes (live reset)
   useEffect(() => {
-    if (!animRef.current.initialized) {
-      animRef.current.currentSimTime = initialDate.getTime();
+    const newTime = initialDate.getTime();
+    if (!animRef.current.initialized || newTime !== prevInitialDateRef.current) {
+      animRef.current.currentSimTime = newTime;
       animRef.current.initialized = true;
+      prevInitialDateRef.current = newTime;
     }
   }, [initialDate]);
 
@@ -354,11 +359,17 @@ function EarthWithTextures({ initialDate, speedMultiplier }: { initialDate: Date
     currentSimTime: initialDate.getTime(),
     currentSpeed: speedMultiplier,
   });
+  const prevInitialDateRef = useRef(initialDate.getTime());
 
-  // Update speed without resetting time
+  // Update speed and reset time when initialDate changes (live reset)
   useEffect(() => {
     clockRef.current.currentSpeed = speedMultiplier;
-  }, [speedMultiplier]);
+    const newTime = initialDate.getTime();
+    if (newTime !== prevInitialDateRef.current) {
+      clockRef.current.currentSimTime = newTime;
+      prevInitialDateRef.current = newTime;
+    }
+  }, [speedMultiplier, initialDate]);
 
   useFrame(() => {
     const clock = clockRef.current;
@@ -400,11 +411,17 @@ function EarthWithoutTextures({ initialDate, speedMultiplier }: { initialDate: D
     currentSimTime: initialDate.getTime(),
     currentSpeed: speedMultiplier,
   });
+  const prevInitialDateRef = useRef(initialDate.getTime());
 
-  // Update speed without resetting time
+  // Update speed and reset time when initialDate changes (live reset)
   useEffect(() => {
     clockRef.current.currentSpeed = speedMultiplier;
-  }, [speedMultiplier]);
+    const newTime = initialDate.getTime();
+    if (newTime !== prevInitialDateRef.current) {
+      clockRef.current.currentSimTime = newTime;
+      prevInitialDateRef.current = newTime;
+    }
+  }, [speedMultiplier, initialDate]);
 
   useFrame(() => {
     const clock = clockRef.current;
@@ -525,6 +542,7 @@ interface EarthViewProps {
   useRealisticTextures?: boolean;
   categoriesToLoad?: TLESourceKey[];
   onTimeUpdate?: (date: Date) => void;
+  resetToLive?: number; // Increment to reset simulation to current time
 }
 
 export function EarthView({
@@ -538,13 +556,21 @@ export function EarthView({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   categoriesToLoad: _categoriesToLoad,
   onTimeUpdate,
+  resetToLive = 0,
 }: EarthViewProps) {
   const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [autoRotate, setAutoRotate] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
-  // Initial date is set once on mount and never changes
-  const [initialDate] = useState(() => new Date());
+  // Initial date - updates when resetToLive changes
+  const [initialDate, setInitialDate] = useState(() => new Date());
+
+  // Reset to live time when resetToLive prop changes
+  useEffect(() => {
+    if (resetToLive > 0) {
+      setInitialDate(new Date());
+    }
+  }, [resetToLive]);
 
   // Handle time updates from InstancedSatellites (the authoritative clock)
   // Simply forward to parent - Earth now has its own internal clock
