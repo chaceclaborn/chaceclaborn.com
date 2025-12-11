@@ -82,6 +82,7 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
   const [hovered, setHovered] = useState<number | null>(null);
   const statesRef = useRef<Map<number, SatelliteState>>(new Map());
   const positionsRef = useRef<Map<number, SatellitePosition>>(new Map());
+  const prevSatellitesLengthRef = useRef<number>(0);
 
   // Animation state - all timing is internal, no React state dependencies in the loop
   const animRef = useRef({
@@ -94,11 +95,20 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
   const { gl } = useThree();
 
   // Sync with external simulatedDate and speed changes
-  // This only fires when the parent updates, not every frame
   useEffect(() => {
     animRef.current.currentSimTime = simulatedDate.getTime();
     animRef.current.currentSpeed = speedMultiplier;
   }, [simulatedDate, speedMultiplier]);
+
+  // Clear states when satellites array changes (e.g., category filter)
+  useEffect(() => {
+    if (satellites.length !== prevSatellitesLengthRef.current) {
+      statesRef.current.clear();
+      positionsRef.current.clear();
+      animRef.current.lastCalcTime = 0; // Force immediate recalculation
+      prevSatellitesLengthRef.current = satellites.length;
+    }
+  }, [satellites]);
 
   // Update cursor when hovering
   useEffect(() => {
@@ -109,7 +119,7 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
 
-  // SGP4 recalculation interval (real ms) - longer = smoother (less CPU spikes)
+  // SGP4 recalculation interval (real ms)
   const CALC_INTERVAL = 3000;
 
   useFrame(() => {
@@ -120,43 +130,62 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
     const realDeltaTime = now - anim.lastFrameTime;
     anim.lastFrameTime = now;
 
-    // Advance simulation time smoothly based on real delta and speed
-    // This is the KEY: we control time internally, not from React state
     const simDeltaTime = realDeltaTime * anim.currentSpeed;
     anim.currentSimTime += simDeltaTime;
 
     const timeSinceCalc = now - anim.lastCalcTime;
 
-    // Periodically recalculate SGP4 positions and velocities
+    // Recalculate SGP4 positions and velocities periodically
     if (timeSinceCalc >= CALC_INTERVAL || anim.lastCalcTime === 0) {
       anim.lastCalcTime = now;
 
       const currentDate = new Date(anim.currentSimTime);
-      // Calculate velocity over 1 second of SIM time
       const futureDate = new Date(anim.currentSimTime + 1000);
 
       satellites.forEach((tle, index) => {
         const pos1 = calculatePosition(tle, currentDate);
         const pos2 = calculatePosition(tle, futureDate);
-        if (!pos1 || !pos2) return;
 
-        // Velocity per millisecond of SIMULATION time
-        // When we apply it, we multiply by simDeltaTime which includes speed
-        const vx = (pos2.x - pos1.x) / 1000;
-        const vy = (pos2.y - pos1.y) / 1000;
-        const vz = (pos2.z - pos1.z) / 1000;
+        // If calculation fails, use fallback position (won't be visible but won't break)
+        if (!pos1) {
+          // Set a default far-away position so it doesn't interfere
+          if (!statesRef.current.has(index)) {
+            statesRef.current.set(index, {
+              x: 0, y: 0, z: 0,
+              vx: 0, vy: 0, vz: 0,
+              altitude: 0,
+              velocity: 0,
+              latitude: 0,
+              longitude: 0,
+              name: tle.name,
+              noradId: tle.noradId,
+              category: tle.category,
+            });
+          }
+          return;
+        }
+
+        // Calculate velocity (use pos1 twice if pos2 fails, giving zero velocity)
+        const p2 = pos2 || pos1;
+        const vx = (p2.x - pos1.x) / 1000;
+        const vy = (p2.y - pos1.y) / 1000;
+        const vz = (p2.z - pos1.z) / 1000;
 
         const existing = statesRef.current.get(index);
 
         if (existing) {
-          // Update velocity only - position continues smoothly
           existing.vx = vx;
           existing.vy = vy;
           existing.vz = vz;
           existing.altitude = pos1.altitude;
           existing.velocity = pos1.velocity;
+          // If this was a failed satellite that now works, update its position
+          if (existing.altitude === 0 && pos1.altitude > 0) {
+            existing.x = pos1.x;
+            existing.y = pos1.y;
+            existing.z = pos1.z;
+          }
         } else {
-          // First initialization
           statesRef.current.set(index, {
             x: pos1.x,
             y: pos1.y,
@@ -174,9 +203,21 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
       });
     }
 
-    // EVERY FRAME: Integrate position using velocity and simulation delta time
-    statesRef.current.forEach((state, index) => {
-      // p += v * dt (using sim delta time for correct speed)
+    // Update ALL satellites every frame (including those not in statesRef yet)
+    for (let index = 0; index < satellites.length; index++) {
+      const state = statesRef.current.get(index);
+      const tle = satellites[index];
+
+      if (!state || state.altitude === 0) {
+        // Satellite not initialized yet or invalid - hide it off-screen
+        dummy.position.set(0, 0, 0);
+        dummy.scale.setScalar(0); // Make invisible
+        dummy.updateMatrix();
+        meshRef.current!.setMatrixAt(index, dummy.matrix);
+        continue;
+      }
+
+      // Integrate position
       state.x += state.vx * simDeltaTime;
       state.y += state.vy * simDeltaTime;
       state.z += state.vz * simDeltaTime;
@@ -203,7 +244,6 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
           (state.z / r) * scale
         );
 
-        const tle = satellites[index];
         const isStation = tle?.category === 'stations';
         const isSelected = selectedSatellite?.name === tle?.name;
         const isHovered = hovered === index;
@@ -219,7 +259,7 @@ function InstancedSatellites({ satellites, simulatedDate, speedMultiplier, onSel
         color.set(isSelected ? '#ffffff' : isHovered ? '#ffffff' : categoryColor || orbitColors[orbitType]);
         meshRef.current!.setColorAt(index, color);
       }
-    });
+    }
 
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) {
@@ -458,6 +498,7 @@ interface EarthViewProps {
   onSelectSatellite?: (tle: TLEData | null) => void;
   useRealisticTextures?: boolean;
   categoriesToLoad?: TLESourceKey[];
+  onTimeUpdate?: (date: Date) => void;
 }
 
 export function EarthView({
@@ -470,6 +511,7 @@ export function EarthView({
   useRealisticTextures = true,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   categoriesToLoad: _categoriesToLoad,
+  onTimeUpdate,
 }: EarthViewProps) {
   const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -492,10 +534,12 @@ export function EarthView({
     const startDate = startDateRef.current;
     const interval = setInterval(() => {
       const elapsed = (Date.now() - startTime) * speedMultiplier;
-      setSimulatedDate(new Date(startDate.getTime() + elapsed));
+      const newDate = new Date(startDate.getTime() + elapsed);
+      setSimulatedDate(newDate);
+      onTimeUpdate?.(newDate);
     }, speedMultiplier === 1 ? 1000 : 200);
     return () => clearInterval(interval);
-  }, [speedMultiplier]);
+  }, [speedMultiplier, onTimeUpdate]);
 
   // Load satellites from Supabase API with fallback to local JSON
   useEffect(() => {

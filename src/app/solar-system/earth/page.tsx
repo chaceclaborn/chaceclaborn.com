@@ -33,23 +33,18 @@ export default function EarthPage() {
   const [speed, setSpeed] = useState(1);
   const [satellite, setSatellite] = useState<TLEData | null>(null);
   const [position, setPosition] = useState<{ alt: number; vel: number; lat: number; lon: number } | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const [simulatedTime, setSimulatedTime] = useState(new Date());
 
   useEffect(() => {
     if (!satellite) { setPosition(null); return; }
     const update = () => {
-      const pos = calculatePosition(satellite, new Date());
+      const pos = calculatePosition(satellite, simulatedTime);
       if (pos) setPosition({ alt: pos.altitude, vel: pos.velocity, lat: pos.latitude, lon: pos.longitude });
     };
     update();
     const interval = setInterval(update, 500);
     return () => clearInterval(interval);
-  }, [satellite]);
+  }, [satellite, simulatedTime]);
 
   const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -91,11 +86,12 @@ export default function EarthPage() {
 
           {/* Right: Time + Speed */}
           <div className="flex items-center gap-2">
-            {/* Clock */}
+            {/* Clock - shows simulated time */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-white font-mono text-xs">{formatTime(currentTime)}</span>
-              <span className="text-white/40 text-[10px] hidden sm:inline">{formatDate(currentTime)}</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${speed === 1 ? 'bg-green-500' : 'bg-amber-500'} animate-pulse`} />
+              <span className="text-white font-mono text-xs">{formatTime(simulatedTime)}</span>
+              <span className="text-white/40 text-[10px] hidden sm:inline">{formatDate(simulatedTime)}</span>
+              {speed > 1 && <span className="text-amber-400 text-[9px] font-medium">SIM</span>}
             </div>
 
             {/* Speed */}
@@ -132,6 +128,7 @@ export default function EarthPage() {
             speedMultiplier={speed}
             selectedSatellite={satellite}
             onSelectSatellite={setSatellite}
+            onTimeUpdate={setSimulatedTime}
           />
         </div>
 
@@ -176,10 +173,12 @@ export default function EarthPage() {
               <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-green-400 text-[9px] font-semibold uppercase tracking-wider">Live Telemetry</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${speed === 1 ? 'bg-green-500' : 'bg-amber-500'} animate-pulse`} />
+                    <span className={`${speed === 1 ? 'text-green-400' : 'text-amber-400'} text-[9px] font-semibold uppercase tracking-wider`}>
+                      {speed === 1 ? 'Live Telemetry' : 'Simulated'}
+                    </span>
                   </div>
-                  <span className="text-white/30 text-[8px] font-mono">{formatTime(currentTime)}</span>
+                  <span className="text-white/30 text-[8px] font-mono">{formatTime(simulatedTime)}</span>
                 </div>
 
                 <div className="space-y-1.5">
