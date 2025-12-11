@@ -32,7 +32,8 @@
       "Bash(yarn db:generate:*)",
       "Bash(yarn db:push)",
       "Bash(yarn db:seed:*)",
-      "WebFetch(domain:www.prisma.io)"
+      "WebFetch(domain:www.prisma.io)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
