@@ -73,7 +73,8 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
 
   // Calculate positions - throttled based on satellite count for performance
   // More satellites = less frequent updates to maintain smooth rendering
-  const updateInterval = satellites.length > 3000 ? 2000 : satellites.length > 1000 ? 1000 : 500;
+  // Faster updates for smoother motion (reduced intervals)
+  const updateInterval = satellites.length > 3000 ? 500 : satellites.length > 1000 ? 250 : 100;
 
   useEffect(() => {
     const newPositions = new Map<number, SatellitePosition>();
@@ -470,7 +471,9 @@ export function EarthView({
       <Canvas
         camera={{ position: [0, 1, 2.5], fov: 50 }}
         style={{ background: 'linear-gradient(to bottom, #000, #0a0a15)' }}
-        dpr={[1, 1.5]} // Limit pixel ratio for performance
+        dpr={[1, 2]} // Higher pixel ratio for crisp rendering
+        frameloop="always" // Always render for smooth satellite animation
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={null}>
           <Scene

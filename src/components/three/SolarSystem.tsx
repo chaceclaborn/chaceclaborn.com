@@ -681,37 +681,59 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-function AsteroidBelt() {
+// Asteroid belt synced with simulatedDate
+// Average orbital period ~4.6 years (typical main belt asteroid at ~2.7 AU)
+// Using Kepler's third law: T² = a³ where a is in AU and T is in years
+function AsteroidBelt({ daysSinceJ2000 }: { daysSinceJ2000: number }) {
   const asteroidsRef = useRef<THREE.Points>(null);
 
-  const { positions, colors } = useMemo(() => {
+  // Pre-calculate asteroid orbital data (semi-major axis and initial angles)
+  const asteroidData = useMemo(() => {
     const count = 2000;
+    const data = [];
+
+    for (let i = 0; i < count; i++) {
+      // Semi-major axis between 2.2 and 3.2 AU (main asteroid belt)
+      const semiMajorAxis = 2.2 + seededRandom(i * 3) * 1.0;
+      // Orbital period in days (Kepler's third law: T = sqrt(a³) years)
+      const orbitalPeriodDays = Math.sqrt(Math.pow(semiMajorAxis, 3)) * 365.25;
+      // Initial angle (randomized)
+      const initialAngle = seededRandom(i * 3 + 1) * Math.PI * 2;
+      // Inclination
+      const inclination = (seededRandom(i * 3 + 2) - 0.5) * 0.3;
+      // Color shade
+      const shade = 0.3 + seededRandom(i * 4) * 0.3;
+
+      data.push({ semiMajorAxis, orbitalPeriodDays, initialAngle, inclination, shade });
+    }
+
+    return data;
+  }, []);
+
+  // Update positions based on current date
+  const { positions, colors } = useMemo(() => {
+    const count = asteroidData.length;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      const r = 2.2 + seededRandom(i * 3) * 1.0;
-      const angle = seededRandom(i * 3 + 1) * Math.PI * 2;
-      const inclination = (seededRandom(i * 3 + 2) - 0.5) * 0.3;
+      const { semiMajorAxis, orbitalPeriodDays, initialAngle, inclination, shade } = asteroidData[i];
 
-      positions[i * 3] = r * Math.cos(angle) * DISTANCE_SCALE;
+      // Calculate current angle based on time
+      const meanAnomaly = (daysSinceJ2000 / orbitalPeriodDays) * Math.PI * 2;
+      const angle = initialAngle + meanAnomaly;
+
+      positions[i * 3] = semiMajorAxis * Math.cos(angle) * DISTANCE_SCALE;
       positions[i * 3 + 1] = inclination * DISTANCE_SCALE;
-      positions[i * 3 + 2] = r * Math.sin(angle) * DISTANCE_SCALE;
+      positions[i * 3 + 2] = semiMajorAxis * Math.sin(angle) * DISTANCE_SCALE;
 
-      const shade = 0.3 + seededRandom(i * 4) * 0.3;
       colors[i * 3] = shade;
       colors[i * 3 + 1] = shade * 0.9;
       colors[i * 3 + 2] = shade * 0.8;
     }
 
     return { positions, colors };
-  }, []);
-
-  useFrame(() => {
-    if (asteroidsRef.current) {
-      asteroidsRef.current.rotation.y += 0.0001;
-    }
-  });
+  }, [asteroidData, daysSinceJ2000]);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -727,32 +749,62 @@ function AsteroidBelt() {
   );
 }
 
-function KuiperBelt() {
-  const geometry = useMemo(() => {
+// Kuiper Belt synced with simulatedDate
+// Orbital periods range from ~200 years (30 AU) to ~500+ years (50 AU)
+function KuiperBelt({ daysSinceJ2000 }: { daysSinceJ2000: number }) {
+  // Pre-calculate Kuiper Belt object orbital data
+  const kuiperData = useMemo(() => {
     const count = 1500;
+    const data = [];
+
+    for (let i = 0; i < count; i++) {
+      // Semi-major axis between 30 and 50 AU (Kuiper Belt)
+      const semiMajorAxis = 30 + seededRandom(i * 5 + 10000) * 20;
+      // Orbital period in days (Kepler's third law)
+      const orbitalPeriodDays = Math.sqrt(Math.pow(semiMajorAxis, 3)) * 365.25;
+      // Initial angle
+      const initialAngle = seededRandom(i * 5 + 10001) * Math.PI * 2;
+      // Inclination (wider range than asteroid belt)
+      const inclination = (seededRandom(i * 5 + 10002) - 0.5) * 0.5;
+      // Color shade
+      const shade = 0.4 + seededRandom(i * 5 + 10003) * 0.2;
+
+      data.push({ semiMajorAxis, orbitalPeriodDays, initialAngle, inclination, shade });
+    }
+
+    return data;
+  }, []);
+
+  const { positions, colors } = useMemo(() => {
+    const count = kuiperData.length;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      const r = 30 + seededRandom(i * 5 + 10000) * 20;
-      const angle = seededRandom(i * 5 + 10001) * Math.PI * 2;
-      const inclination = (seededRandom(i * 5 + 10002) - 0.5) * 0.5;
+      const { semiMajorAxis, orbitalPeriodDays, initialAngle, inclination, shade } = kuiperData[i];
 
-      positions[i * 3] = r * Math.cos(angle) * DISTANCE_SCALE;
+      // Calculate current angle based on time
+      const meanAnomaly = (daysSinceJ2000 / orbitalPeriodDays) * Math.PI * 2;
+      const angle = initialAngle + meanAnomaly;
+
+      positions[i * 3] = semiMajorAxis * Math.cos(angle) * DISTANCE_SCALE;
       positions[i * 3 + 1] = inclination * DISTANCE_SCALE;
-      positions[i * 3 + 2] = r * Math.sin(angle) * DISTANCE_SCALE;
+      positions[i * 3 + 2] = semiMajorAxis * Math.sin(angle) * DISTANCE_SCALE;
 
-      const shade = 0.4 + seededRandom(i * 5 + 10003) * 0.2;
       colors[i * 3] = shade * 0.9;
       colors[i * 3 + 1] = shade;
       colors[i * 3 + 2] = shade * 1.1;
     }
 
+    return { positions, colors };
+  }, [kuiperData, daysSinceJ2000]);
+
+  const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     return geo;
-  }, []);
+  }, [positions, colors]);
 
   return (
     <points geometry={geometry}>
@@ -815,8 +867,8 @@ function Scene({
     <>
       <Stars radius={200} depth={100} count={8000} factor={4} saturation={0} fade />
       <Sun onSelect={onSunSelect} />
-      <AsteroidBelt />
-      <KuiperBelt />
+      <AsteroidBelt daysSinceJ2000={daysSinceJ2000} />
+      <KuiperBelt daysSinceJ2000={daysSinceJ2000} />
 
       {celestialBodies.map((body) => (
         <group key={body.name}>
