@@ -4,50 +4,58 @@ export interface TLEData {
   name: string;
   line1: string;
   line2: string;
+  noradId?: number;
+  category?: string;
 }
 
 export interface SatellitePosition {
   name: string;
   latitude: number;
   longitude: number;
-  altitude: number; // km
-  x: number; // normalized position
+  altitude: number;
+  x: number;
   y: number;
   z: number;
-  velocity: number; // km/s
+  velocity: number;
+  noradId?: number;
+  category?: string;
 }
 
-// CelesTrak public TLE sources
-const TLE_SOURCES = {
-  stations: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle',
-  starlink: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle',
-  gps: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle',
-  geostationary: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=geo&FORMAT=tle',
-  active: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle',
-};
+export type TLESourceKey =
+  | 'stations'
+  | 'starlink'
+  | 'oneweb'
+  | 'gps-ops'
+  | 'glonass'
+  | 'galileo'
+  | 'beidou'
+  | 'iridium-next'
+  | 'geo'
+  | 'weather';
 
-// Parse TLE text into array of TLE data
-function parseTLE(tleText: string): TLEData[] {
-  const lines = tleText.trim().split('\n');
-  const tles: TLEData[] = [];
-
-  for (let i = 0; i < lines.length; i += 3) {
-    if (i + 2 < lines.length) {
-      tles.push({
-        name: lines[i].trim(),
-        line1: lines[i + 1].trim(),
-        line2: lines[i + 2].trim(),
-      });
-    }
-  }
-
-  return tles;
-}
+// Category display information
+export const SATELLITE_CATEGORIES = {
+  stations: { name: 'Space Stations', color: '#ff6b6b', icon: '🛸' },
+  starlink: { name: 'Starlink', color: '#00bfff', icon: '📡' },
+  oneweb: { name: 'OneWeb', color: '#9b59b6', icon: '📡' },
+  'gps-ops': { name: 'GPS', color: '#f1c40f', icon: '🛰️' },
+  glonass: { name: 'GLONASS', color: '#e74c3c', icon: '🛰️' },
+  galileo: { name: 'Galileo', color: '#3498db', icon: '🛰️' },
+  beidou: { name: 'BeiDou', color: '#e67e22', icon: '🛰️' },
+  'iridium-next': { name: 'Iridium NEXT', color: '#1abc9c', icon: '📱' },
+  geo: { name: 'Geostationary', color: '#ff4488', icon: '📺' },
+  weather: { name: 'Weather', color: '#74b9ff', icon: '🌤️' },
+} as const;
 
 // Calculate satellite position from TLE at given time
 export function calculatePosition(tle: TLEData, date: Date = new Date()): SatellitePosition | null {
   try {
     const satrec = satellite.twoline2satrec(tle.line1, tle.line2);
+
+    if (satrec.error !== 0) {
+      return null;
+    }
+
     const positionAndVelocity = satellite.propagate(satrec, date);
 
     if (!positionAndVelocity || !positionAndVelocity.position || typeof positionAndVelocity.position === 'boolean') {
@@ -57,23 +65,23 @@ export function calculatePosition(tle: TLEData, date: Date = new Date()): Satell
     const positionEci = positionAndVelocity.position;
     const velocityEci = positionAndVelocity.velocity;
 
-    // Get geodetic coordinates
     const gmst = satellite.gstime(date);
     const positionGd = satellite.eciToGeodetic(positionEci, gmst);
 
-    // Convert to degrees
     const latitude = satellite.degreesLat(positionGd.latitude);
     const longitude = satellite.degreesLong(positionGd.longitude);
     const altitude = positionGd.height;
 
-    // Convert ECI to normalized 3D position for Three.js (Earth radius = 1)
+    if (altitude < 100 || altitude > 100000 || isNaN(altitude)) {
+      return null;
+    }
+
     const earthRadiusKm = 6371;
     const scale = 1 / earthRadiusKm;
     const x = positionEci.x * scale;
-    const y = positionEci.z * scale; // Swap y/z for Three.js coordinate system
+    const y = positionEci.z * scale;
     const z = positionEci.y * scale;
 
-    // Calculate velocity magnitude
     let velocity = 0;
     if (velocityEci && typeof velocityEci !== 'boolean') {
       velocity = Math.sqrt(
@@ -92,61 +100,54 @@ export function calculatePosition(tle: TLEData, date: Date = new Date()): Satell
       y,
       z,
       velocity,
+      noradId: tle.noradId,
+      category: tle.category,
     };
   } catch {
     return null;
   }
 }
 
-// Fetch TLE data from CelesTrak
-export async function fetchTLEData(source: keyof typeof TLE_SOURCES = 'stations'): Promise<TLEData[]> {
-  try {
-    const response = await fetch(TLE_SOURCES[source]);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch TLE data: ${response.status}`);
-    }
-    const text = await response.text();
-    return parseTLE(text);
-  } catch (error) {
-    console.error('Error fetching TLE data:', error);
-    return [];
+// Classify satellite by orbit type based on altitude
+export function getOrbitType(altitude: number): 'LEO' | 'MEO' | 'GEO' | 'HEO' {
+  if (altitude < 2000) return 'LEO';
+  if (altitude < 35000) return 'MEO';
+  if (altitude < 36000) return 'GEO';
+  return 'HEO';
+}
+
+// Get orbit color by type
+export function getOrbitColor(altitude: number): string {
+  const type = getOrbitType(altitude);
+  switch (type) {
+    case 'LEO': return '#00ff88';
+    case 'MEO': return '#ffaa00';
+    case 'GEO': return '#ff4488';
+    case 'HEO': return '#9b59b6';
   }
 }
 
-// Sample TLE data for fallback (ISS and other notable satellites)
+// Fallback TLE data (used when database is unavailable)
 export const FALLBACK_TLE: TLEData[] = [
   {
     name: 'ISS (ZARYA)',
-    line1: '1 25544U 98067A   24001.50000000  .00016717  00000-0  10270-3 0  9025',
-    line2: '2 25544  51.6400 208.9163 0006703  40.5536 117.4264 15.49560469999999',
+    line1: '1 25544U 98067A   24350.54166667  .00020954  00000+0  37219-3 0  9991',
+    line2: '2 25544  51.6392 201.4723 0007654  33.7249 326.4295 15.49907405485239',
+    noradId: 25544,
+    category: 'stations',
   },
   {
-    name: 'STARLINK-1007',
-    line1: '1 44713U 19074A   24001.50000000  .00001000  00000-0  10000-4 0  9999',
-    line2: '2 44713  53.0000 200.0000 0001000  90.0000 270.0000 15.05000000 99999',
+    name: 'CSS (TIANHE)',
+    line1: '1 48274U 21035A   24350.50000000  .00017543  00000+0  20847-3 0  9995',
+    line2: '2 48274  41.4700  45.2835 0005683 331.2478 151.8342 15.62154647199546',
+    noradId: 48274,
+    category: 'stations',
   },
   {
-    name: 'GPS BIIR-2',
-    line1: '1 24876U 97035A   24001.50000000 -.00000002  00000-0  00000+0 0  9999',
-    line2: '2 24876  55.7000 120.0000 0100000 270.0000  90.0000  2.00565000 99999',
-  },
-  {
-    name: 'GOES-16',
-    line1: '1 41866U 16071A   24001.50000000 -.00000120  00000-0  00000+0 0  9999',
-    line2: '2 41866   0.0500 270.0000 0001000  90.0000 270.0000  1.00270000 99999',
+    name: 'HUBBLE SPACE TELESCOPE',
+    line1: '1 20580U 90037B   24350.50000000  .00001200  00000+0  60000-4 0  9994',
+    line2: '2 20580  28.4700 110.5000 0002700 100.0000 260.0000 15.09000000550000',
+    noradId: 20580,
+    category: 'stations',
   },
 ];
-
-// Get multiple satellite positions at once
-export function calculateMultiplePositions(tles: TLEData[], date: Date = new Date()): SatellitePosition[] {
-  return tles
-    .map(tle => calculatePosition(tle, date))
-    .filter((pos): pos is SatellitePosition => pos !== null);
-}
-
-// Classify satellite by orbit type based on altitude
-export function getOrbitType(altitude: number): 'LEO' | 'MEO' | 'GEO' {
-  if (altitude < 2000) return 'LEO';
-  if (altitude < 35000) return 'MEO';
-  return 'GEO';
-}

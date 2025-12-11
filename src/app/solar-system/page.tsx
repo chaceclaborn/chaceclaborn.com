@@ -4,7 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Info, Eye, EyeOff, Globe, Pause, Play, ChevronUp, X } from 'lucide-react';
+import { ArrowLeft, Info, Eye, EyeOff, Globe, ChevronUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -26,18 +26,10 @@ const planetInfo = [
   { name: 'Neptune', color: '#3b82f6', description: 'Windiest planet, storms reach 2,100 km/h.', fact: '14 known moons' },
 ];
 
-const speedPresets = [
-  { label: '0.5x', value: 0.5 },
-  { label: '1x', value: 1 },
-  { label: '2x', value: 2 },
-  { label: '3x', value: 3 },
-];
-
 export default function SolarSystemPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [selectedPlanet, setSelectedPlanet] = useState<number | null>(null);
-  const [speed, setSpeed] = useState(1);
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
@@ -47,7 +39,6 @@ export default function SolarSystemPage() {
         showExpandButton={false}
         showLabels={showLabels}
         interactive={true}
-        speedMultiplier={speed}
       />
 
       {/* Header Controls - Compact on mobile */}
@@ -99,45 +90,6 @@ export default function SolarSystemPage() {
       >
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1">Solar System</h1>
         <p className="text-white/50 text-xs md:text-sm">Drag to rotate • Scroll to zoom</p>
-      </motion.div>
-
-      {/* Speed Control - Bottom left on mobile, side on desktop */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="absolute bottom-4 left-4 md:left-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2 z-10"
-      >
-        <div className="bg-black/70 backdrop-blur-sm rounded-xl p-2 md:p-3 border border-white/10">
-          <div className="text-white/40 text-[10px] md:text-xs mb-1.5 md:mb-2 text-center font-medium">Speed</div>
-          <div className="flex md:flex-col items-center gap-1">
-            {speedPresets.map((preset) => (
-              <Button
-                key={preset.value}
-                variant="ghost"
-                size="sm"
-                onClick={() => setSpeed(preset.value)}
-                className={`text-[10px] md:text-xs h-7 md:h-8 px-2.5 md:px-3 md:w-full rounded-lg ${
-                  speed === preset.value
-                    ? 'bg-primary/30 text-primary-foreground ring-1 ring-primary/50'
-                    : 'text-white/60 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {preset.label}
-              </Button>
-            ))}
-          </div>
-          <div className="hidden md:flex mt-2 pt-2 border-t border-white/10 justify-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSpeed(speed === 0 ? 1 : 0)}
-              className="h-8 w-8 text-white hover:bg-white/20 rounded-lg"
-            >
-              {speed === 0 ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
       </motion.div>
 
       {/* Planet Info Panel - Bottom sheet on mobile, side panel on desktop */}

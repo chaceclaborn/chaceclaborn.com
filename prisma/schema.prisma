@@ -1,0 +1,36 @@
+// Prisma Schema for Satellite Tracker
+// Database: Supabase (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Satellite TLE Data
+model Satellite {
+  id        String   @id @default(cuid())
+  noradId   Int      @unique
+  name      String
+  line1     String   // TLE Line 1
+  line2     String   // TLE Line 2
+  category  String   // stations, starlink, gps-ops, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([name])
+}
+
+// Track when data was last updated
+model DataUpdate {
+  id          String   @id @default(cuid())
+  source      String   // 'celestrak'
+  totalCount  Int
+  updatedAt   DateTime @default(now())
+
+  @@index([source])
+}

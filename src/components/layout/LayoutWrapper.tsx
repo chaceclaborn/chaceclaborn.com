@@ -21,7 +21,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   return (
     <>
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-h-0">
         {children}
       </main>
       <Footer onChatToggle={handleChatToggle} isChatOpen={isChatOpen} />

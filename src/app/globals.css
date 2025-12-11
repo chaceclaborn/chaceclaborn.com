@@ -559,10 +559,18 @@ body:has(.dimensional-container) {
   text-transform: uppercase;
   letter-spacing: 2px;
   padding: 4px 10px;
-  background: transparent;
-  border: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
   box-shadow: none !important;
   outline: none !important;
+}
+
+.dimensional-current-label * {
+  border: 0 !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
 }
 
 @media (min-width: 768px) {

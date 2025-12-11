@@ -45,3 +45,5 @@ nul
 
 # Large files (upload with: yarn upload:large)
 /public/large-files/
+
+/src/generated/prisma
