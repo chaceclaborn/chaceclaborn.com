@@ -91,8 +91,8 @@ export function DimensionalLayers({
       const touchEndY = e.changedTouches[0].clientY;
       const deltaY = touchStartY.current - touchEndY;
 
-      // Require significant swipe (50px threshold)
-      if (Math.abs(deltaY) > 50) {
+      // Reduced threshold (30px) for easier mobile swiping
+      if (Math.abs(deltaY) > 30) {
         if (deltaY > 0) {
           navigateToLayer(touchStartLayer.current + 1);
         } else {

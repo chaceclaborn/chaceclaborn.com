@@ -387,9 +387,9 @@ body:has(.dimensional-container) {
   overflow: hidden;
   z-index: 5;
   outline: none;
-  /* Account for fixed header/footer */
-  padding-top: 56px;
-  padding-bottom: 64px;
+  /* Account for fixed header/footer - more space on mobile */
+  padding-top: 60px;
+  padding-bottom: 70px;
   box-sizing: border-box;
   background: var(--background);
 }

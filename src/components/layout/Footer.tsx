@@ -21,8 +21,8 @@ export function Footer({ onChatToggle, isChatOpen }: FooterProps) {
   const isHomePage = pathname === '/';
 
   return (
-    <footer className={`${isHomePage ? 'fixed bottom-0 left-0 right-0' : 'mt-auto'} z-[100] bg-background/95 backdrop-blur-xl border-t border-border/30`}>
-      <div className="container max-w-7xl mx-auto px-4 py-3 md:py-4">
+    <footer className={`${isHomePage ? 'fixed bottom-0 left-0 right-0' : 'mt-auto'} z-[1000] bg-background/98 backdrop-blur-xl border-t border-border/50`}>
+      <div className="container max-w-7xl mx-auto px-4 py-2.5 sm:py-3 md:py-4">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-xs sm:text-sm text-muted-foreground">
             © {currentYear} Chace Claborn

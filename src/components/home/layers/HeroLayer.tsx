@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function HeroLayer() {
   return (
-    <div className="w-full h-full max-w-5xl mx-auto flex items-center justify-center px-6 sm:px-8 md:px-10">
+    <div className="w-full h-full max-w-5xl mx-auto flex items-center justify-center px-6 sm:px-8 md:px-10 pt-4 sm:pt-0">
       <div className="grid md:grid-cols-2 gap-6 md:gap-10 lg:gap-14 items-center w-full">
         {/* Left Column - Profile Info */}
         <motion.div
