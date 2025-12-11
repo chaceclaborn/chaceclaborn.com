@@ -56,23 +56,23 @@ interface InstancedSatellitesProps {
   selectedSatellite: TLEData | null;
 }
 
-// Store position data for interpolation
-interface InterpolatedPosition extends SatellitePosition {
-  prevX: number;
-  prevY: number;
-  prevZ: number;
-  targetX: number;
-  targetY: number;
-  targetZ: number;
+// Position with velocity for interpolation
+interface SatelliteState {
+  pos: SatellitePosition;
+  // Velocity in normalized units per ms for smooth interpolation
+  vx: number;
+  vy: number;
+  vz: number;
+  lastCalcTime: number;
 }
 
 function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSatellite }: InstancedSatellitesProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [hovered, setHovered] = useState<number | null>(null);
-  // Store positions with interpolation data
-  const positionsRef = useRef<Map<number, InterpolatedPosition>>(new Map());
-  const lastUpdateRef = useRef<number>(0);
-  const interpolationRef = useRef<number>(0);
+  // Store positions with velocity for smooth interpolation
+  const statesRef = useRef<Map<number, SatelliteState>>(new Map());
+  const positionsRef = useRef<Map<number, SatellitePosition>>(new Map());
+  const lastBatchUpdateRef = useRef<number>(0);
   const { gl } = useThree();
 
   // Update cursor when hovering
@@ -84,71 +84,58 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const color = useMemo(() => new THREE.Color(), []);
 
-  // Update interval in ms - calculate new positions every 100ms, interpolate between
-  const UPDATE_INTERVAL = 100;
+  // How often to recalculate SGP4 positions (ms)
+  const CALC_INTERVAL = 200;
 
-  // Smooth animation with interpolation between position updates
+  // Smooth animation: calculate SGP4 periodically, interpolate every frame
   useFrame(() => {
     if (!meshRef.current) return;
 
     const now = performance.now();
-    const timeSinceUpdate = now - lastUpdateRef.current;
+    const timeSinceCalc = now - lastBatchUpdateRef.current;
 
-    // Calculate new target positions periodically
-    if (timeSinceUpdate >= UPDATE_INTERVAL) {
-      lastUpdateRef.current = now;
-      interpolationRef.current = 0;
+    // Periodically recalculate actual positions and velocities
+    if (timeSinceCalc >= CALC_INTERVAL || lastBatchUpdateRef.current === 0) {
+      lastBatchUpdateRef.current = now;
+
+      // Calculate positions at two time points to get velocity
+      const t1 = simulatedDate;
+      const t2 = new Date(simulatedDate.getTime() + 1000); // 1 second later
 
       satellites.forEach((tle, index) => {
-        const pos = calculatePosition(tle, simulatedDate);
-        if (!pos) return;
+        const pos1 = calculatePosition(tle, t1);
+        const pos2 = calculatePosition(tle, t2);
+        if (!pos1 || !pos2) return;
 
-        const existing = positionsRef.current.get(index);
+        // Calculate velocity (change per millisecond)
+        const vx = (pos2.x - pos1.x) / 1000;
+        const vy = (pos2.y - pos1.y) / 1000;
+        const vz = (pos2.z - pos1.z) / 1000;
 
-        if (existing) {
-          // Store current interpolated position as previous, new calc as target
-          existing.prevX = existing.x;
-          existing.prevY = existing.y;
-          existing.prevZ = existing.z;
-          existing.targetX = pos.x;
-          existing.targetY = pos.y;
-          existing.targetZ = pos.z;
-          existing.altitude = pos.altitude;
-          existing.velocity = pos.velocity;
-          existing.latitude = pos.latitude;
-          existing.longitude = pos.longitude;
-        } else {
-          // First time - no interpolation needed
-          positionsRef.current.set(index, {
-            ...pos,
-            prevX: pos.x,
-            prevY: pos.y,
-            prevZ: pos.z,
-            targetX: pos.x,
-            targetY: pos.y,
-            targetZ: pos.z,
-          });
-        }
+        statesRef.current.set(index, {
+          pos: pos1,
+          vx,
+          vy,
+          vz,
+          lastCalcTime: now
+        });
       });
     }
 
-    // Interpolation factor (0 to 1) - smooth easing
-    const t = Math.min(timeSinceUpdate / UPDATE_INTERVAL, 1);
-    // Smooth step for extra smoothness
-    const smoothT = t * t * (3 - 2 * t);
+    // Every frame: interpolate positions based on velocity
+    statesRef.current.forEach((state, index) => {
+      const elapsed = now - state.lastCalcTime;
 
-    positionsRef.current.forEach((pos, index) => {
-      // Interpolate position for butter-smooth movement
-      const x = pos.prevX + (pos.targetX - pos.prevX) * smoothT;
-      const y = pos.prevY + (pos.targetY - pos.prevY) * smoothT;
-      const z = pos.prevZ + (pos.targetZ - pos.prevZ) * smoothT;
+      // Interpolate position using velocity
+      const x = state.pos.x + state.vx * elapsed;
+      const y = state.pos.y + state.vy * elapsed;
+      const z = state.pos.z + state.vz * elapsed;
 
-      // Update the stored current position for tooltips
-      pos.x = x;
-      pos.y = y;
-      pos.z = z;
+      // Update stored position for tooltips
+      const currentPos = { ...state.pos, x, y, z };
+      positionsRef.current.set(index, currentPos);
 
-      const scale = 1 + scaleAltitude(pos.altitude);
+      const scale = 1 + scaleAltitude(state.pos.altitude);
       const normalizedRadius = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
 
       if (normalizedRadius > 0) {
@@ -171,7 +158,7 @@ function InstancedSatellites({ satellites, simulatedDate, onSelect, selectedSate
         meshRef.current!.setMatrixAt(index, dummy.matrix);
 
         // Set color based on orbit type
-        const orbitType = getOrbitType(pos.altitude);
+        const orbitType = getOrbitType(state.pos.altitude);
         const categoryColor = SATELLITE_CATEGORIES[tle?.category as keyof typeof SATELLITE_CATEGORIES]?.color;
         color.set(isSelected ? '#ffffff' : isHovered ? '#ffffff' : categoryColor || orbitColors[orbitType]);
         meshRef.current!.setColorAt(index, color);
