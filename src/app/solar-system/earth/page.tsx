@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, X, Satellite, Settings, Eye, Layers } from 'lucide-react';
+import { ArrowLeft, X, Satellite, Settings, Eye } from 'lucide-react';
 import { calculatePosition, SATELLITE_CATEGORIES, getOrbitType, getConstellation, CONSTELLATION_TYPE_NAMES, type TLEData, type TLESourceKey } from '@/lib/satellite-service';
 import { SatelliteCreator } from '@/components/satellites/SatelliteCreator';
 
@@ -271,12 +271,7 @@ export default function EarthPage() {
                     className="absolute right-0 sm:right-0 top-full mt-2 w-[280px] sm:w-64 bg-black/98 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden z-[100]"
                     style={{ maxHeight: 'calc(100vh - 120px)' }}
                   >
-                    <div className="p-2">
-                      <div className="px-2 py-1.5 text-[10px] font-semibold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
-                        <Layers className="h-3 w-3" />
-                        Orbital Visualizations
-                      </div>
-
+                    <div className="p-2 space-y-0.5">
                       {/* Equatorial Plane */}
                       <button
                         onClick={() => setShowEquatorialPlane(!showEquatorialPlane)}
@@ -286,13 +281,8 @@ export default function EarthPage() {
                             : 'text-white/60 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <span className={`w-3 h-3 rounded border ${showEquatorialPlane ? 'bg-white/80 border-white/80' : 'border-white/30'} flex items-center justify-center`}>
-                          {showEquatorialPlane && <span className="text-black text-[8px] font-bold">✓</span>}
-                        </span>
-                        <div className="flex-1 text-left">
-                          <div>Equatorial Plane</div>
-                          <div className="text-[9px] text-white/40">Reference plane at 0° inclination</div>
-                        </div>
+                        <span className={`w-3 h-3 rounded-sm border transition-colors ${showEquatorialPlane ? 'bg-white border-white' : 'border-white/30'}`} />
+                        <span>Equatorial Plane</span>
                       </button>
 
                       {/* Inclination Guides */}
@@ -304,13 +294,8 @@ export default function EarthPage() {
                             : 'text-white/60 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <span className={`w-3 h-3 rounded border ${showInclinationGuides ? 'bg-white/80 border-white/80' : 'border-white/30'} flex items-center justify-center`}>
-                          {showInclinationGuides && <span className="text-black text-[8px] font-bold">✓</span>}
-                        </span>
-                        <div className="flex-1 text-left">
-                          <div>Inclination Guides</div>
-                          <div className="text-[9px] text-white/40">Reference circles at 23.5°, 45°, 55°, 63.4°, 90°</div>
-                        </div>
+                        <span className={`w-3 h-3 rounded-sm border transition-colors ${showInclinationGuides ? 'bg-white border-white' : 'border-white/30'}`} />
+                        <span>Inclination Guides</span>
                       </button>
 
                       {/* Constellation Orbital Planes */}
@@ -322,20 +307,9 @@ export default function EarthPage() {
                             : 'text-white/60 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <span className={`w-3 h-3 rounded border ${showOrbitalPlanes ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'} flex items-center justify-center`}>
-                          {showOrbitalPlanes && <span className="text-black text-[8px] font-bold">✓</span>}
-                        </span>
-                        <div className="flex-1 text-left">
-                          <div>My Constellation Planes</div>
-                          <div className="text-[9px] text-white/40">Show orbital planes for custom constellations</div>
-                        </div>
+                        <span className={`w-3 h-3 rounded-sm border transition-colors ${showOrbitalPlanes ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'}`} />
+                        <span>Constellation Planes</span>
                       </button>
-
-                      <div className="mt-2 pt-2 border-t border-white/10 px-2.5">
-                        <div className="text-[9px] text-white/30 leading-relaxed">
-                          Enable visualizations to see orbital geometry. Custom constellation planes show Walker pattern RAAN spacing.
-                        </div>
-                      </div>
                     </div>
                   </motion.div>
                 )}

@@ -33,7 +33,10 @@
       "Bash(yarn db:push)",
       "Bash(yarn db:seed:*)",
       "WebFetch(domain:www.prisma.io)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(yarn install:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

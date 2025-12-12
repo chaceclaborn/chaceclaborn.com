@@ -569,121 +569,55 @@ function EquatorialPlane({ radius = 2.5, color = '#ffffff', opacity = 0.05 }: Eq
 }
 
 /**
- * Scientific inclination reference data
- * These are real-world significant orbital inclinations used in spaceflight
- *
- * References:
- * - https://en.wikipedia.org/wiki/Orbital_inclination
- * - https://www.nasa.gov/mission_pages/station/structure/elements/orbital.html
- * - Vallado, "Fundamentals of Astrodynamics and Applications"
+ * Key orbital inclinations used in spaceflight
+ * Simplified display showing just the angle value
  */
-const INCLINATION_REFERENCES: { angle: number; label: string; color: string; description: string }[] = [
-  {
-    angle: 0,
-    label: '0° Equatorial',
-    color: '#ffff00',
-    description: 'Geostationary orbit plane - satellites appear stationary over equator'
-  },
-  {
-    angle: 23.44,
-    label: '23.4° Tropics',
-    color: '#ff9500',
-    description: 'Earth\'s axial tilt - defines Tropic of Cancer/Capricorn'
-  },
-  {
-    angle: 51.6,
-    label: '51.6° ISS',
-    color: '#00ff88',
-    description: 'International Space Station orbit - optimized for Russian launch sites'
-  },
-  {
-    angle: 55,
-    label: '55° GPS',
-    color: '#00bfff',
-    description: 'GPS/GNSS constellation inclination - provides global coverage'
-  },
-  {
-    angle: 63.4,
-    label: '63.4° Critical',
-    color: '#ff6b6b',
-    description: 'Critical inclination - no apsidal precession (Molniya orbits)'
-  },
-  {
-    angle: 90,
-    label: '90° Polar',
-    color: '#bf5fff',
-    description: 'Polar orbit - passes over both poles, sees entire Earth surface'
-  },
-  {
-    angle: 98.2,
-    label: '98° Sun-Sync',
-    color: '#ff69b4',
-    description: 'Sun-synchronous orbit - consistent lighting for Earth observation'
-  },
-];
+const INCLINATION_ANGLES = [0, 28.5, 51.6, 55, 63.4, 90];
 
 interface InclinationGuideProps {
   radius?: number;
 }
 
 /**
- * Shows reference circles at scientifically significant inclination angles
- * Each inclination represents a real orbital regime used in spaceflight
+ * Minimal inclination reference guides
+ * Shows subtle dashed circles with small angle labels
  */
-function InclinationGuides({ radius = 1.8 }: InclinationGuideProps) {
+function InclinationGuides({ radius = 1.6 }: InclinationGuideProps) {
   return (
     <group>
-      {INCLINATION_REFERENCES.map(({ angle, label, color }) => {
+      {INCLINATION_ANGLES.map((angle) => {
         const incRad = (angle * Math.PI) / 180;
         const points: [number, number, number][] = [];
 
-        // Generate orbital path at this inclination (RAAN = 0 for reference)
         for (let i = 0; i <= 64; i++) {
           const theta = (i / 64) * Math.PI * 2;
-          // Orbit starts in XZ plane, rotated by inclination around X axis
           const x = Math.cos(theta) * radius;
           const z = Math.sin(theta) * radius;
-
-          // Apply inclination rotation (around X axis)
-          // y' = y*cos(i) - z*sin(i), but y=0 initially
-          // z' = y*sin(i) + z*cos(i)
           const y = z * Math.sin(incRad);
           const zRotated = z * Math.cos(incRad);
-
           points.push([x, y, zRotated]);
         }
-
-        // Position label at the highest point of the inclined orbit
-        const labelY = radius * Math.sin(incRad);
-        const labelZ = radius * Math.cos(incRad);
 
         return (
           <group key={angle}>
             <Line
               points={points}
-              color={color}
+              color="#ffffff"
               transparent
-              opacity={0.25}
-              lineWidth={1.5}
+              opacity={0.08}
+              lineWidth={1}
               dashed
-              dashSize={0.08}
-              gapSize={0.04}
+              dashSize={0.06}
+              gapSize={0.06}
             />
-            {/* Label positioned at the "top" of the orbit */}
+            {/* Small angle label at edge of orbit */}
             <Html
-              position={[0, labelY * 0.95, labelZ * 0.3]}
+              position={[radius + 0.08, radius * Math.sin(incRad) * 0.7, 0]}
               center
               style={{ pointerEvents: 'none' }}
             >
-              <div
-                className="text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap border"
-                style={{
-                  color: color,
-                  backgroundColor: 'rgba(0,0,0,0.7)',
-                  borderColor: `${color}40`
-                }}
-              >
-                {label}
+              <div className="text-[9px] text-white/30 font-mono">
+                {angle}°
               </div>
             </Html>
           </group>
