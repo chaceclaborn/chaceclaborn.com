@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, X, Satellite } from 'lucide-react';
-import { calculatePosition, SATELLITE_CATEGORIES, getOrbitType, type TLEData, type TLESourceKey } from '@/lib/satellite-service';
+import { ArrowLeft, X, Satellite, Settings, Eye, Layers } from 'lucide-react';
+import { calculatePosition, SATELLITE_CATEGORIES, getOrbitType, getConstellation, CONSTELLATION_TYPE_NAMES, type TLEData, type TLESourceKey } from '@/lib/satellite-service';
+import { SatelliteCreator } from '@/components/satellites/SatelliteCreator';
 
 const EarthView = dynamic(
   () => import('@/components/three/EarthView').then((mod) => mod.EarthView),
@@ -19,11 +20,17 @@ const EarthView = dynamic(
   }
 );
 
+// Real satellite categories (excludes custom)
 const categories: { key: TLESourceKey | null; label: string; color: string }[] = [
   { key: null, label: 'All', color: '#888888' },
   { key: 'stations', label: 'Stations', color: '#ff6b6b' },
   { key: 'starlink', label: 'Starlink', color: '#00bfff' },
+  { key: 'oneweb', label: 'OneWeb', color: '#9b59b6' },
+  { key: 'iridium-next', label: 'Iridium', color: '#1abc9c' },
   { key: 'gps-ops', label: 'GPS', color: '#f1c40f' },
+  { key: 'glonass', label: 'GLONASS', color: '#e74c3c' },
+  { key: 'galileo', label: 'Galileo', color: '#3498db' },
+  { key: 'beidou', label: 'BeiDou', color: '#e67e22' },
   { key: 'geo', label: 'GEO', color: '#ff4488' },
   { key: 'weather', label: 'Weather', color: '#74b9ff' },
 ];
@@ -89,12 +96,20 @@ function TelemetryTime({ timeRef }: { timeRef: React.RefObject<Date | null> }) {
 }
 
 export default function EarthPage() {
-  const [category, setCategory] = useState<TLESourceKey | null>(null);
+  const [category, setCategory] = useState<TLESourceKey | 'custom' | null>(null);
   const [speed, setSpeed] = useState(1);
   const [satellite, setSatellite] = useState<TLEData | null>(null);
   const [position, setPosition] = useState<{ alt: number; vel: number; lat: number; lon: number } | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [isLive, setIsLive] = useState(true);
+  const [showCreator, setShowCreator] = useState(false);
+  const [customSatellitesKey, setCustomSatellitesKey] = useState(0); // Trigger reload of custom satellites
+  const [showCustomSatellites, setShowCustomSatellites] = useState(true); // Toggle visibility of custom satellites
+  // Educational visualization toggles
+  const [showOrbitalPlanes, setShowOrbitalPlanes] = useState(false);
+  const [showEquatorialPlane, setShowEquatorialPlane] = useState(false);
+  const [showInclinationGuides, setShowInclinationGuides] = useState(false);
+  const [showViewOptions, setShowViewOptions] = useState(false); // Dropdown visibility
 
   // Use ref for simulated time to avoid re-renders
   const simulatedTimeRef = useRef<Date | null>(new Date());
@@ -118,6 +133,19 @@ export default function EarthPage() {
     }
   }, [speed]);
 
+  // Close view options dropdown when clicking outside
+  useEffect(() => {
+    if (!showViewOptions) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-view-dropdown]')) {
+        setShowViewOptions(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showViewOptions]);
+
   // Update satellite position based on ref (separate from render cycle)
   useEffect(() => {
     if (!satellite) { setPosition(null); return; }
@@ -134,8 +162,8 @@ export default function EarthPage() {
   return (
     <div className="flex flex-col flex-1 min-h-0 h-full">
       {/* Filter Bar - Between header and content */}
-      <div className="shrink-0 bg-black/95 backdrop-blur border-b border-white/10 px-4 py-2">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div className="shrink-0 bg-black/95 backdrop-blur border-b border-white/10 px-4 py-2 overflow-visible relative z-40">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 overflow-visible">
           {/* Left: Back + Filters */}
           <div className="flex items-center gap-3 flex-wrap">
             <Link
@@ -163,11 +191,43 @@ export default function EarthPage() {
                   {cat.label}
                 </button>
               ))}
+
+              {/* Divider */}
+              <div className="h-5 w-px bg-white/10 mx-1" />
+
+              {/* My Satellites Filter - same style as other category filters */}
+              <button
+                onClick={() => {
+                  if (category === 'custom') {
+                    setCategory(null); // Go back to all
+                  } else {
+                    setCategory('custom'); // Show only custom
+                    setShowCustomSatellites(true); // Make sure they're visible
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+                  category === 'custom'
+                    ? 'bg-white/20 text-white ring-1 ring-white/30'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                My Sats
+              </button>
+
+              {/* Manage Button */}
+              <button
+                onClick={() => setShowCreator(true)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border border-emerald-500/30 text-emerald-400 hover:from-emerald-600/30 hover:to-blue-600/30 hover:text-emerald-300 transition-all"
+              >
+                <Settings className="h-3 w-3" />
+                Manage
+              </button>
             </div>
           </div>
 
           {/* Right: Time + Speed */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-visible">
             {/* Clock - shows simulated time (isolated component to prevent re-renders) */}
             <ClockDisplay timeRef={simulatedTimeRef} speed={speed} />
 
@@ -183,6 +243,104 @@ export default function EarthPage() {
               <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-300' : 'bg-red-300'}`} />
               LIVE
             </button>
+
+            {/* View Options Dropdown */}
+            <div className="relative" data-view-dropdown>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowViewOptions(!showViewOptions);
+                }}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                  showOrbitalPlanes || showEquatorialPlane || showInclinationGuides
+                    ? 'bg-purple-600/30 text-purple-300 border border-purple-500/30'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10'
+                }`}
+              >
+                <Eye className="h-3.5 w-3.5" />
+                View
+              </button>
+
+              <AnimatePresence>
+                {showViewOptions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 sm:right-0 top-full mt-2 w-[280px] sm:w-64 bg-black/98 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden z-[100]"
+                    style={{ maxHeight: 'calc(100vh - 120px)' }}
+                  >
+                    <div className="p-2">
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
+                        <Layers className="h-3 w-3" />
+                        Orbital Visualizations
+                      </div>
+
+                      {/* Equatorial Plane */}
+                      <button
+                        onClick={() => setShowEquatorialPlane(!showEquatorialPlane)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-all ${
+                          showEquatorialPlane
+                            ? 'bg-white/10 text-white'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span className={`w-3 h-3 rounded border ${showEquatorialPlane ? 'bg-white/80 border-white/80' : 'border-white/30'} flex items-center justify-center`}>
+                          {showEquatorialPlane && <span className="text-black text-[8px] font-bold">✓</span>}
+                        </span>
+                        <div className="flex-1 text-left">
+                          <div>Equatorial Plane</div>
+                          <div className="text-[9px] text-white/40">Reference plane at 0° inclination</div>
+                        </div>
+                      </button>
+
+                      {/* Inclination Guides */}
+                      <button
+                        onClick={() => setShowInclinationGuides(!showInclinationGuides)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-all ${
+                          showInclinationGuides
+                            ? 'bg-white/10 text-white'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span className={`w-3 h-3 rounded border ${showInclinationGuides ? 'bg-white/80 border-white/80' : 'border-white/30'} flex items-center justify-center`}>
+                          {showInclinationGuides && <span className="text-black text-[8px] font-bold">✓</span>}
+                        </span>
+                        <div className="flex-1 text-left">
+                          <div>Inclination Guides</div>
+                          <div className="text-[9px] text-white/40">Reference circles at 23.5°, 45°, 55°, 63.4°, 90°</div>
+                        </div>
+                      </button>
+
+                      {/* Constellation Orbital Planes */}
+                      <button
+                        onClick={() => setShowOrbitalPlanes(!showOrbitalPlanes)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-all ${
+                          showOrbitalPlanes
+                            ? 'bg-white/10 text-white'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span className={`w-3 h-3 rounded border ${showOrbitalPlanes ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'} flex items-center justify-center`}>
+                          {showOrbitalPlanes && <span className="text-black text-[8px] font-bold">✓</span>}
+                        </span>
+                        <div className="flex-1 text-left">
+                          <div>My Constellation Planes</div>
+                          <div className="text-[9px] text-white/40">Show orbital planes for custom constellations</div>
+                        </div>
+                      </button>
+
+                      <div className="mt-2 pt-2 border-t border-white/10 px-2.5">
+                        <div className="text-[9px] text-white/30 leading-relaxed">
+                          Enable visualizations to see orbital geometry. Custom constellation planes show Walker pattern RAAN spacing.
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Speed */}
             <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/5 border border-white/10">
@@ -220,6 +378,11 @@ export default function EarthPage() {
             onSelectSatellite={setSatellite}
             onTimeUpdate={handleTimeUpdate}
             resetToLive={resetKey}
+            customSatellitesKey={customSatellitesKey}
+            showCustomSatellites={showCustomSatellites}
+            showOrbitalPlanes={showOrbitalPlanes}
+            showEquatorialPlane={showEquatorialPlane}
+            showInclinationGuides={showInclinationGuides}
           />
         </div>
 
@@ -259,6 +422,66 @@ export default function EarthPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Constellation Info */}
+              {(() => {
+                const constellation = getConstellation(satellite.name);
+                if (!constellation) return null;
+                return (
+                  <div className="px-3 py-2.5 border-b border-white/10 bg-gradient-to-r from-purple-600/10 to-blue-600/10">
+                    {/* Constellation Header */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded font-semibold"
+                        style={{ backgroundColor: `${constellation.color}30`, color: constellation.color }}
+                      >
+                        {constellation.name}
+                      </span>
+                      <span
+                        className="text-[8px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-medium"
+                      >
+                        {CONSTELLATION_TYPE_NAMES[constellation.constellationType]}
+                      </span>
+                    </div>
+
+                    {/* Purpose & Operator */}
+                    <div className="text-[9px] text-white/50 mb-2">{constellation.purpose}</div>
+
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px]">
+                      <span className="text-white/40">Operator</span>
+                      <span className="text-white/70 truncate">{constellation.operator}</span>
+
+                      {/* Walker notation with explanation */}
+                      {constellation.walker && (
+                        <>
+                          <span className="text-white/40">Constellation</span>
+                          <span className="text-cyan-400 font-mono text-[8px]">{constellation.walker}</span>
+                        </>
+                      )}
+                      {constellation.walkerExplained && (
+                        <>
+                          <span className="text-white/40"></span>
+                          <span className="text-white/50 text-[8px]">{constellation.walkerExplained}</span>
+                        </>
+                      )}
+
+                      {constellation.altitude && (
+                        <>
+                          <span className="text-white/40">Design Alt</span>
+                          <span className="text-white/70">{constellation.altitude}</span>
+                        </>
+                      )}
+
+                      {constellation.totalSatellites && constellation.totalSatellites > 1 && (
+                        <>
+                          <span className="text-white/40">Fleet Size</span>
+                          <span className="text-white/70">{constellation.totalSatellites.toLocaleString()} sats</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Live Telemetry */}
               <div className="p-3">
@@ -312,6 +535,13 @@ export default function EarthPage() {
           CelesTrak
         </a>
       </div>
+
+      {/* Satellite Creator Modal */}
+      <SatelliteCreator
+        isOpen={showCreator}
+        onClose={() => setShowCreator(false)}
+        onSatellitesChange={() => setCustomSatellitesKey(k => k + 1)}
+      />
     </div>
   );
 }

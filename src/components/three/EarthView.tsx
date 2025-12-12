@@ -13,6 +13,11 @@ import {
   type TLEData,
   type TLESourceKey,
 } from '@/lib/satellite-service';
+import {
+  loadCustomSatellites,
+  loadCustomConstellations,
+  customSatelliteToTLE,
+} from '@/lib/custom-satellites';
 
 // ============================================
 // CONSTANTS
@@ -272,6 +277,7 @@ function InstancedSatellites({ satellites, initialDate, speedMultiplier, onSelec
   return (
     <>
       <instancedMesh
+        key={satellites.length} // Force recreation when satellite count changes
         ref={meshRef}
         args={[undefined, undefined, satellites.length]}
         onPointerMove={handlePointerMove}
@@ -333,6 +339,408 @@ function OrbitPath({ altitude, inclination, color }: { altitude: number; inclina
   }, [altitude, inclination]);
 
   return <Line points={points} color={color} transparent opacity={0.2} lineWidth={1} />;
+}
+
+// ============================================
+// EDUCATIONAL ORBITAL VISUALIZATIONS
+// ============================================
+
+interface OrbitalPlaneProps {
+  altitude: number;
+  inclination: number;
+  raan: number; // Right Ascension of Ascending Node
+  color: string;
+  opacity?: number;
+  showPlane?: boolean;
+  showOrbit?: boolean;
+  showNodes?: boolean;
+  label?: string;
+}
+
+/**
+ * Renders a complete orbital plane with scientifically accurate geometry
+ *
+ * Orbital mechanics reference:
+ * - Inclination (i): Angle between orbital plane and equatorial plane
+ * - RAAN (Ω): Right Ascension of Ascending Node - angle from vernal equinox
+ *   to ascending node, measured in the equatorial plane
+ *
+ * Rotation order (standard orbital mechanics):
+ * 1. Start with orbit in equatorial plane (XZ plane, Y up)
+ * 2. Rotate by inclination around the line of nodes (X axis after RAAN rotation)
+ * 3. Rotate by RAAN around the polar axis (Y axis)
+ *
+ * Reference: Vallado, "Fundamentals of Astrodynamics and Applications", Chapter 2
+ */
+function OrbitalPlane({
+  altitude,
+  inclination,
+  raan,
+  color,
+  opacity = 0.15,
+  showPlane = true,
+  showOrbit = true,
+  showNodes = false,
+  label
+}: OrbitalPlaneProps) {
+  const groupRef = useRef<THREE.Group>(null);
+  const radius = 1 + scaleAltitude(altitude);
+  const incRad = (inclination * Math.PI) / 180;
+  const raanRad = (raan * Math.PI) / 180;
+
+  // Orbital path points using proper 3D rotation matrices
+  const orbitPoints = useMemo(() => {
+    const pts: [number, number, number][] = [];
+    for (let i = 0; i <= 64; i++) {
+      const theta = (i / 64) * Math.PI * 2;
+
+      // Start with circular orbit in XZ plane (equatorial)
+      const x0 = Math.cos(theta) * radius;
+      const y0 = 0;
+      const z0 = Math.sin(theta) * radius;
+
+      // Step 1: Rotate by inclination around X axis
+      // This tilts the orbital plane relative to the equator
+      const x1 = x0;
+      const y1 = y0 * Math.cos(incRad) - z0 * Math.sin(incRad);
+      const z1 = y0 * Math.sin(incRad) + z0 * Math.cos(incRad);
+
+      // Step 2: Rotate by RAAN around Y axis (polar axis)
+      // This positions the ascending node at the correct longitude
+      const x2 = x1 * Math.cos(raanRad) + z1 * Math.sin(raanRad);
+      const y2 = y1;
+      const z2 = -x1 * Math.sin(raanRad) + z1 * Math.cos(raanRad);
+
+      pts.push([x2, y2, z2]);
+    }
+    return pts;
+  }, [radius, incRad, raanRad]);
+
+  // Ascending node: where orbit crosses equator going north (y increasing)
+  // Located at angle = RAAN from X axis in XZ plane
+  const ascendingNode = useMemo(() => {
+    const x = Math.cos(raanRad) * radius;
+    const z = -Math.sin(raanRad) * radius;
+    return [x, 0, z] as [number, number, number];
+  }, [radius, raanRad]);
+
+  // Descending node: opposite side of orbit (180° from ascending node)
+  const descendingNode = useMemo(() => {
+    const x = -Math.cos(raanRad) * radius;
+    const z = Math.sin(raanRad) * radius;
+    return [x, 0, z] as [number, number, number];
+  }, [radius, raanRad]);
+
+  // Create rotation for the plane mesh using Euler angles
+  // Order: Y (RAAN) then X (inclination) - 'YXZ' order
+  const planeRotation = useMemo(() => {
+    const euler = new THREE.Euler(incRad, raanRad, 0, 'YXZ');
+    return euler;
+  }, [incRad, raanRad]);
+
+  return (
+    <group ref={groupRef}>
+      {/* Orbital path */}
+      {showOrbit && (
+        <Line
+          points={orbitPoints}
+          color={color}
+          transparent
+          opacity={opacity * 2.5}
+          lineWidth={1.5}
+        />
+      )}
+
+      {/* Semi-transparent orbital plane disk */}
+      {showPlane && (
+        <mesh rotation={planeRotation} position={[0, 0, 0]}>
+          <ringGeometry args={[radius * 0.3, radius, 48]} />
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={opacity}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* Ascending node marker (green - going "up" through equator) */}
+      {showNodes && (
+        <>
+          <mesh position={ascendingNode}>
+            <sphereGeometry args={[0.025, 12, 12]} />
+            <meshBasicMaterial color="#00ff00" />
+          </mesh>
+          <Html position={ascendingNode} center style={{ pointerEvents: 'none' }}>
+            <div className="text-[8px] text-green-400 bg-black/60 px-1 rounded -mt-4">AN</div>
+          </Html>
+
+          <mesh position={descendingNode}>
+            <sphereGeometry args={[0.025, 12, 12]} />
+            <meshBasicMaterial color="#ff4444" />
+          </mesh>
+          <Html position={descendingNode} center style={{ pointerEvents: 'none' }}>
+            <div className="text-[8px] text-red-400 bg-black/60 px-1 rounded -mt-4">DN</div>
+          </Html>
+        </>
+      )}
+
+      {/* Label */}
+      {label && (
+        <Html position={[orbitPoints[0][0] * 1.1, orbitPoints[0][1] * 1.1, orbitPoints[0][2] * 1.1]} center>
+          <div className="text-[10px] text-white/70 bg-black/50 px-1 rounded whitespace-nowrap">
+            {label}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+interface ConstellationPlanesProps {
+  altitude: number;
+  inclination: number;
+  planes: number;
+  constellationType: 'walker-delta' | 'walker-star';
+  color: string;
+  showPlanes?: boolean;
+  showOrbits?: boolean;
+}
+
+/**
+ * Renders all orbital planes for a Walker constellation
+ * Walker Delta: 360° RAAN spread
+ * Walker Star: 180° RAAN spread
+ */
+function ConstellationPlanes({
+  altitude,
+  inclination,
+  planes,
+  constellationType,
+  color,
+  showPlanes = true,
+  showOrbits = true,
+}: ConstellationPlanesProps) {
+  const raanSpread = constellationType === 'walker-star' ? 180 : 360;
+  const raanSpacing = raanSpread / planes;
+
+  return (
+    <group>
+      {Array.from({ length: planes }).map((_, i) => (
+        <OrbitalPlane
+          key={i}
+          altitude={altitude}
+          inclination={inclination}
+          raan={i * raanSpacing}
+          color={color}
+          opacity={0.1}
+          showPlane={showPlanes}
+          showOrbit={showOrbits}
+          showNodes={i === 0} // Only show nodes on first plane
+        />
+      ))}
+    </group>
+  );
+}
+
+interface EquatorialPlaneProps {
+  radius?: number;
+  color?: string;
+  opacity?: number;
+}
+
+/**
+ * Reference equatorial plane (0° inclination)
+ */
+function EquatorialPlane({ radius = 2.5, color = '#ffffff', opacity = 0.05 }: EquatorialPlaneProps) {
+  return (
+    <mesh rotation={[Math.PI / 2, 0, 0]}>
+      <ringGeometry args={[1.05, radius, 64]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={opacity}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+/**
+ * Scientific inclination reference data
+ * These are real-world significant orbital inclinations used in spaceflight
+ *
+ * References:
+ * - https://en.wikipedia.org/wiki/Orbital_inclination
+ * - https://www.nasa.gov/mission_pages/station/structure/elements/orbital.html
+ * - Vallado, "Fundamentals of Astrodynamics and Applications"
+ */
+const INCLINATION_REFERENCES: { angle: number; label: string; color: string; description: string }[] = [
+  {
+    angle: 0,
+    label: '0° Equatorial',
+    color: '#ffff00',
+    description: 'Geostationary orbit plane - satellites appear stationary over equator'
+  },
+  {
+    angle: 23.44,
+    label: '23.4° Tropics',
+    color: '#ff9500',
+    description: 'Earth\'s axial tilt - defines Tropic of Cancer/Capricorn'
+  },
+  {
+    angle: 51.6,
+    label: '51.6° ISS',
+    color: '#00ff88',
+    description: 'International Space Station orbit - optimized for Russian launch sites'
+  },
+  {
+    angle: 55,
+    label: '55° GPS',
+    color: '#00bfff',
+    description: 'GPS/GNSS constellation inclination - provides global coverage'
+  },
+  {
+    angle: 63.4,
+    label: '63.4° Critical',
+    color: '#ff6b6b',
+    description: 'Critical inclination - no apsidal precession (Molniya orbits)'
+  },
+  {
+    angle: 90,
+    label: '90° Polar',
+    color: '#bf5fff',
+    description: 'Polar orbit - passes over both poles, sees entire Earth surface'
+  },
+  {
+    angle: 98.2,
+    label: '98° Sun-Sync',
+    color: '#ff69b4',
+    description: 'Sun-synchronous orbit - consistent lighting for Earth observation'
+  },
+];
+
+interface InclinationGuideProps {
+  radius?: number;
+}
+
+/**
+ * Shows reference circles at scientifically significant inclination angles
+ * Each inclination represents a real orbital regime used in spaceflight
+ */
+function InclinationGuides({ radius = 1.8 }: InclinationGuideProps) {
+  return (
+    <group>
+      {INCLINATION_REFERENCES.map(({ angle, label, color }) => {
+        const incRad = (angle * Math.PI) / 180;
+        const points: [number, number, number][] = [];
+
+        // Generate orbital path at this inclination (RAAN = 0 for reference)
+        for (let i = 0; i <= 64; i++) {
+          const theta = (i / 64) * Math.PI * 2;
+          // Orbit starts in XZ plane, rotated by inclination around X axis
+          const x = Math.cos(theta) * radius;
+          const z = Math.sin(theta) * radius;
+
+          // Apply inclination rotation (around X axis)
+          // y' = y*cos(i) - z*sin(i), but y=0 initially
+          // z' = y*sin(i) + z*cos(i)
+          const y = z * Math.sin(incRad);
+          const zRotated = z * Math.cos(incRad);
+
+          points.push([x, y, zRotated]);
+        }
+
+        // Position label at the highest point of the inclined orbit
+        const labelY = radius * Math.sin(incRad);
+        const labelZ = radius * Math.cos(incRad);
+
+        return (
+          <group key={angle}>
+            <Line
+              points={points}
+              color={color}
+              transparent
+              opacity={0.25}
+              lineWidth={1.5}
+              dashed
+              dashSize={0.08}
+              gapSize={0.04}
+            />
+            {/* Label positioned at the "top" of the orbit */}
+            <Html
+              position={[0, labelY * 0.95, labelZ * 0.3]}
+              center
+              style={{ pointerEvents: 'none' }}
+            >
+              <div
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap border"
+                style={{
+                  color: color,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  borderColor: `${color}40`
+                }}
+              >
+                {label}
+              </div>
+            </Html>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+interface OrbitalVisualizationProps {
+  customConstellations: Array<{
+    altitude: number;
+    inclination: number;
+    planes: number;
+    constellationType: 'walker-delta' | 'walker-star';
+    color: string;
+    name: string;
+  }>;
+  showEquatorialPlane?: boolean;
+  showInclinationGuides?: boolean;
+  showConstellationPlanes?: boolean;
+  showConstellationOrbits?: boolean;
+}
+
+/**
+ * Main orbital visualization component that combines all educational elements
+ */
+function OrbitalVisualization({
+  customConstellations,
+  showEquatorialPlane = true,
+  showInclinationGuides = false,
+  showConstellationPlanes = true,
+  showConstellationOrbits = true,
+}: OrbitalVisualizationProps) {
+  return (
+    <group>
+      {/* Equatorial reference plane */}
+      {showEquatorialPlane && <EquatorialPlane />}
+
+      {/* Inclination reference guides - scientifically accurate orbital inclinations */}
+      {showInclinationGuides && <InclinationGuides />}
+
+      {/* Custom constellation orbital planes */}
+      {customConstellations.map((constellation, idx) => (
+        <ConstellationPlanes
+          key={idx}
+          altitude={constellation.altitude}
+          inclination={constellation.inclination}
+          planes={constellation.planes}
+          constellationType={constellation.constellationType}
+          color={constellation.color}
+          showPlanes={showConstellationPlanes}
+          showOrbits={showConstellationOrbits}
+        />
+      ))}
+    </group>
+  );
 }
 
 // ============================================
@@ -464,6 +872,15 @@ function Earth({ initialDate, speedMultiplier, useTextures }: EarthProps) {
 // SCENE
 // ============================================
 
+interface ConstellationVisualizationData {
+  altitude: number;
+  inclination: number;
+  planes: number;
+  constellationType: 'walker-delta' | 'walker-star';
+  color: string;
+  name: string;
+}
+
 interface SceneProps {
   showOrbits: boolean;
   initialDate: Date;
@@ -475,9 +892,29 @@ interface SceneProps {
   autoRotate: boolean;
   onInteraction: () => void;
   onTimeUpdate?: (date: Date) => void;
+  // Educational visualization props
+  customConstellations?: ConstellationVisualizationData[];
+  showOrbitalPlanes?: boolean;
+  showEquatorialPlane?: boolean;
+  showInclinationGuides?: boolean;
 }
 
-function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, onSelectSatellite, satellites, useTextures, autoRotate, onInteraction, onTimeUpdate }: SceneProps) {
+function Scene({
+  showOrbits,
+  initialDate,
+  speedMultiplier,
+  selectedSatellite,
+  onSelectSatellite,
+  satellites,
+  useTextures,
+  autoRotate,
+  onInteraction,
+  onTimeUpdate,
+  customConstellations = [],
+  showOrbitalPlanes = false,
+  showEquatorialPlane = false,
+  showInclinationGuides = false,
+}: SceneProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
 
@@ -497,6 +934,7 @@ function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, on
 
       <Earth initialDate={initialDate} speedMultiplier={speedMultiplier} useTextures={useTextures} />
 
+      {/* Standard reference orbits */}
       {showOrbits && (
         <>
           <OrbitPath altitude={420} inclination={51.6} color={orbitColors.LEO} />
@@ -504,6 +942,17 @@ function Scene({ showOrbits, initialDate, speedMultiplier, selectedSatellite, on
           <OrbitPath altitude={20200} inclination={55} color={orbitColors.MEO} />
           <OrbitPath altitude={35786} inclination={0} color={orbitColors.GEO} />
         </>
+      )}
+
+      {/* Educational orbital visualizations */}
+      {(showOrbitalPlanes || showEquatorialPlane || showInclinationGuides) && (
+        <OrbitalVisualization
+          customConstellations={customConstellations}
+          showEquatorialPlane={showEquatorialPlane}
+          showInclinationGuides={showInclinationGuides}
+          showConstellationPlanes={showOrbitalPlanes}
+          showConstellationOrbits={showOrbitalPlanes}
+        />
       )}
 
       <InstancedSatellites
@@ -543,6 +992,12 @@ interface EarthViewProps {
   categoriesToLoad?: TLESourceKey[];
   onTimeUpdate?: (date: Date) => void;
   resetToLive?: number; // Increment to reset simulation to current time
+  customSatellitesKey?: number; // Increment to reload custom satellites
+  showCustomSatellites?: boolean; // Toggle visibility of custom satellites
+  // Educational visualization options
+  showOrbitalPlanes?: boolean; // Show orbital plane disks for custom constellations
+  showEquatorialPlane?: boolean; // Show reference equatorial plane
+  showInclinationGuides?: boolean; // Show inclination reference circles
 }
 
 export function EarthView({
@@ -557,8 +1012,15 @@ export function EarthView({
   categoriesToLoad: _categoriesToLoad,
   onTimeUpdate,
   resetToLive = 0,
+  customSatellitesKey = 0,
+  showCustomSatellites = true,
+  showOrbitalPlanes = false,
+  showEquatorialPlane = false,
+  showInclinationGuides = false,
 }: EarthViewProps) {
-  const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
+  const [realSatellites, setRealSatellites] = useState<TLEData[]>([]);
+  const [customTLEs, setCustomTLEs] = useState<TLEData[]>([]);
+  const [constellationVizData, setConstellationVizData] = useState<ConstellationVisualizationData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [autoRotate, setAutoRotate] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -578,6 +1040,51 @@ export function EarthView({
     onTimeUpdate?.(date);
   }, [onTimeUpdate]);
 
+  // Load custom satellites from localStorage when customSatellitesKey changes
+  useEffect(() => {
+    const customSats = loadCustomSatellites();
+    const constellations = loadCustomConstellations();
+
+    // Convert custom satellites to TLE format
+    const customTLEData: TLEData[] = customSats.map(sat => {
+      const tleData = customSatelliteToTLE(sat);
+      return {
+        ...tleData,
+        category: 'custom' as TLESourceKey,
+      } as TLEData;
+    });
+
+    // Also add satellites from constellations that aren't already in the list
+    const existingIds = new Set(customTLEData.map(s => s.name));
+    for (const constellation of constellations) {
+      for (const sat of constellation.satellites) {
+        if (!existingIds.has(sat.name)) {
+          const tleData = customSatelliteToTLE(sat);
+          customTLEData.push({
+            ...tleData,
+            category: 'custom' as TLESourceKey,
+          } as TLEData);
+          existingIds.add(sat.name);
+        }
+      }
+    }
+
+    setCustomTLEs(customTLEData);
+
+    // Extract constellation visualization data for orbital plane rendering
+    const vizData: ConstellationVisualizationData[] = constellations
+      .filter(c => c.constellationType === 'walker-delta' || c.constellationType === 'walker-star')
+      .map(c => ({
+        altitude: c.altitude,
+        inclination: c.inclination,
+        planes: c.planes,
+        constellationType: c.constellationType as 'walker-delta' | 'walker-star',
+        color: c.color,
+        name: c.name,
+      }));
+    setConstellationVizData(vizData);
+  }, [customSatellitesKey]);
+
   // Load satellites from Supabase API with fallback to local JSON
   useEffect(() => {
     async function load() {
@@ -586,32 +1093,45 @@ export function EarthView({
       let satellites: TLEData[] = [];
       let source = '';
 
-      // Try API first (Supabase database)
+      // Try local JSON first (most reliable for development)
+      try {
+        const response = await fetch('/data/satellites.json');
+        if (response.ok) {
+          const data = await response.json();
+          satellites = data.satellites || [];
+          source = 'local JSON';
+          console.log(`Loaded ${satellites.length} satellites from local JSON (updated: ${data.lastUpdated})`);
+        }
+      } catch (error) {
+        console.warn('Local JSON unavailable, trying API...');
+      }
+
+      // Also try API and merge any new satellites
       try {
         const response = await fetch('/api/satellites');
         if (response.ok) {
           const data = await response.json();
-          satellites = data.satellites || [];
-          source = 'Supabase';
-          console.log(`Last updated: ${data.lastUpdated}`);
+          const apiSatellites: TLEData[] = data.satellites || [];
+
+          if (apiSatellites.length > 100) {
+            // API has real data, merge with local
+            const existingIds = new Set(satellites.map(s => s.noradId));
+            const newSatellites = apiSatellites.filter(s => s.noradId && !existingIds.has(s.noradId));
+
+            if (newSatellites.length > 0) {
+              satellites = [...satellites, ...newSatellites];
+              console.log(`Added ${newSatellites.length} new satellites from API`);
+            }
+
+            // If API has more data overall, prefer it
+            if (apiSatellites.length > satellites.length) {
+              satellites = apiSatellites;
+              source = 'Supabase API';
+            }
+          }
         }
       } catch (error) {
-        console.warn('API unavailable, trying local JSON fallback...');
-      }
-
-      // Fallback to local JSON file
-      if (satellites.length === 0) {
-        try {
-          const response = await fetch('/data/satellites.json');
-          if (response.ok) {
-            const data = await response.json();
-            satellites = data.satellites || [];
-            source = 'local JSON';
-            console.log(`Last updated: ${data.lastUpdated}`);
-          }
-        } catch (error) {
-          console.warn('Local JSON unavailable, using hardcoded fallback...');
-        }
+        console.warn('API unavailable, using local data only');
       }
 
       // Final fallback to hardcoded data
@@ -625,16 +1145,36 @@ export function EarthView({
       // Prioritize stations at the front
       const stations = satellites.filter((s: TLEData) => s.category === 'stations');
       const others = satellites.filter((s: TLEData) => s.category !== 'stations');
-      setAllSatellites([...stations, ...others]);
+      setRealSatellites([...stations, ...others]);
 
       setIsLoading(false);
     }
     load();
   }, []);
 
+  // Combine real satellites with custom satellites (respecting visibility toggle)
+  const allSatellites = useMemo(() => {
+    if (showCustomSatellites) {
+      return [...realSatellites, ...customTLEs];
+    }
+    return realSatellites;
+  }, [realSatellites, customTLEs, showCustomSatellites]);
+
+  // Geostationary weather satellite names (in the 'geo' category but are weather satellites)
+  const GEO_WEATHER_NAMES = ['GOES', 'METEOSAT', 'HIMAWARI', 'INSAT', 'ELEKTRO', 'FY-4', 'GEO-KOMPSAT'];
+
   // Filter by category
   const filteredSatellites = useMemo(() => {
     if (!selectedCategory) return allSatellites;
+
+    // Special case: weather filter should include geostationary weather satellites
+    if (selectedCategory === 'weather') {
+      return allSatellites.filter(s =>
+        s.category === 'weather' ||
+        (s.category === 'geo' && GEO_WEATHER_NAMES.some(name => s.name.toUpperCase().includes(name)))
+      );
+    }
+
     return allSatellites.filter(s => s.category === selectedCategory);
   }, [allSatellites, selectedCategory]);
 
@@ -666,6 +1206,10 @@ export function EarthView({
             autoRotate={autoRotate}
             onInteraction={handleInteraction}
             onTimeUpdate={handleTimeUpdate}
+            customConstellations={constellationVizData}
+            showOrbitalPlanes={showOrbitalPlanes}
+            showEquatorialPlane={showEquatorialPlane}
+            showInclinationGuides={showInclinationGuides}
           />
         </Suspense>
       </Canvas>
