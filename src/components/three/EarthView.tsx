@@ -570,9 +570,14 @@ function EquatorialPlane({ radius = 2.5, color = '#ffffff', opacity = 0.05 }: Eq
 
 /**
  * Key orbital inclinations used in spaceflight
- * Simplified display showing just the angle value
+ * Color-coded for easy identification
  */
-const INCLINATION_ANGLES = [0, 28.5, 51.6, 55, 63.4, 90];
+const INCLINATION_DATA: { angle: number; color: string }[] = [
+  { angle: 0, color: '#ffd700' },      // Equatorial - gold
+  { angle: 51.6, color: '#00ff88' },   // ISS - green
+  { angle: 55, color: '#00bfff' },     // GPS - blue
+  { angle: 90, color: '#bf5fff' },     // Polar - purple
+];
 
 interface InclinationGuideProps {
   radius?: number;
@@ -580,12 +585,12 @@ interface InclinationGuideProps {
 
 /**
  * Minimal inclination reference guides
- * Shows subtle dashed circles with small angle labels
+ * Clean colored rings with no floating labels
  */
-function InclinationGuides({ radius = 1.6 }: InclinationGuideProps) {
+function InclinationGuides({ radius = 1.5 }: InclinationGuideProps) {
   return (
     <group>
-      {INCLINATION_ANGLES.map((angle) => {
+      {INCLINATION_DATA.map(({ angle, color }) => {
         const incRad = (angle * Math.PI) / 180;
         const points: [number, number, number][] = [];
 
@@ -599,28 +604,14 @@ function InclinationGuides({ radius = 1.6 }: InclinationGuideProps) {
         }
 
         return (
-          <group key={angle}>
-            <Line
-              points={points}
-              color="#ffffff"
-              transparent
-              opacity={0.08}
-              lineWidth={1}
-              dashed
-              dashSize={0.06}
-              gapSize={0.06}
-            />
-            {/* Small angle label at edge of orbit */}
-            <Html
-              position={[radius + 0.08, radius * Math.sin(incRad) * 0.7, 0]}
-              center
-              style={{ pointerEvents: 'none' }}
-            >
-              <div className="text-[9px] text-white/30 font-mono">
-                {angle}°
-              </div>
-            </Html>
-          </group>
+          <Line
+            key={angle}
+            points={points}
+            color={color}
+            transparent
+            opacity={0.15}
+            lineWidth={1}
+          />
         );
       })}
     </group>

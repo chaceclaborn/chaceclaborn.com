@@ -499,6 +499,34 @@ export default function EarthPage() {
           )}
         </AnimatePresence>
 
+        {/* Inclination Legend - shows when guides are enabled */}
+        <AnimatePresence>
+          {showInclinationGuides && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10"
+            >
+              <div className="text-[9px] text-white/40 mb-1.5 font-medium">Inclination</div>
+              <div className="space-y-1">
+                {[
+                  { angle: '0°', label: 'Equatorial', color: '#ffd700' },
+                  { angle: '51.6°', label: 'ISS', color: '#00ff88' },
+                  { angle: '55°', label: 'GPS', color: '#00bfff' },
+                  { angle: '90°', label: 'Polar', color: '#bf5fff' },
+                ].map(({ angle, label, color }) => (
+                  <div key={angle} className="flex items-center gap-2 text-[9px]">
+                    <span className="w-3 h-0.5 rounded-full" style={{ backgroundColor: color }} />
+                    <span className="text-white/50 w-7">{angle}</span>
+                    <span className="text-white/30">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Attribution */}
         <a
           href="https://celestrak.org"
