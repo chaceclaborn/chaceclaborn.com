@@ -9,14 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function HeroLayer() {
   return (
-    <div className="w-full h-full max-w-5xl mx-auto flex items-center justify-center px-6 sm:px-8 md:px-10 pt-4 sm:pt-0">
-      <div className="grid md:grid-cols-2 gap-6 md:gap-10 lg:gap-14 items-center w-full">
+    <div className="w-full h-full max-w-5xl mx-auto flex items-start sm:items-center justify-center px-6 sm:px-8 md:px-10 pt-16 sm:pt-0 overflow-y-auto sm:overflow-visible">
+      <div className="grid md:grid-cols-2 gap-5 sm:gap-6 md:gap-10 lg:gap-14 items-center w-full pb-8 sm:pb-0">
         {/* Left Column - Profile Info */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="space-y-4 sm:space-y-5 md:space-y-6"
+          className="space-y-3 sm:space-y-5 md:space-y-6"
         >
           {/* Profile Image */}
           <div className="flex justify-center md:justify-start">
@@ -25,7 +25,7 @@ export function HeroLayer() {
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="relative group"
             >
-              <div className="h-32 w-32 sm:h-36 sm:w-36 md:h-44 md:w-44 lg:h-48 lg:w-48 rounded-full border-4 border-primary/40 p-1 shadow-lg transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 bg-background">
+              <div className="h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 lg:h-48 lg:w-48 rounded-full border-4 border-primary/40 p-1 shadow-lg transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 bg-background">
                 <Avatar className="h-full w-full">
                   <AvatarImage src="/images/profile.jpg" alt="Chace Claborn" className="!h-[110%] !w-[110%] object-cover object-top -translate-y-[4%]" />
                   <AvatarFallback className="bg-primary text-primary-foreground text-3xl md:text-4xl lg:text-5xl font-bold">
