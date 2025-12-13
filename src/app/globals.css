@@ -387,9 +387,9 @@ body:has(.dimensional-container) {
   overflow: hidden;
   z-index: 5;
   outline: none;
-  /* Account for fixed header/footer - more space on mobile */
-  padding-top: 60px;
-  padding-bottom: 70px;
+  /* Account for fixed header/footer - more space on mobile for label */
+  padding-top: 56px;
+  padding-bottom: 90px;
   box-sizing: border-box;
   background: var(--background);
 }
@@ -397,7 +397,7 @@ body:has(.dimensional-container) {
 @media (min-width: 768px) {
   .dimensional-container {
     padding-top: 64px;
-    padding-bottom: 72px;
+    padding-bottom: 80px;
   }
 }
 
@@ -538,10 +538,10 @@ body:has(.dimensional-container) {
   }
 }
 
-/* Current layer label */
+/* Current layer label - positioned above footer */
 .dimensional-current-label {
   position: fixed;
-  bottom: 58px; /* Lower on mobile to avoid content overlap */
+  bottom: 68px; /* Above footer on mobile */
   left: 0;
   right: 0;
   display: flex;
@@ -556,32 +556,22 @@ body:has(.dimensional-container) {
   font-size: 9px;
   font-weight: 500;
   color: var(--muted-foreground);
-  opacity: 0.6;
+  opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  padding: 3px 8px;
-  background: transparent !important;
-  border: 0 !important;
-  border-width: 0 !important;
-  border-style: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.dimensional-current-label * {
-  border: 0 !important;
-  border-width: 0 !important;
-  box-shadow: none !important;
+  padding: 4px 12px;
+  background: var(--background);
+  border-radius: 4px;
 }
 
 @media (min-width: 768px) {
   .dimensional-current-label {
-    bottom: 76px;
+    bottom: 78px;
   }
   .dimensional-label-text {
-    font-size: 11px;
-    letter-spacing: 2.5px;
-    opacity: 1;
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.8;
   }
 }
 
