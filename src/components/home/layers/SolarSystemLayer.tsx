@@ -60,16 +60,12 @@ export function SolarSystemLayer() {
         </Link>
       </motion.div>
 
-      {/* Solar System Container - Smaller on mobile for easier swiping */}
+      {/* Solar System Container - Compact on mobile for easier swiping */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="solar-system-container w-full max-w-3xl rounded-xl overflow-hidden"
-        style={{
-          height: 'calc(100% - 80px)',
-          maxHeight: '500px' // Limit height on mobile
-        }}
+        className="solar-system-container w-full max-w-3xl rounded-xl overflow-hidden h-[280px] sm:h-[350px] md:h-[400px] lg:h-[450px]"
       >
         <SolarSystem
           className="w-full h-full"
@@ -79,15 +75,6 @@ export function SolarSystemLayer() {
         />
       </motion.div>
 
-      {/* Swipe hint on mobile */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="sm:hidden text-muted-foreground/50 text-[9px] mt-2 text-center"
-      >
-        Swipe up or down outside the 3D view to navigate
-      </motion.p>
     </div>
   );
 }
