@@ -84,9 +84,9 @@ export function SolarSystemLayer() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="sm:hidden text-muted-foreground/60 text-[10px] mt-3 text-center"
+        className="sm:hidden text-muted-foreground/50 text-[9px] mt-2 text-center"
       >
-        Swipe left or right to navigate
+        Swipe up or down outside the 3D view to navigate
       </motion.p>
     </div>
   );

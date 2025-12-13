@@ -59,7 +59,6 @@ export function QuotesLayer() {
   return (
     <div
       className="w-full h-full max-w-2xl mx-auto flex flex-col items-center justify-center px-3 sm:px-4 pb-14 sm:pb-12"
-      data-allow-scroll
     >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
