@@ -923,6 +923,7 @@ interface EarthViewProps {
   showOrbitalPlanes?: boolean; // Show orbital plane disks for custom constellations
   showEquatorialPlane?: boolean; // Show reference equatorial plane
   showInclinationGuides?: boolean; // Show inclination reference circles
+  onSatellitesLoaded?: (satellites: TLEData[]) => void; // Callback when satellites are loaded
 }
 
 export function EarthView({
@@ -942,6 +943,7 @@ export function EarthView({
   showOrbitalPlanes = false,
   showEquatorialPlane = false,
   showInclinationGuides = false,
+  onSatellitesLoaded,
 }: EarthViewProps) {
   const [realSatellites, setRealSatellites] = useState<TLEData[]>([]);
   const [customTLEs, setCustomTLEs] = useState<TLEData[]>([]);
@@ -1084,6 +1086,13 @@ export function EarthView({
     }
     return realSatellites;
   }, [realSatellites, customTLEs, showCustomSatellites]);
+
+  // Notify parent when satellites are loaded
+  useEffect(() => {
+    if (allSatellites.length > 0) {
+      onSatellitesLoaded?.(allSatellites);
+    }
+  }, [allSatellites, onSatellitesLoaded]);
 
   // Geostationary weather satellite names (in the 'geo' category but are weather satellites)
   const GEO_WEATHER_NAMES = ['GOES', 'METEOSAT', 'HIMAWARI', 'INSAT', 'ELEKTRO', 'FY-4', 'GEO-KOMPSAT'];

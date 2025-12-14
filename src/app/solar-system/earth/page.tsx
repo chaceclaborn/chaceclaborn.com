@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, X, Satellite, Settings, Eye } from 'lucide-react';
+import { ArrowLeft, X, Satellite, Settings, Eye, Search } from 'lucide-react';
 import { calculatePosition, SATELLITE_CATEGORIES, getOrbitType, getConstellation, CONSTELLATION_TYPE_NAMES, type TLEData, type TLESourceKey } from '@/lib/satellite-service';
 import { SatelliteCreator } from '@/components/satellites/SatelliteCreator';
 
@@ -111,6 +111,11 @@ export default function EarthPage() {
   const [showInclinationGuides, setShowInclinationGuides] = useState(false);
   const [showViewOptions, setShowViewOptions] = useState(false); // Dropdown visibility
 
+  // Search functionality
+  const [allSatellites, setAllSatellites] = useState<TLEData[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+
   // Use ref for simulated time to avoid re-renders
   const simulatedTimeRef = useRef<Date | null>(new Date());
 
@@ -125,6 +130,18 @@ export default function EarthPage() {
     setSpeed(1);
     setIsLive(true);
   }, []);
+
+  // Handle satellites loaded from EarthView
+  const handleSatellitesLoaded = useCallback((satellites: TLEData[]) => {
+    setAllSatellites(satellites);
+  }, []);
+
+  // Filter satellites based on search query
+  const searchResults = searchQuery.trim()
+    ? allSatellites.filter(sat =>
+        sat.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 50) // Limit to 50 results for performance
+    : [];
 
   // Track when we go non-live
   useEffect(() => {
@@ -222,6 +239,19 @@ export default function EarthPage() {
               >
                 <Settings className="h-3 w-3" />
                 Manage
+              </button>
+
+              {/* Search Button */}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  showSearch
+                    ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10'
+                }`}
+              >
+                <Search className="h-3 w-3" />
+                Search
               </button>
             </div>
           </div>
@@ -357,8 +387,105 @@ export default function EarthPage() {
             showOrbitalPlanes={showOrbitalPlanes}
             showEquatorialPlane={showEquatorialPlane}
             showInclinationGuides={showInclinationGuides}
+            onSatellitesLoaded={handleSatellitesLoaded}
           />
         </div>
+
+        {/* Search Panel */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="absolute top-4 left-4 z-20 w-[280px] bg-black/95 backdrop-blur-md rounded-xl border border-white/20 shadow-2xl overflow-hidden"
+            >
+              {/* Search Header */}
+              <div className="px-3 py-2.5 border-b border-white/10 bg-gradient-to-r from-blue-600/20 to-cyan-600/20">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-blue-400" />
+                    <span className="text-white font-semibold text-sm">Search Satellites</span>
+                  </div>
+                  <button onClick={() => setShowSearch(false)} className="p-1 rounded-md hover:bg-white/10 transition-colors">
+                    <X className="h-3.5 w-3.5 text-white/60" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="p-3 border-b border-white/10">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+                  <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
+                    autoFocus
+                  />
+                </div>
+                <div className="mt-2 text-[10px] text-white/40">
+                  {allSatellites.length.toLocaleString()} satellites loaded
+                </div>
+              </div>
+
+              {/* Search Results */}
+              <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                {searchQuery.trim() ? (
+                  searchResults.length > 0 ? (
+                    <div className="p-1">
+                      {searchResults.map((sat, index) => {
+                        const catInfo = sat.category ? SATELLITE_CATEGORIES[sat.category as keyof typeof SATELLITE_CATEGORIES] : null;
+                        return (
+                          <button
+                            key={sat.noradId || `${sat.name}-${index}`}
+                            onClick={() => {
+                              setSatellite(sat);
+                              setSearchQuery('');
+                              setShowSearch(false);
+                            }}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all hover:bg-white/10 ${
+                              satellite?.name === sat.name ? 'bg-blue-600/20 border border-blue-500/30' : ''
+                            }`}
+                          >
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: catInfo?.color || '#888' }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-white text-xs font-medium truncate">{sat.name}</div>
+                              {catInfo && (
+                                <div className="text-[9px] text-white/40">{catInfo.name}</div>
+                              )}
+                            </div>
+                            {sat.noradId && (
+                              <span className="text-[9px] text-white/30 font-mono">#{sat.noradId}</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                      {searchResults.length === 50 && (
+                        <div className="text-center text-[10px] text-white/40 py-2">
+                          Showing first 50 results...
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-white/40 text-sm">
+                      No satellites found
+                    </div>
+                  )
+                ) : (
+                  <div className="p-6 text-center text-white/40 text-sm">
+                    Type to search...
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Satellite Info Panel */}
         <AnimatePresence>
