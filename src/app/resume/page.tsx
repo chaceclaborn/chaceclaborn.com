@@ -13,7 +13,7 @@ const experience = [
   {
     title: 'Propulsion Design Engineer II - BE-3U Turbomachinery',
     company: 'Blue Origin',
-    period: '2024-2025',
+    period: '2025 - Present',
     highlights: [
       'Coming Soon'
     ],
@@ -22,7 +22,7 @@ const experience = [
   {
     title: 'Hardware Manufacturing Engineer II - BE-3U Turbomachinery',
     company: 'Blue Origin',
-    period: '2024-2025',
+    period: '2025',
     highlights: [
       'Develop and update manufacturing work instructions and support the shop floor for BE-4 and BE-3U rocket engine components such as turbomachinery, valves, and various other components',
       'Perform comprehensive engineering analysis and dispositions of non-conformances, applying advanced problemsolving techniques to ensure compliance with design specifications and production standards',
