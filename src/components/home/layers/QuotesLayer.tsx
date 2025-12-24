@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
@@ -42,6 +42,8 @@ const quotes: QuoteItem[] = [
 
 export function QuotesLayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const nextQuote = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % quotes.length);
@@ -51,10 +53,50 @@ export function QuotesLayer() {
     setCurrentIndex((prev) => (prev - 1 + quotes.length) % quotes.length);
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(nextQuote, 6000);
-    return () => clearInterval(interval);
+  const startAutoAdvance = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(nextQuote, 6000);
   }, [nextQuote]);
+
+  const pauseAndNavigate = useCallback((direction: 'next' | 'prev') => {
+    // Clear auto-advance interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Clear any existing pause timeout
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
+
+    // Navigate
+    if (direction === 'next') {
+      nextQuote();
+    } else {
+      prevQuote();
+    }
+
+    // Resume auto-advance after 5 seconds
+    pauseTimeoutRef.current = setTimeout(() => {
+      startAutoAdvance();
+    }, 5000);
+  }, [nextQuote, prevQuote, startAutoAdvance]);
+
+  // Start auto-advance on mount
+  useEffect(() => {
+    startAutoAdvance();
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+    };
+  }, [startAutoAdvance]);
 
   return (
     <div
@@ -85,7 +127,7 @@ export function QuotesLayer() {
 
         {/* Navigation buttons - larger touch targets with high z-index */}
         <button
-          onClick={prevQuote}
+          onClick={() => pauseAndNavigate('prev')}
           className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full text-muted-foreground hover:text-primary hover:bg-muted/80 active:bg-muted transition-all cursor-pointer select-none"
           style={{ zIndex: 100, touchAction: 'manipulation' }}
           aria-label="Previous quote"
@@ -94,7 +136,7 @@ export function QuotesLayer() {
           <ChevronLeft className="h-6 w-6 md:h-7 md:w-7 pointer-events-none" />
         </button>
         <button
-          onClick={nextQuote}
+          onClick={() => pauseAndNavigate('next')}
           className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full text-muted-foreground hover:text-primary hover:bg-muted/80 active:bg-muted transition-all cursor-pointer select-none"
           style={{ zIndex: 100, touchAction: 'manipulation' }}
           aria-label="Next quote"

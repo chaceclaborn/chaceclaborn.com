@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -42,6 +42,8 @@ const quotes: QuoteItem[] = [
 
 export function QuotesCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const nextQuote = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % quotes.length);
@@ -51,10 +53,51 @@ export function QuotesCarousel() {
     setCurrentIndex((prev) => (prev - 1 + quotes.length) % quotes.length);
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(nextQuote, 6000);
-    return () => clearInterval(interval);
+  const startAutoAdvance = useCallback(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(nextQuote, 6000);
   }, [nextQuote]);
+
+  const pauseAndNavigate = useCallback((direction: 'next' | 'prev') => {
+    // Clear auto-advance interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Clear any existing pause timeout
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+    }
+
+    // Navigate
+    if (direction === 'next') {
+      nextQuote();
+    } else {
+      prevQuote();
+    }
+
+    // Resume auto-advance after 5 seconds
+    pauseTimeoutRef.current = setTimeout(() => {
+      startAutoAdvance();
+    }, 5000);
+  }, [nextQuote, prevQuote, startAutoAdvance]);
+
+  // Start auto-advance on mount
+  useEffect(() => {
+    startAutoAdvance();
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+    };
+  }, [startAutoAdvance]);
 
   return (
     <section className="py-8 md:py-10 relative">
@@ -62,14 +105,14 @@ export function QuotesCarousel() {
         <div className="relative p-6 md:p-8">
           {/* Navigation buttons */}
           <button
-            onClick={prevQuote}
+            onClick={() => pauseAndNavigate('prev')}
             className="absolute left-0 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-muted-foreground hover:text-primary transition-colors"
             aria-label="Previous quote"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
-            onClick={nextQuote}
+            onClick={() => pauseAndNavigate('next')}
             className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-muted-foreground hover:text-primary transition-colors"
             aria-label="Next quote"
           >

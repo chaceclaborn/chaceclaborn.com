@@ -25,6 +25,7 @@ export function DimensionalLayers({
   const [activeLayer, setActiveLayer] = useState(initialLayer);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const lastScrollTime = useRef(0);
+  const accumulatedDelta = useRef(0);
   const touchStartY = useRef(0);
   const touchStartLayer = useRef(initialLayer);
 
@@ -59,13 +60,24 @@ export function DimensionalLayers({
       e.preventDefault();
 
       const now = Date.now();
-      // Debounce wheel events
-      if (now - lastScrollTime.current < 400) return;
+
+      // Reset accumulated delta if too much time has passed
+      if (now - lastScrollTime.current > 150) {
+        accumulatedDelta.current = 0;
+      }
       lastScrollTime.current = now;
 
-      if (e.deltaY > 30) {
+      // Accumulate delta for trackpad sensitivity
+      accumulatedDelta.current += e.deltaY;
+
+      // Lower threshold (5) for much better trackpad responsiveness
+      const threshold = 5;
+
+      if (accumulatedDelta.current > threshold) {
+        accumulatedDelta.current = 0;
         navigateToLayer(activeLayer + 1);
-      } else if (e.deltaY < -30) {
+      } else if (accumulatedDelta.current < -threshold) {
+        accumulatedDelta.current = 0;
         navigateToLayer(activeLayer - 1);
       }
     };
