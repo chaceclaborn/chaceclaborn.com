@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Presentation, Github, ExternalLink, Cpu, Download, Rocket, Globe } from 'lucide-react';
+import { Presentation, Github, ExternalLink, Cpu, Download, Rocket, Globe, Brain } from 'lucide-react';
 
 const projects = [
   {
@@ -54,6 +54,15 @@ const projects = [
     link: '/solar-system/earth',
     linkText: 'View Earth',
     gradient: 'from-cyan-500/20 to-emerald-500/20',
+  },
+  {
+    title: 'AI Learning Dashboard',
+    description: 'Interactive visualizations of AI and algorithm concepts. Explore pathfinding algorithms (A*, Dijkstra, BFS), game theory (Minimax, Alpha-Beta), and more.',
+    icon: Brain,
+    tags: ['Python', 'Algorithms', 'AI', 'Visualization'],
+    link: '/ai-learning',
+    linkText: 'Explore Algorithms',
+    gradient: 'from-purple-500/20 to-pink-500/20',
   },
 ];
 

@@ -31,13 +31,13 @@ function generateTree(depth: number, nodeId: string = 'root', isMax: boolean = t
   if (depth === 0) {
     return {
       id: nodeId,
-      value: Math.floor(Math.random() * 21) - 10, // -10 to 10
+      value: Math.floor(Math.random() * 21) - 10,
       player: isMax ? 'MAX' : 'MIN',
       children: []
     };
   }
 
-  const numChildren = 2 + Math.floor(Math.random() * 2); // 2-3 children
+  const numChildren = 2 + Math.floor(Math.random() * 2);
   const children: TreeNode[] = [];
 
   for (let i = 0; i < numChildren; i++) {
@@ -52,14 +52,10 @@ function generateTree(depth: number, nodeId: string = 'root', isMax: boolean = t
   };
 }
 
-// Run minimax algorithm
+// Minimax algorithm
 function minimax(node: TreeNode, isMax: boolean, steps: Step[]): number {
   if (node.children.length === 0) {
-    steps.push({
-      node: node.id,
-      action: 'evaluate',
-      value: node.value!
-    });
+    steps.push({ node: node.id, action: 'evaluate', value: node.value! });
     return node.value!;
   }
 
@@ -70,11 +66,7 @@ function minimax(node: TreeNode, isMax: boolean, steps: Step[]): number {
       maxValue = Math.max(maxValue, value);
     }
     node.value = maxValue;
-    steps.push({
-      node: node.id,
-      action: 'max',
-      value: maxValue
-    });
+    steps.push({ node: node.id, action: 'max', value: maxValue });
     return maxValue;
   } else {
     let minValue = Infinity;
@@ -83,31 +75,15 @@ function minimax(node: TreeNode, isMax: boolean, steps: Step[]): number {
       minValue = Math.min(minValue, value);
     }
     node.value = minValue;
-    steps.push({
-      node: node.id,
-      action: 'min',
-      value: minValue
-    });
+    steps.push({ node: node.id, action: 'min', value: minValue });
     return minValue;
   }
 }
 
-// Run alpha-beta pruning
-function alphabeta(
-  node: TreeNode,
-  isMax: boolean,
-  alpha: number,
-  beta: number,
-  steps: Step[]
-): number {
+// Alpha-beta pruning
+function alphabeta(node: TreeNode, isMax: boolean, alpha: number, beta: number, steps: Step[]): number {
   if (node.children.length === 0) {
-    steps.push({
-      node: node.id,
-      action: 'evaluate',
-      value: node.value!,
-      alpha,
-      beta
-    });
+    steps.push({ node: node.id, action: 'evaluate', value: node.value!, alpha, beta });
     return node.value!;
   }
 
@@ -117,21 +93,10 @@ function alphabeta(
       const value = alphabeta(child, false, alpha, beta, steps);
       maxValue = Math.max(maxValue, value);
       alpha = Math.max(alpha, maxValue);
-
-      steps.push({
-        node: node.id,
-        action: 'max',
-        value: maxValue,
-        alpha,
-        beta
-      });
+      steps.push({ node: node.id, action: 'max', value: maxValue, alpha, beta });
 
       if (beta <= alpha) {
-        steps.push({
-          node: node.id,
-          action: 'prune',
-          message: `Beta cutoff: ${beta} <= ${alpha}`
-        });
+        steps.push({ node: node.id, action: 'prune', message: `Beta cutoff: ${beta} <= ${alpha}` });
         break;
       }
     }
@@ -143,21 +108,10 @@ function alphabeta(
       const value = alphabeta(child, true, alpha, beta, steps);
       minValue = Math.min(minValue, value);
       beta = Math.min(beta, minValue);
-
-      steps.push({
-        node: node.id,
-        action: 'min',
-        value: minValue,
-        alpha,
-        beta
-      });
+      steps.push({ node: node.id, action: 'min', value: minValue, alpha, beta });
 
       if (beta <= alpha) {
-        steps.push({
-          node: node.id,
-          action: 'prune',
-          message: `Alpha cutoff: ${beta} <= ${alpha}`
-        });
+        steps.push({ node: node.id, action: 'prune', message: `Alpha cutoff: ${beta} <= ${alpha}` });
         break;
       }
     }
@@ -168,41 +122,36 @@ function alphabeta(
 
 // Tree visualization component
 function TreeVisualization({ tree, currentStep, steps }: { tree: TreeNode; currentStep: number; steps: Step[] }) {
-  const activeNodes = new Set<string>();
   const evaluatedNodes = new Map<string, number>();
-  const prunedNodes = new Set<string>();
+  let activeNode = '';
 
-  // Process steps up to currentStep
   for (let i = 0; i <= currentStep && i < steps.length; i++) {
     const step = steps[i];
     if (step.action === 'evaluate' || step.action === 'max' || step.action === 'min') {
       evaluatedNodes.set(step.node, step.value!);
     }
-    if (step.action === 'prune') {
-      prunedNodes.add(step.node);
-    }
     if (i === currentStep) {
-      activeNodes.add(step.node);
+      activeNode = step.node;
     }
   }
 
-  const renderNode = (node: TreeNode, depth: number, index: number, totalAtDepth: number) => {
+  const renderNode = (node: TreeNode, depth: number) => {
     const isLeaf = node.children.length === 0;
-    const isActive = activeNodes.has(node.id);
+    const isActive = activeNode === node.id;
     const isEvaluated = evaluatedNodes.has(node.id);
     const displayValue = isEvaluated ? evaluatedNodes.get(node.id) : (isLeaf ? node.value : '?');
 
-    let bgColor = 'bg-card';
+    let bgColor = 'bg-card border-border';
     if (isLeaf) {
-      bgColor = 'bg-amber-500';
+      bgColor = 'bg-amber-500 border-amber-600';
     } else if (node.player === 'MAX') {
-      bgColor = isEvaluated ? 'bg-sage-500' : 'bg-sage-300';
+      bgColor = isEvaluated ? 'bg-sage-500 border-sage-600' : 'bg-sage-300 border-sage-400';
     } else {
-      bgColor = isEvaluated ? 'bg-red-500' : 'bg-red-300';
+      bgColor = isEvaluated ? 'bg-red-500 border-red-600' : 'bg-red-300 border-red-400';
     }
 
     if (isActive) {
-      bgColor = 'bg-blue-500 ring-4 ring-blue-300';
+      bgColor = 'bg-blue-500 border-blue-400 ring-2 ring-blue-300';
     }
 
     return (
@@ -210,34 +159,32 @@ function TreeVisualization({ tree, currentStep, steps }: { tree: TreeNode; curre
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className={`w-10 h-10 rounded-full ${bgColor} flex items-center justify-center text-white font-bold text-sm shadow-md border-2 border-white/20`}
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full ${bgColor} border-2 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-md`}
         >
           {displayValue}
         </motion.div>
-        <span className="text-[10px] text-muted-foreground mt-1">{node.player}</span>
+        <span className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">{node.player}</span>
 
         {node.children.length > 0 && (
-          <div className="flex gap-2 mt-3 relative">
-            {/* Connection lines */}
-            <svg className="absolute -top-3 left-0 w-full h-3 overflow-visible" style={{ pointerEvents: 'none' }}>
-              {node.children.map((_, i) => {
-                const totalWidth = (node.children.length - 1) * 60;
-                const startX = totalWidth / 2;
-                const endX = i * 60 - startX + 20;
-                return (
-                  <line
-                    key={i}
-                    x1="50%"
-                    y1="0"
-                    x2={`calc(50% + ${endX}px)`}
-                    y2="12"
-                    stroke="#4a5930"
-                    strokeWidth="2"
-                  />
-                );
-              })}
-            </svg>
-            {node.children.map((child, i) => renderNode(child, depth + 1, i, node.children.length))}
+          <div className="flex gap-2 sm:gap-3 mt-3 relative">
+            {/* Connector lines drawn with CSS */}
+            <div className="absolute -top-3 left-1/2 w-px h-3 bg-sage-600" />
+            {node.children.length > 1 && (
+              <div
+                className="absolute -top-3 h-px bg-sage-600"
+                style={{
+                  left: `calc(${100 / (2 * node.children.length)}% + 4px)`,
+                  right: `calc(${100 / (2 * node.children.length)}% + 4px)`
+                }}
+              />
+            )}
+            {node.children.map((child) => (
+              <div key={child.id} className="relative">
+                {/* Vertical line down to child */}
+                <div className="absolute -top-3 left-1/2 w-px h-3 bg-sage-600" />
+                {renderNode(child, depth + 1)}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -246,12 +193,12 @@ function TreeVisualization({ tree, currentStep, steps }: { tree: TreeNode; curre
 
   return (
     <div className="flex justify-center overflow-x-auto py-4">
-      {renderNode(tree, 0, 0, 1)}
+      {renderNode(tree, 0)}
     </div>
   );
 }
 
-export function MinimaxLayer() {
+export function MinimaxVisualization() {
   const [depth, setDepth] = useState(3);
   const [algorithm, setAlgorithm] = useState<'minimax' | 'alphabeta'>('minimax');
   const [tree, setTree] = useState<TreeNode | null>(null);
@@ -260,7 +207,6 @@ export function MinimaxLayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [message, setMessage] = useState('Generate a tree to begin');
 
-  // Generate new tree
   const handleGenerateTree = useCallback(() => {
     const newTree = generateTree(depth);
     setTree(newTree);
@@ -270,11 +216,9 @@ export function MinimaxLayer() {
     setMessage(`Tree generated with depth ${depth}. Click Solve to run algorithm.`);
   }, [depth]);
 
-  // Solve tree
   const handleSolve = useCallback(() => {
     if (!tree) return;
 
-    // Deep clone tree for solving
     const treeCopy = JSON.parse(JSON.stringify(tree));
     const steps: Step[] = [];
     let value: number;
@@ -292,10 +236,9 @@ export function MinimaxLayer() {
       steps
     });
     setCurrentStep(0);
-    setMessage(`Running ${algorithm === 'minimax' ? 'Minimax' : 'Alpha-Beta Pruning'}...`);
+    setMessage(`Running ${algorithm === 'minimax' ? 'Minimax' : 'Alpha-Beta'}...`);
   }, [tree, algorithm]);
 
-  // Animation playback
   useEffect(() => {
     if (!isPlaying || !result) return;
 
@@ -320,37 +263,20 @@ export function MinimaxLayer() {
 
         return prev + 1;
       });
-    }, 800);
+    }, 700);
 
     return () => clearInterval(timer);
   }, [isPlaying, result]);
 
-  // Generate tree on mount
   useEffect(() => {
     handleGenerateTree();
-  }, []);
+  }, [handleGenerateTree]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6" data-allow-scroll>
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6"
-      >
-        <h2 className="text-3xl font-bold mb-2 text-gradient">Minimax Algorithm</h2>
-        <p className="text-muted-foreground">
-          Explore game tree search and how Alpha-Beta pruning optimizes decisions
-        </p>
-      </motion.div>
-
-      <div className="grid lg:grid-cols-[220px_1fr] gap-4">
+    <div className="p-4 sm:p-6">
+      <div className="grid lg:grid-cols-[200px_1fr] gap-4">
         {/* Controls */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-card rounded-xl p-4 shadow-soft border border-border h-fit"
-        >
+        <div className="bg-background rounded-xl p-4 border border-border">
           <h3 className="font-semibold mb-3 text-primary">Settings</h3>
 
           <label className="block text-sm mb-1 text-muted-foreground">
@@ -370,7 +296,7 @@ export function MinimaxLayer() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                name="algorithm"
+                name="algo"
                 checked={algorithm === 'minimax'}
                 onChange={() => setAlgorithm('minimax')}
                 className="accent-primary"
@@ -380,7 +306,7 @@ export function MinimaxLayer() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                name="algorithm"
+                name="algo"
                 checked={algorithm === 'alphabeta'}
                 onChange={() => setAlgorithm('alphabeta')}
                 className="accent-primary"
@@ -425,15 +351,11 @@ export function MinimaxLayer() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Tree Visualization */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-xl p-4 shadow-soft border border-border"
-        >
-          <div className="min-h-[350px] flex items-center justify-center overflow-x-auto">
+        <div className="flex flex-col">
+          <div className="min-h-[350px] flex items-center justify-center overflow-x-auto bg-background rounded-xl border border-border">
             {result ? (
               <TreeVisualization tree={result.tree} currentStep={currentStep} steps={result.steps} />
             ) : tree ? (
@@ -469,7 +391,6 @@ export function MinimaxLayer() {
 
           <p className="text-center text-sm text-muted-foreground mt-3">{message}</p>
 
-          {/* Stats */}
           {result && (
             <div className="flex justify-center gap-6 mt-4 text-sm">
               <div>
@@ -481,43 +402,35 @@ export function MinimaxLayer() {
                 <span className="font-medium">{result.steps.length}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">Optimal Value: </span>
+                <span className="text-muted-foreground">Optimal: </span>
                 <span className="font-medium">{result.value}</span>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
-      {/* Info Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-card rounded-xl p-6 shadow-soft border border-border mt-6"
-      >
-        <h3 className="font-semibold text-primary mb-3">How It Works</h3>
-        <div className="grid md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium mb-2">Minimax</h4>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• MAX player tries to maximize the score</li>
-              <li>• MIN player tries to minimize the score</li>
-              <li>• Recursively evaluates all possible moves</li>
-              <li>• Assumes both players play optimally</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium mb-2">Alpha-Beta Pruning</h4>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• Alpha (α): Best value MAX can guarantee</li>
-              <li>• Beta (β): Best value MIN can guarantee</li>
-              <li>• Prunes branches when α ≥ β</li>
-              <li>• Same result, fewer nodes evaluated</li>
-            </ul>
-          </div>
+      {/* Info Cards */}
+      <div className="grid md:grid-cols-2 gap-4 mt-6">
+        <div className="bg-background rounded-xl p-4 border border-border">
+          <h4 className="font-semibold text-primary mb-2">Minimax</h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>• MAX player tries to maximize score</li>
+            <li>• MIN player tries to minimize score</li>
+            <li>• Evaluates all possible game states</li>
+            <li>• Assumes optimal play from both</li>
+          </ul>
         </div>
-      </motion.div>
+        <div className="bg-background rounded-xl p-4 border border-border">
+          <h4 className="font-semibold text-primary mb-2">Alpha-Beta Pruning</h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>• Alpha (α): Best MAX can guarantee</li>
+            <li>• Beta (β): Best MIN can guarantee</li>
+            <li>• Prunes when α ≥ β</li>
+            <li>• Same result, fewer evaluations</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
