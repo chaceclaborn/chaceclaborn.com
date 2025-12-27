@@ -1,0 +1,3 @@
+[submodule "api/ai-learning"]
+	path = api/ai-learning
+	url = https://github.com/chaceclaborn/AI-Learning-Dashboard
