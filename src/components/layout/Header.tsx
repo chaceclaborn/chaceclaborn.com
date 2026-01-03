@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, Home, Briefcase, FileText, Users, Heart, Shield, LucideIcon, Menu } from 'lucide-react';
-import { AuthButton } from '@/components/auth/AuthButton';
+import { ChevronDown, Home, Briefcase, FileText, LucideIcon, Menu } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { useAuth } from '@/lib/auth-context';
 import { getNavItems } from '@/config/navigation';
 
 // Icon mapping for nav items
@@ -15,9 +13,6 @@ const navIcons: Record<string, LucideIcon> = {
   home: Home,
   portfolio: Briefcase,
   resume: FileText,
-  family: Users,
-  girlfriend: Heart,
-  admin: Shield,
 };
 
 export function Header() {
@@ -25,9 +20,8 @@ export function Header() {
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { tier } = useAuth();
 
-  const navItems = getNavItems(tier.name, tier.level);
+  const navItems = getNavItems();
 
   // Normalize pathname for comparison (handle trailing slashes)
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
@@ -257,7 +251,6 @@ export function Header() {
             </AnimatePresence>
           </div>
           <ThemeToggle />
-          <AuthButton />
         </div>
       </div>
     </header>
